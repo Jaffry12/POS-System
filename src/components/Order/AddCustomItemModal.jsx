@@ -1,6 +1,5 @@
-// src/components/Order/AddCustomItemModal.jsx
 import { useState, useCallback } from 'react';
-import { X, Plus, Check, Trash2, FileText, Folder, DollarSign, Settings, Image as ImageIcon, List, FolderTree } from 'lucide-react';
+import { X, Plus, Check, Trash2, FileText, Folder, DollarSign, List, FolderTree } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { usePOS } from '../../hooks/usePOS';
 import { SETTINGS, CATEGORIES } from '../../data/menuData';
@@ -18,7 +17,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
   const [isCreatingNewSubcategory, setIsCreatingNewSubcategory] = useState(false);
   const [isCreatingCustomDrink, setIsCreatingCustomDrink] = useState(false);
   
-  // Pricing options
   const [pricingType, setPricingType] = useState('fixed');
   const [fixedPrice, setFixedPrice] = useState('');
   const [customSizes, setCustomSizes] = useState([
@@ -26,7 +24,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
     { name: '700ml', price: '' }
   ]);
   
-  // Additional features
   const [hasModifiers, setHasModifiers] = useState(false);
   const [modifierGroups, setModifierGroups] = useState(() => [{
     id: Date.now(),
@@ -40,17 +37,14 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [addedItemName, setAddedItemName] = useState('');
 
-  // Get existing categories from menu
   const existingCategories = Object.keys(menu).map(key => ({
     id: key,
     name: key.charAt(0).toUpperCase() + key.slice(1)
   }));
 
-  // Check if selected category is drinks
   const isDrinksCategory = selectedCategory === 'drinks';
   const drinkSubcategories = CATEGORIES.drinks || [];
 
-  // Size management
   const addSize = () => {
     setCustomSizes([...customSizes, { name: '', price: '' }]);
   };
@@ -65,7 +59,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
     setCustomSizes(updated);
   };
 
-  // Modifier group management
   const addModifierGroup = () => {
     setModifierGroups([
       ...modifierGroups,
@@ -106,7 +99,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
     setModifierGroups(updated);
   };
 
-  // Reset form
   const resetForm = useCallback(() => {
     setItemName('');
     setSelectedCategory('');
@@ -142,7 +134,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Determine final category
     let finalCategory = selectedCategory;
     
     if (isCreatingNewCategory) {
@@ -152,12 +143,10 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       }
       finalCategory = newCategoryName.toLowerCase().replace(/\s+/g, '');
       
-      // If creating new subcategory under new category
       if (isCreatingNewSubcategory && newSubcategoryName.trim()) {
         finalCategory = newSubcategoryName.toLowerCase().replace(/\s+/g, '');
       }
     } else if (isDrinksCategory) {
-      // Handle drinks category
       if (isCreatingCustomDrink) {
         if (!newSubcategoryName.trim()) {
           alert('Please enter a custom drink type name');
@@ -172,7 +161,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
         finalCategory = selectedSubcategory;
       }
     } else if (selectedCategory) {
-      // If creating new subcategory under existing category
       if (isCreatingNewSubcategory) {
         if (!newSubcategoryName.trim()) {
           alert('Please enter a subcategory name');
@@ -185,7 +173,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    // Build menu item
     const newMenuItem = {
       id: `custom-${Date.now()}`,
       name: itemName.trim(),
@@ -194,7 +181,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       isCustom: true,
     };
 
-    // Add parent category if subcategory was created
     if (isCreatingNewSubcategory && newSubcategoryName.trim()) {
       newMenuItem.parentCategory = isCreatingNewCategory 
         ? newCategoryName.toLowerCase().replace(/\s+/g, '')
@@ -203,7 +189,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       newMenuItem.parentCategory = 'drinks';
     }
 
-    // Add pricing based on type
     if (pricingType === 'fixed') {
       const priceValue = parseFloat(fixedPrice) || 0;
       if (priceValue <= 0) {
@@ -225,7 +210,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       newMenuItem.prices = pricesObject;
     }
 
-    // Add modifiers if enabled
     if (hasModifiers) {
       const validGroups = modifierGroups.filter(g => 
         g.title.trim() && 
@@ -248,7 +232,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       }
     }
 
-    // Add optional fields
     if (itemImage.trim()) {
       newMenuItem.image = itemImage.trim();
     }
@@ -256,12 +239,10 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
       newMenuItem.description = itemDescription.trim();
     }
 
-    // Add to menu
     addMenuItem(newMenuItem);
     setActiveCategory(finalCategory);
     setAddedItemName(itemName.trim());
 
-    // Show success
     setShowSuccess(true);
     setTimeout(() => {
       setShowSuccess(false);
@@ -584,7 +565,7 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
   if (showSuccess) {
     return (
       <div style={styles.overlay}>
-        <div style={styles.modal}>
+        <div style={styles.modal} className="add-item-modal">
           <div style={styles.successScreen}>
             <div style={styles.successIcon}>
               <Check size={40} color="#FFFFFF" />
@@ -597,21 +578,130 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
   }
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div style={styles.header}>
-          <div style={styles.title}>Add New Menu Item</div>
+    <div style={styles.overlay} onClick={onClose} className="add-item-overlay">
+      <style>{`
+        /* 📱 Tablet (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .add-item-modal {
+            width: 600px !important;
+          }
+          .add-item-header {
+            padding: 18px 20px !important;
+          }
+          .add-item-title {
+            font-size: 18px !important;
+          }
+          .add-item-body {
+            padding: 20px !important;
+          }
+          .add-item-footer {
+            padding: 18px 20px !important;
+          }
+        }
+
+        /* 📱 Mobile (480px - 768px) */
+        @media (max-width: 768px) {
+          .add-item-modal {
+            width: 100% !important;
+            max-height: 95vh !important;
+            border-radius: 16px 16px 0 0 !important;
+            margin-top: auto !important;
+          }
+          .add-item-overlay {
+            align-items: flex-end !important;
+            padding: 0 !important;
+          }
+          .add-item-header {
+            padding: 16px !important;
+          }
+          .add-item-title {
+            font-size: 17px !important;
+          }
+          .add-item-body {
+            padding: 16px !important;
+          }
+          .add-item-section {
+            margin-bottom: 20px !important;
+            padding: 14px !important;
+          }
+          .add-item-section-title {
+            font-size: 14px !important;
+            margin-bottom: 10px !important;
+          }
+          .add-item-footer {
+            padding: 16px !important;
+          }
+          .add-item-btn {
+            padding: 13px !important;
+            font-size: 14px !important;
+          }
+          .add-item-size-row {
+            grid-template-columns: 1fr 1fr auto !important;
+            gap: 8px !important;
+          }
+          .add-item-modifier-option-row {
+            grid-template-columns: 1fr 80px auto !important;
+            gap: 6px !important;
+          }
+        }
+
+        /* 📱 Small Mobile (< 480px) */
+        @media (max-width: 480px) {
+          .add-item-header {
+            padding: 14px 12px !important;
+          }
+          .add-item-title {
+            font-size: 16px !important;
+          }
+          .add-item-body {
+            padding: 12px !important;
+          }
+          .add-item-section {
+            margin-bottom: 16px !important;
+            padding: 12px !important;
+          }
+          .add-item-section-title {
+            font-size: 13px !important;
+          }
+          .add-item-footer {
+            padding: 14px 12px !important;
+            gap: 10px !important;
+          }
+          .add-item-btn {
+            padding: 12px !important;
+            font-size: 13px !important;
+          }
+          .add-item-radio-group {
+            gap: 8px !important;
+          }
+          .add-item-radio-option {
+            flex: 1 1 100px !important;
+            padding: 8px !important;
+            font-size: 12px !important;
+          }
+          .add-item-size-row {
+            grid-template-columns: 1fr 70px auto !important;
+            gap: 6px !important;
+          }
+          .add-item-remove-btn {
+            width: 32px !important;
+            height: 32px !important;
+          }
+        }
+      `}</style>
+
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()} className="add-item-modal">
+        <div style={styles.header} className="add-item-header">
+          <div style={styles.title} className="add-item-title">Add New Menu Item</div>
           <button style={styles.closeButton} onClick={onClose}>
             <X size={24} />
           </button>
         </div>
 
-        {/* Body */}
-        <div style={styles.body}>
+        <div style={styles.body} className="add-item-body">
           {/* Basic Information */}
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>
+          <div style={styles.section} className="add-item-section">
+            <div style={styles.sectionTitle} className="add-item-section-title">
               <FileText size={18} />
               Basic Information
             </div>
@@ -639,8 +729,8 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Category & Subcategory */}
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>
+          <div style={styles.section} className="add-item-section">
+            <div style={styles.sectionTitle} className="add-item-section-title">
               <Folder size={18} />
               Category & Subcategory
             </div>
@@ -666,7 +756,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
               </select>
             </div>
 
-            {/* New Category Input */}
             {isCreatingNewCategory && (
               <div style={styles.subsection}>
                 <div style={styles.subsectionTitle}>
@@ -683,7 +772,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
               </div>
             )}
 
-            {/* Drink Subcategory (for Drinks category) */}
             {isDrinksCategory && !isCreatingNewCategory && (
               <>
                 <div style={styles.formGroup}>
@@ -721,7 +809,6 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
               </>
             )}
 
-            {/* Subcategory Option (for non-drink categories) */}
             {(selectedCategory || isCreatingNewCategory) && !isDrinksCategory && (
               <>
                 <div style={styles.formGroup}>
@@ -761,24 +848,26 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Pricing */}
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>
+          <div style={styles.section} className="add-item-section">
+            <div style={styles.sectionTitle} className="add-item-section-title">
               <DollarSign size={18} />
               Pricing
             </div>
             
             <div style={styles.formGroup}>
               <label style={styles.label}>Pricing Type *</label>
-              <div style={styles.radioGroup}>
+              <div style={styles.radioGroup} className="add-item-radio-group">
                 <div
                   style={styles.radioOption(pricingType === 'fixed')}
                   onClick={() => setPricingType('fixed')}
+                  className="add-item-radio-option"
                 >
                   Fixed Price
                 </div>
                 <div
                   style={styles.radioOption(pricingType === 'sizes')}
                   onClick={() => setPricingType('sizes')}
+                  className="add-item-radio-option"
                 >
                   Multiple Sizes
                 </div>
@@ -801,7 +890,7 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
               <div style={styles.formGroup}>
                 <label style={styles.label}>Size Options *</label>
                 {customSizes.map((size, index) => (
-                  <div key={index} style={styles.sizeRow}>
+                  <div key={index} style={styles.sizeRow} className="add-item-size-row">
                     <input
                       type="text"
                       placeholder="Size name"
@@ -826,6 +915,7 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
                       <button
                         style={styles.removeBtn}
                         onClick={() => removeSize(index)}
+                        className="add-item-remove-btn"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -841,8 +931,8 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Modifiers/Toppings */}
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>
+          <div style={styles.section} className="add-item-section">
+            <div style={styles.sectionTitle} className="add-item-section-title">
               <List size={18} />
               Toppings & Modifiers
             </div>
@@ -900,7 +990,7 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
 
                     <div style={{ marginTop: '12px' }}>
                       {group.options.map((option, optionIndex) => (
-                        <div key={option.id} style={styles.modifierOptionRow}>
+                        <div key={option.id} style={styles.modifierOptionRow} className="add-item-modifier-option-row">
                           <input
                             type="text"
                             placeholder="Option name"
@@ -949,46 +1039,16 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
               </>
             )}
           </div>
-
-          {/* Additional Options */}
-          <div style={styles.section}>
-            <div style={styles.sectionTitle}>
-              <Settings size={18} />
-              Additional Options
-            </div>
-
-            <div style={styles.formGroup}>
-              <label style={styles.label}>Image URL (Optional)</label>
-              <div style={{ position: 'relative' }}>
-                <ImageIcon 
-                  size={16} 
-                  style={{ 
-                    position: 'absolute', 
-                    left: '10px', 
-                    top: '50%', 
-                    transform: 'translateY(-50%)',
-                    color: theme.textLight 
-                  }} 
-                />
-                <input
-                  type="text"
-                  placeholder="https://example.com/image.jpg"
-                  style={{ ...styles.input, paddingLeft: '36px' }}
-                  value={itemImage}
-                  onChange={(e) => setItemImage(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
-        <div style={styles.footer}>
+        <div style={styles.footer} className="add-item-footer">
           <button
             style={styles.button('secondary')}
             onClick={onClose}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            className="add-item-btn"
           >
             Cancel
           </button>
@@ -997,6 +1057,7 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
             onClick={handleAddItem}
             onMouseEnter={(e) => e.currentTarget.style.opacity = '0.9'}
             onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            className="add-item-btn"
           >
             <Plus size={18} />
             Add to Menu

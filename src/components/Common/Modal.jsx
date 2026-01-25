@@ -1,6 +1,5 @@
 import { COLORS, RADIUS, SPACING, SHADOWS } from '../../theme/colors';
 
-// Inline Styles
 const styles = {
   overlay: {
     display: 'flex',
@@ -62,32 +61,126 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   };
 
   return (
-    <div style={styles.overlay} onClick={handleOverlayClick}>
-      <div style={{ ...styles.modalContent, position: 'relative' }}>
-        <button
-          style={styles.closeButton}
-          onClick={onClose}
-          onMouseEnter={(e) => {
-            e.target.style.background = COLORS.gray200;
-            e.target.style.color = COLORS.textPrimary;
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'none';
-            e.target.style.color = COLORS.textSecondary;
-          }}
+    <>
+      <style>{`
+        /* Hide scrollbar for modal content */
+        .common-modal-content {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .common-modal-content::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .common-modal-content {
+            padding: 24px !important;
+            min-width: 350px !important;
+            max-width: 85vw !important;
+          }
+          .common-modal-title {
+            font-size: 22px !important;
+          }
+          .common-modal-header {
+            margin-bottom: 20px !important;
+            padding-bottom: 12px !important;
+          }
+          .common-modal-close {
+            top: 20px !important;
+            right: 20px !important;
+            font-size: 22px !important;
+          }
+        }
+
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .common-modal-content {
+            padding: 20px !important;
+            min-width: 0 !important;
+            max-width: 95vw !important;
+            max-height: 85vh !important;
+            border-radius: 12px !important;
+          }
+          .common-modal-title {
+            font-size: 20px !important;
+            padding-right: 40px !important;
+          }
+          .common-modal-header {
+            margin-bottom: 18px !important;
+            padding-bottom: 12px !important;
+          }
+          .common-modal-close {
+            top: 18px !important;
+            right: 18px !important;
+            font-size: 20px !important;
+            padding: 6px !important;
+          }
+        }
+
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .common-modal-overlay {
+            padding: 10px !important;
+          }
+          .common-modal-content {
+            padding: 16px !important;
+            max-width: 100vw !important;
+            max-height: 90vh !important;
+            border-radius: 10px !important;
+          }
+          .common-modal-title {
+            font-size: 18px !important;
+            padding-right: 35px !important;
+            line-height: 1.3 !important;
+          }
+          .common-modal-header {
+            margin-bottom: 16px !important;
+            padding-bottom: 10px !important;
+          }
+          .common-modal-close {
+            top: 14px !important;
+            right: 14px !important;
+            font-size: 18px !important;
+            padding: 4px !important;
+          }
+        }
+      `}</style>
+
+      <div 
+        style={styles.overlay} 
+        className="common-modal-overlay"
+        onClick={handleOverlayClick}
+      >
+        <div 
+          style={{ ...styles.modalContent, position: 'relative' }}
+          className="common-modal-content"
         >
-          ✕
-        </button>
-        {title && (
-          <div style={styles.header}>
-            <h2 style={styles.title}>{title}</h2>
-          </div>
-        )}
-        <div>{children}</div>
+          <button
+            style={styles.closeButton}
+            className="common-modal-close"
+            onClick={onClose}
+            onMouseEnter={(e) => {
+              e.target.style.background = COLORS.gray200;
+              e.target.style.color = COLORS.textPrimary;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'none';
+              e.target.style.color = COLORS.textSecondary;
+            }}
+          >
+            ✕
+          </button>
+          {title && (
+            <div style={styles.header} className="common-modal-header">
+              <h2 style={styles.title} className="common-modal-title">{title}</h2>
+            </div>
+          )}
+          <div>{children}</div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
 export default Modal;
-

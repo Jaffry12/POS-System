@@ -174,7 +174,6 @@ const MenuManagementPage = () => {
       flexDirection: "column",
       gap: "18px",
     },
-
     headerTop: {
       display: "flex",
       justifyContent: "space-between",
@@ -199,7 +198,6 @@ const MenuManagementPage = () => {
       alignItems: "center",
       gap: "8px",
     },
-
     statsRow: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -221,7 +219,6 @@ const MenuManagementPage = () => {
       fontSize: "13px",
       color: theme.textSecondary,
     },
-
     controls: {
       display: "flex",
       gap: "12px",
@@ -281,16 +278,14 @@ const MenuManagementPage = () => {
       fontSize: "13px",
       fontWeight: "700",
     }),
-
-    // âœ… Scrollable items panel (hidden scrollbar, last card visible)
     itemsPanel: {
       background: theme.cardBg,
       borderRadius: "16px",
       boxShadow: theme.shadow,
       border: `1px solid ${theme.border}`,
       padding: "14px",
-      paddingBottom: "28px",           // âœ… last item not cut
-      maxHeight: "calc(100vh - 320px)",// âœ… better responsive height
+      paddingBottom: "28px",
+      maxHeight: "calc(100vh - 320px)",
       overflowY: "auto",
     },
     itemsPanelTitle: {
@@ -307,8 +302,6 @@ const MenuManagementPage = () => {
       color: theme.textSecondary,
       fontWeight: "700",
     },
-
-    // âœ… smaller grid
     gridView: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
@@ -319,8 +312,6 @@ const MenuManagementPage = () => {
       flexDirection: "column",
       gap: "10px",
     },
-
-    // âœ… smaller card
     itemCard: {
       background: theme.bgSecondary,
       borderRadius: "12px",
@@ -385,7 +376,6 @@ const MenuManagementPage = () => {
       justifyContent: "center",
       gap: "8px",
     }),
-
     listItem: {
       background: theme.bgSecondary,
       borderRadius: "12px",
@@ -397,7 +387,6 @@ const MenuManagementPage = () => {
       gap: "12px",
       alignItems: "center",
     },
-
     emptyState: {
       textAlign: "center",
       padding: "44px 18px",
@@ -422,7 +411,6 @@ const MenuManagementPage = () => {
       fontSize: "13px",
       color: theme.textLight,
     },
-
     categorySectionWrap: {
       marginTop: "6px",
       background: theme.cardBg,
@@ -448,8 +436,6 @@ const MenuManagementPage = () => {
       alignItems: "center",
       gap: "10px",
     },
-
-    // Edit modal
     overlay: {
       position: "fixed",
       inset: 0,
@@ -553,8 +539,7 @@ const MenuManagementPage = () => {
   };
 
   return (
-    <div style={styles.container}>
-      {/* hide scrollbar but keep scroll */}
+    <div style={styles.container} className="menu-container">
       <style>{`
         .items-scroll-hide {
           -ms-overflow-style: none;
@@ -563,48 +548,326 @@ const MenuManagementPage = () => {
         .items-scroll-hide::-webkit-scrollbar {
           display: none;
         }
+
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .menu-container {
+            padding: 32px !important;
+            gap: 16px !important;
+          }
+          .menu-header-top {
+            margin-bottom: 14px !important;
+          }
+          .menu-title {
+            font-size: 28px !important;
+          }
+          .menu-add-btn {
+            padding: 10px 20px !important;
+            font-size: 14px !important;
+          }
+          .menu-stats {
+            gap: 14px !important;
+          }
+          .menu-stat-card {
+            padding: 16px !important;
+          }
+          .menu-stat-value {
+            font-size: 24px !important;
+          }
+          .menu-controls {
+            gap: 10px !important;
+          }
+          .menu-items-panel {
+            padding: 12px !important;
+            padding-bottom: 24px !important;
+          }
+          .menu-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+            gap: 12px !important;
+          }
+        }
+
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .menu-container {
+            padding: 20px !important;
+            gap: 14px !important;
+          }
+          .menu-header-top {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+            margin-bottom: 12px !important;
+          }
+          .menu-title {
+            font-size: 24px !important;
+          }
+          .menu-add-btn {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 12px !important;
+          }
+          .menu-stats {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+          .menu-stat-card {
+            padding: 14px !important;
+          }
+          .menu-stat-value {
+            font-size: 22px !important;
+          }
+          .menu-stat-label {
+            font-size: 12px !important;
+          }
+          .menu-controls {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .menu-search-box {
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          .menu-select {
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          .menu-view-toggle {
+            width: 100% !important;
+          }
+          .menu-view-btn {
+            flex: 1 !important;
+            justify-content: center !important;
+          }
+          .menu-items-panel {
+            padding: 12px !important;
+            padding-bottom: 20px !important;
+            max-height: calc(100vh - 450px) !important;
+          }
+          .menu-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+          }
+          .menu-list {
+            gap: 10px !important;
+          }
+          .menu-list-item {
+            grid-template-columns: 1fr !important;
+            padding: 12px !important;
+            gap: 10px !important;
+          }
+          .menu-list-actions {
+            width: 100% !important;
+            justify-content: stretch !important;
+          }
+          .menu-list-actions button {
+            flex: 1 !important;
+          }
+          .menu-category-section {
+            padding: 14px !important;
+          }
+          .menu-category-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            padding: 12px !important;
+          }
+          .menu-category-delete {
+            width: 100% !important;
+          }
+          .menu-modal {
+            width: 95vw !important;
+            max-height: 90vh !important;
+          }
+          .menu-modal-body {
+            padding: 14px !important;
+            max-height: 60vh !important;
+          }
+          .menu-modal-row2 {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .menu-container {
+            padding: 16px !important;
+            gap: 12px !important;
+          }
+          .menu-title {
+            font-size: 22px !important;
+          }
+          .menu-add-btn {
+            padding: 10px !important;
+            font-size: 13px !important;
+          }
+          .menu-stats {
+            gap: 10px !important;
+          }
+          .menu-stat-card {
+            padding: 12px !important;
+          }
+          .menu-stat-value {
+            font-size: 20px !important;
+          }
+          .menu-stat-label {
+            font-size: 11px !important;
+          }
+          .menu-controls {
+            gap: 8px !important;
+          }
+          .menu-search-input {
+            padding: 10px 10px 10px 36px !important;
+            font-size: 13px !important;
+          }
+          .menu-select {
+            padding: 10px 12px !important;
+            font-size: 13px !important;
+          }
+          .menu-view-btn {
+            padding: 8px 10px !important;
+            font-size: 12px !important;
+          }
+          .menu-items-panel {
+            padding: 10px !important;
+            padding-bottom: 16px !important;
+          }
+          .menu-panel-title {
+            font-size: 14px !important;
+            margin-bottom: 10px !important;
+          }
+          .menu-items-count {
+            font-size: 11px !important;
+          }
+          .menu-grid {
+            gap: 10px !important;
+          }
+          .menu-card {
+            padding: 12px !important;
+          }
+          .menu-item-name {
+            font-size: 13px !important;
+          }
+          .menu-item-category {
+            font-size: 10px !important;
+          }
+          .menu-item-price {
+            font-size: 14px !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+          }
+          .menu-badges {
+            gap: 6px !important;
+            margin-bottom: 6px !important;
+          }
+          .menu-badge {
+            font-size: 9px !important;
+            padding: 2px 6px !important;
+          }
+          .menu-actions {
+            gap: 8px !important;
+            margin-top: 8px !important;
+          }
+          .menu-action-btn {
+            padding: 8px !important;
+            font-size: 11px !important;
+          }
+          .menu-list-item {
+            padding: 10px !important;
+          }
+          .menu-empty {
+            padding: 32px 14px !important;
+          }
+          .menu-empty-icon {
+            width: 48px !important;
+            height: 48px !important;
+            margin-bottom: 12px !important;
+          }
+          .menu-empty-text {
+            font-size: 14px !important;
+          }
+          .menu-empty-subtext {
+            font-size: 12px !important;
+          }
+          .menu-category-section {
+            padding: 12px !important;
+          }
+          .menu-category-title {
+            font-size: 16px !important;
+            margin-bottom: 10px !important;
+          }
+          .menu-category-header {
+            padding: 10px !important;
+          }
+          .menu-category-name {
+            font-size: 14px !important;
+          }
+          .menu-modal-header {
+            padding: 12px 14px !important;
+          }
+          .menu-modal-title {
+            font-size: 16px !important;
+          }
+          .menu-modal-body {
+            padding: 12px !important;
+            gap: 10px !important;
+          }
+          .menu-modal-label {
+            font-size: 12px !important;
+          }
+          .menu-modal-input {
+            padding: 10px !important;
+            font-size: 13px !important;
+          }
+          .menu-modal-footer {
+            padding: 12px 14px !important;
+            gap: 8px !important;
+          }
+          .menu-modal-btn {
+            padding: 10px 12px !important;
+            font-size: 13px !important;
+          }
+        }
       `}</style>
 
-      {/* Header */}
       <div>
-        <div style={styles.headerTop}>
-          <div style={styles.title}>Menu Management</div>
+        <div style={styles.headerTop} className="menu-header-top">
+          <div style={styles.title} className="menu-title">Menu Management</div>
 
-          <button style={styles.addButton} onClick={() => setShowAddModal(true)}>
+          <button style={styles.addButton} className="menu-add-btn" onClick={() => setShowAddModal(true)}>
             <Plus size={20} />
             Add New Item
           </button>
         </div>
 
-        {/* Stats */}
-        <div style={styles.statsRow}>
-          <div style={styles.statCard}>
-            <div style={styles.statValue}>{stats.totalItems}</div>
-            <div style={styles.statLabel}>Total Items</div>
+        <div style={styles.statsRow} className="menu-stats">
+          <div style={styles.statCard} className="menu-stat-card">
+            <div style={styles.statValue} className="menu-stat-value">{stats.totalItems}</div>
+            <div style={styles.statLabel} className="menu-stat-label">Total Items</div>
           </div>
-          <div style={styles.statCard}>
-            <div style={styles.statValue}>{stats.customItems}</div>
-            <div style={styles.statLabel}>Custom Items</div>
+          <div style={styles.statCard} className="menu-stat-card">
+            <div style={styles.statValue} className="menu-stat-value">{stats.customItems}</div>
+            <div style={styles.statLabel} className="menu-stat-label">Custom Items</div>
           </div>
-          <div style={styles.statCard}>
-            <div style={styles.statValue}>{stats.categories}</div>
-            <div style={styles.statLabel}>Categories</div>
+          <div style={styles.statCard} className="menu-stat-card">
+            <div style={styles.statValue} className="menu-stat-value">{stats.categories}</div>
+            <div style={styles.statLabel} className="menu-stat-label">Categories</div>
           </div>
-          <div style={styles.statCard}>
-            <div style={styles.statValue}>{stats.customCategories}</div>
-            <div style={styles.statLabel}>Custom Categories</div>
+          <div style={styles.statCard} className="menu-stat-card">
+            <div style={styles.statValue} className="menu-stat-value">{stats.customCategories}</div>
+            <div style={styles.statLabel} className="menu-stat-label">Custom Categories</div>
           </div>
         </div>
       </div>
 
-      {/* Controls */}
-      <div style={styles.controls}>
-        <div style={styles.searchBox}>
+      <div style={styles.controls} className="menu-controls">
+        <div style={styles.searchBox} className="menu-search-box">
           <Search size={18} style={styles.searchIcon} />
           <input
             type="text"
             placeholder="Search items..."
             style={styles.searchInput}
+            className="menu-search-input"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -612,6 +875,7 @@ const MenuManagementPage = () => {
 
         <select
           style={styles.select}
+          className="menu-select"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
@@ -623,15 +887,17 @@ const MenuManagementPage = () => {
           ))}
         </select>
 
-        <div style={styles.viewToggle}>
+        <div style={styles.viewToggle} className="menu-view-toggle">
           <button
             style={styles.viewButton(viewMode === "grid")}
+            className="menu-view-btn"
             onClick={() => setViewMode("grid")}
           >
             <Grid size={16} /> Grid
           </button>
           <button
             style={styles.viewButton(viewMode === "list")}
+            className="menu-view-btn"
             onClick={() => setViewMode("list")}
           >
             <ListIcon size={16} /> List
@@ -639,29 +905,29 @@ const MenuManagementPage = () => {
         </div>
       </div>
 
-      {/* âœ… Scrollable Items Panel */}
-      <div style={styles.itemsPanel} className="items-scroll-hide">
-        <div style={styles.itemsPanelTitle}>
+      <div style={styles.itemsPanel} className="items-scroll-hide menu-items-panel">
+        <div style={styles.itemsPanelTitle} className="menu-panel-title">
           <span>Items</span>
-          <span style={styles.itemsCount}>{filteredItems.length} shown</span>
+          <span style={styles.itemsCount} className="menu-items-count">{filteredItems.length} shown</span>
         </div>
 
         {filteredItems.length === 0 ? (
-          <div style={styles.emptyState}>
-            <Package style={styles.emptyIcon} />
-            <div style={styles.emptyText}>No items found</div>
-            <div style={styles.emptySubtext}>
+          <div style={styles.emptyState} className="menu-empty">
+            <Package style={styles.emptyIcon} className="menu-empty-icon" />
+            <div style={styles.emptyText} className="menu-empty-text">No items found</div>
+            <div style={styles.emptySubtext} className="menu-empty-subtext">
               {searchQuery || selectedCategory !== "all"
                 ? "Try adjusting your filters"
                 : "Add your first menu item to get started"}
             </div>
           </div>
         ) : viewMode === "grid" ? (
-          <div style={styles.gridView}>
+          <div style={styles.gridView} className="menu-grid">
             {filteredItems.map((item) => (
               <div
                 key={item.id}
                 style={styles.itemCard}
+                className="menu-card"
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = theme.success;
                   e.currentTarget.style.transform = "translateY(-2px)";
@@ -674,43 +940,44 @@ const MenuManagementPage = () => {
                 }}
               >
                 <div>
-                  <div style={styles.itemName}>{item.name}</div>
-                  <div style={styles.itemCategory}>{item.category}</div>
+                  <div style={styles.itemName} className="menu-item-name">{item.name}</div>
+                  <div style={styles.itemCategory} className="menu-item-category">{item.category}</div>
                 </div>
 
-                <div style={styles.itemPrice}>{getPrice(item)}</div>
+                <div style={styles.itemPrice} className="menu-item-price">{getPrice(item)}</div>
 
-                <div style={styles.badges}>
+                <div style={styles.badges} className="menu-badges">
                   {item.isCustom ? (
-                    <span style={styles.badge(theme.success)}>
+                    <span style={styles.badge(theme.success)} className="menu-badge">
                       <CheckCircle size={11} /> CUSTOM
                     </span>
                   ) : (
-                    <span style={styles.badge(theme.textSecondary)}>
+                    <span style={styles.badge(theme.textSecondary)} className="menu-badge">
                       <Package size={11} /> DEFAULT
                     </span>
                   )}
 
                   {item.hasModifiers && (
-                    <span style={styles.badge(theme.textSecondary)}>
+                    <span style={styles.badge(theme.textSecondary)} className="menu-badge">
                       <AlertTriangle size={11} /> MODIFIERS
                     </span>
                   )}
 
                   {item.prices && (
-                    <span style={styles.badge(theme.success)}>
+                    <span style={styles.badge(theme.success)} className="menu-badge">
                       <Layers size={11} /> {Object.keys(item.prices).length} SIZES
                     </span>
                   )}
                 </div>
 
-                <div style={styles.actions}>
-                  <button style={styles.actionButton("edit")} onClick={() => openEdit(item)}>
+                <div style={styles.actions} className="menu-actions">
+                  <button style={styles.actionButton("edit")} className="menu-action-btn" onClick={() => openEdit(item)}>
                     <Edit2 size={12} /> View / Edit
                   </button>
 
                   <button
                     style={styles.actionButton("delete")}
+                    className="menu-action-btn"
                     onClick={() => handleDeleteItem(item)}
                   >
                     <Trash2 size={12} /> Delete
@@ -720,11 +987,11 @@ const MenuManagementPage = () => {
             ))}
           </div>
         ) : (
-          <div style={styles.listView}>
+          <div style={styles.listView} className="menu-list">
             {filteredItems.map((item) => (
-              <div key={item.id} style={styles.listItem}>
+              <div key={item.id} style={styles.listItem} className="menu-list-item">
                 <div>
-                  <div style={styles.itemName}>{item.name}</div>
+                  <div style={styles.itemName} className="menu-item-name">{item.name}</div>
                   {item.description && (
                     <div style={{ fontSize: "13px", color: theme.textSecondary, marginTop: "4px" }}>
                       {item.description}
@@ -732,10 +999,10 @@ const MenuManagementPage = () => {
                   )}
                 </div>
 
-                <div style={styles.itemCategory}>{item.category}</div>
-                <div style={styles.itemPrice}>{getPrice(item)}</div>
+                <div style={styles.itemCategory} className="menu-item-category">{item.category}</div>
+                <div style={styles.itemPrice} className="menu-item-price">{getPrice(item)}</div>
 
-                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }} className="menu-list-actions">
                   <button style={styles.btn("primary")} onClick={() => openEdit(item)}>
                     <Edit2 size={14} /> Edit
                   </button>
@@ -752,9 +1019,8 @@ const MenuManagementPage = () => {
         )}
       </div>
 
-      {/* Category Management */}
-      <div style={styles.categorySectionWrap}>
-        <h2 style={{ fontSize: "18px", fontWeight: "800", color: theme.textPrimary, marginBottom: "12px" }}>
+      <div style={styles.categorySectionWrap} className="menu-category-section">
+        <h2 style={{ fontSize: "18px", fontWeight: "800", color: theme.textPrimary, marginBottom: "12px" }} className="menu-category-title">
           Category Management
         </h2>
 
@@ -765,8 +1031,8 @@ const MenuManagementPage = () => {
 
           return (
             <div key={category} style={{ marginBottom: "12px" }}>
-              <div style={styles.categoryHeader}>
-                <div style={styles.categoryTitle}>
+              <div style={styles.categoryHeader} className="menu-category-header">
+                <div style={styles.categoryTitle} className="menu-category-name">
                   <Package size={18} />
                   {category.toUpperCase()}
                   <span style={{ fontSize: "13px", fontWeight: "700", color: theme.textSecondary }}>
@@ -777,6 +1043,7 @@ const MenuManagementPage = () => {
                 {isCustom && (
                   <button
                     style={{ ...styles.btn("secondary"), background: theme.danger, color: "#fff" }}
+                    className="menu-category-delete"
                     onClick={() => handleDeleteCategory(category)}
                   >
                     <Trash2 size={14} />
@@ -789,26 +1056,25 @@ const MenuManagementPage = () => {
         })}
       </div>
 
-      {/* Add Item Modal */}
       <AddCustomItemModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
 
-      {/* Edit Modal */}
       {editOpen && editItem && (
         <div style={styles.overlay} onClick={closeEdit}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <div style={styles.modalTitle}>View / Edit Item</div>
+          <div style={styles.modal} className="menu-modal" onClick={(e) => e.stopPropagation()}>
+            <div style={styles.modalHeader} className="menu-modal-header">
+              <div style={styles.modalTitle} className="menu-modal-title">View / Edit Item</div>
               <button style={styles.btn("secondary")} onClick={closeEdit}>
                 <X size={16} />
                 Close
               </button>
             </div>
 
-            <div style={styles.modalBody}>
+            <div style={styles.modalBody} className="menu-modal-body">
               <div>
-                <div style={styles.label}>Item Name</div>
+                <div style={styles.label} className="menu-modal-label">Item Name</div>
                 <input
                   style={styles.input}
+                  className="menu-modal-input"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="e.g. Chicken Sub"
@@ -816,20 +1082,22 @@ const MenuManagementPage = () => {
               </div>
 
               <div>
-                <div style={styles.label}>Description</div>
+                <div style={styles.label} className="menu-modal-label">Description</div>
                 <textarea
                   style={styles.textarea}
+                  className="menu-modal-input"
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
                   placeholder="Optional description..."
                 />
               </div>
 
-              <div style={styles.row2}>
+              <div style={styles.row2} className="menu-modal-row2">
                 <div>
-                  <div style={styles.label}>Category</div>
+                  <div style={styles.label} className="menu-modal-label">Category</div>
                   <select
                     style={styles.input}
+                    className="menu-modal-input"
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
                   >
@@ -843,9 +1111,10 @@ const MenuManagementPage = () => {
 
                 {!editItem.prices ? (
                   <div>
-                    <div style={styles.label}>Price ({SETTINGS.currency})</div>
+                    <div style={styles.label} className="menu-modal-label">Price ({SETTINGS.currency})</div>
                     <input
                       style={styles.input}
+                      className="menu-modal-input"
                       value={editPrice}
                       onChange={(e) => setEditPrice(e.target.value)}
                       placeholder="e.g. 4.99"
@@ -853,13 +1122,14 @@ const MenuManagementPage = () => {
                   </div>
                 ) : (
                   <div>
-                    <div style={styles.label}>Sizes & Prices ({SETTINGS.currency})</div>
+                    <div style={styles.label} className="menu-modal-label">Sizes & Prices ({SETTINGS.currency})</div>
                     <div style={styles.pricesBox}>
                       {Object.keys(editItem.prices).map((k) => (
                         <div key={k} style={styles.priceRow}>
                           <div style={{ fontWeight: "800", color: theme.textPrimary }}>{k}</div>
                           <input
                             style={styles.input}
+                            className="menu-modal-input"
                             value={editPrices[k] ?? ""}
                             onChange={(e) =>
                               setEditPrices((p) => ({ ...p, [k]: e.target.value }))
@@ -874,11 +1144,11 @@ const MenuManagementPage = () => {
               </div>
             </div>
 
-            <div style={styles.modalFooter}>
-              <button style={styles.btn("secondary")} onClick={closeEdit}>
+            <div style={styles.modalFooter} className="menu-modal-footer">
+              <button style={styles.btn("secondary")} className="menu-modal-btn" onClick={closeEdit}>
                 Cancel
               </button>
-              <button style={styles.btn("primary")} onClick={handleSaveEdit}>
+              <button style={styles.btn("primary")} className="menu-modal-btn" onClick={handleSaveEdit}>
                 <CheckCircle size={16} />
                 Save Changes
               </button>

@@ -4,10 +4,18 @@ import { Moon, Sun, ChefHat } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { NAVIGATION_ITEMS, SETTINGS } from "../../data/menuData";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, isDark, toggleTheme } = useTheme();
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    // Close sidebar on mobile after navigation
+    if (window.innerWidth <= 1024) {
+      onClose();
+    }
+  };
 
   const styles = {
     sidebar: {
@@ -21,6 +29,7 @@ const Sidebar = () => {
       left: 0,
       top: 0,
       zIndex: 100,
+      transition: "transform 0.3s ease",
     },
     header: {
       padding: "24px 20px",
@@ -30,28 +39,41 @@ const Sidebar = () => {
       display: "flex",
       alignItems: "center",
       gap: "12px",
+      cursor: "pointer",
     },
     logo: {
-      width: "48px",
-      height: "48px",
+      width: "52px",
+      height: "52px",
       borderRadius: "50%",
-      background: theme.primary,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      overflow: "hidden",
+      flexShrink: 0,
+      background: "transparent",
+    },
+    logoImg: {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+      borderRadius: "50%",
+      display: "block",
     },
     shopInfo: {
       flex: 1,
+      minWidth: 0,
     },
     shopName: {
       fontSize: "16px",
       fontWeight: "600",
       color: theme.textPrimary,
       marginBottom: "2px",
+      lineHeight: "1.2",
     },
     shopSubtitle: {
       fontSize: "12px",
       color: theme.textSecondary,
+      lineHeight: "1.2",
     },
     nav: {
       flex: 1,
@@ -113,68 +135,140 @@ const Sidebar = () => {
   };
 
   return (
-    <div style={styles.sidebar}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div style={styles.logoContainer}>
-          <div style={styles.logo}>
-            <ChefHat size={24} color="#fff" />
-          </div>
-          <div style={styles.shopInfo}>
-            <div style={styles.shopName}>{SETTINGS.shopName}</div>
-            <div style={styles.shopSubtitle}>{SETTINGS.shopSubtitle}</div>
+    <>
+      <style>{`
+        /* Desktop View (default - unchanged) */
+        .sidebar-responsive {
+          transform: translateX(0);
+        }
+
+        /* Tablet & Mobile: Drawer behavior */
+        @media (max-width: 1024px) {
+          .sidebar-responsive {
+            transform: translateX(${isOpen ? '0' : '-100%'});
+            z-index: 150 !important;
+            box-shadow: ${isOpen ? '4px 0 12px rgba(0, 0, 0, 0.15)' : 'none'};
+          }
+        }
+
+        /* Mobile: Smaller logo & padding */
+        @media (max-width: 768px) {
+          .sidebar-responsive {
+            width: 260px !important;
+          }
+          
+          .sidebar-header-mobile {
+            padding: 20px 16px !important;
+          }
+          
+          .sidebar-nav-mobile {
+            padding: 16px 10px !important;
+          }
+          
+          .sidebar-mascot-mobile {
+            padding: 16px !important;
+          }
+        }
+
+        /* Small Mobile: Even more compact */
+        @media (max-width: 480px) {
+          .sidebar-responsive {
+            width: 240px !important;
+          }
+          
+          .sidebar-logo-mobile {
+            width: 44px !important;
+            height: 44px !important;
+          }
+          
+          .sidebar-shop-name {
+            font-size: 14px !important;
+          }
+          
+          .sidebar-shop-subtitle {
+            font-size: 11px !important;
+          }
+          
+          .sidebar-mascot-icon {
+            width: 52px !important;
+            height: 52px !important;
+          }
+        }
+      `}</style>
+
+      <div className="sidebar-responsive" style={styles.sidebar}>
+        {/* Header */}
+        <div className="sidebar-header-mobile" style={styles.header}>
+          <div style={styles.logoContainer} onClick={() => handleNavigation("/")}>
+            <div className="sidebar-logo-mobile" style={styles.logo}>
+              <img
+                src="/logo.png"
+                alt={SETTINGS.shopName}
+                style={styles.logoImg}
+              />
+            </div>
+            <div style={styles.shopInfo}>
+              <div className="sidebar-shop-name" style={styles.shopName}>
+                {SETTINGS.shopName}
+              </div>
+              <div className="sidebar-shop-subtitle" style={styles.shopSubtitle}>
+                {SETTINGS.shopSubtitle}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <div style={styles.nav}>
-        {NAVIGATION_ITEMS.map((item) => {
-          const Icon = Icons[item.icon];
-          const isActive = location.pathname === item.path;
+        {/* Navigation */}
+        <div className="sidebar-nav-mobile" style={styles.nav}>
+          {NAVIGATION_ITEMS.map((item) => {
+            const Icon = Icons[item.icon];
+            const isActive = location.pathname === item.path;
 
-          return (
-            <div
-              key={item.id}
-              style={styles.navItem(isActive)}
-              onClick={() => navigate(item.path)}
-              onMouseEnter={(e) => {
-                if (!isActive) e.currentTarget.style.background = theme.bgHover;
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) e.currentTarget.style.background = "transparent";
-              }}
-            >
-              <Icon style={styles.navIcon} />
-              <span style={styles.navLabel}>{item.name}</span>
-            </div>
-          );
-        })}
-      </div>
+            return (
+              <div
+                key={item.id}
+                style={styles.navItem(isActive)}
+                onClick={() => handleNavigation(item.path)}
+                onMouseEnter={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.background = theme.bgHover;
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive)
+                    e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <Icon style={styles.navIcon} />
+                <span style={styles.navLabel}>{item.name}</span>
+              </div>
+            );
+          })}
+        </div>
 
-      {/* Mascot */}
-      <div style={styles.mascot}>
-        <ChefHat style={styles.mascotIcon} />
-      </div>
+        {/* Mascot */}
+        <div className="sidebar-mascot-mobile" style={styles.mascot}>
+          <ChefHat className="sidebar-mascot-icon" style={styles.mascotIcon} />
+        </div>
 
-      {/* Theme Toggle */}
-      <div style={styles.themeToggle}>
-        <button
-          style={styles.themeButton(!isDark)}
-          onClick={() => !isDark || toggleTheme()}
-        >
-          <Sun size={16} />
-          Light
-        </button>
-        <button
-          style={styles.themeButton(isDark)}
-          onClick={() => isDark || toggleTheme()}
-        >
-          <Moon size={16} />
-          Dark
-        </button>
+        {/* Theme Toggle */}
+        <div style={styles.themeToggle}>
+          <button
+            style={styles.themeButton(!isDark)}
+            onClick={() => !isDark || toggleTheme()}
+          >
+            <Sun size={16} />
+            Light
+          </button>
+          <button
+            style={styles.themeButton(isDark)}
+            onClick={() => isDark || toggleTheme()}
+          >
+            <Moon size={16} />
+            Dark
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

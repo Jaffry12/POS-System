@@ -45,7 +45,8 @@ const Button = ({
   variant = 'primary', 
   fullWidth = false,
   disabled = false,
-  style = {} 
+  style = {},
+  className = ''
 }) => {
   const buttonStyle = {
     ...getButtonStyles(variant, fullWidth),
@@ -67,18 +68,47 @@ const Button = ({
   };
 
   return (
-    <button
-      style={buttonStyle}
-      onClick={onClick}
-      disabled={disabled}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      {children}
-    </button>
+    <>
+      <style>{`
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .common-button {
+            padding: 10px 20px !important;
+            font-size: 13px !important;
+          }
+        }
+
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .common-button {
+            padding: 12px 20px !important;
+            font-size: 14px !important;
+            border-radius: 8px !important;
+          }
+        }
+
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .common-button {
+            padding: 10px 16px !important;
+            font-size: 13px !important;
+            border-radius: 8px !important;
+          }
+        }
+      `}</style>
+
+      <button
+        style={buttonStyle}
+        className={`common-button ${className}`}
+        onClick={onClick}
+        disabled={disabled}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {children}
+      </button>
+    </>
   );
 };
 
 export default Button;
-
-

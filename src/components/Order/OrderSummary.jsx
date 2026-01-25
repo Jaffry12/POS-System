@@ -82,7 +82,6 @@ const OrderSummary = () => {
       fontWeight: "600",
       textAlign: "center",
       outline: "none",
-      // Hide default number input arrows
       appearance: "textfield",
       MozAppearance: "textfield",
       WebkitAppearance: "none",
@@ -122,7 +121,7 @@ const OrderSummary = () => {
   };
 
   return (
-    <div style={styles.summary}>
+    <>
       <style>
         {`
           input[type="number"]::-webkit-inner-spin-button,
@@ -133,78 +132,178 @@ const OrderSummary = () => {
           input[type="number"] {
             -moz-appearance: textfield;
           }
+
+          /* Tablet: 768px - 1024px */
+          @media (max-width: 1024px) and (min-width: 768px) {
+            .order-summary {
+              margin-bottom: 14px !important;
+            }
+            .summary-row {
+              padding: 7px 0 !important;
+              font-size: 13px !important;
+            }
+            .summary-total-row {
+              padding: 10px 0 !important;
+            }
+            .summary-total-label {
+              font-size: 15px !important;
+            }
+            .summary-total-value {
+              font-size: 18px !important;
+            }
+            .summary-discount-input {
+              width: 45px !important;
+              padding: 6px 5px !important;
+              font-size: 13px !important;
+            }
+            .summary-percent-label {
+              font-size: 12px !important;
+            }
+          }
+
+          /* Mobile: 480px - 768px */
+          @media (max-width: 768px) {
+            .order-summary {
+              margin-bottom: 12px !important;
+            }
+            .summary-row {
+              padding: 6px 0 !important;
+              font-size: 13px !important;
+            }
+            .summary-discount-row {
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: 8px !important;
+              padding: 8px 0 !important;
+            }
+            .summary-discount-section {
+              width: 100% !important;
+              justify-content: space-between !important;
+            }
+            .summary-total-row {
+              padding: 10px 0 !important;
+            }
+            .summary-total-label {
+              font-size: 15px !important;
+            }
+            .summary-total-value {
+              font-size: 18px !important;
+            }
+            .summary-divider {
+              margin: 10px 0 !important;
+            }
+          }
+
+          /* Small Mobile: < 480px */
+          @media (max-width: 480px) {
+            .order-summary {
+              margin-bottom: 10px !important;
+            }
+            .summary-row {
+              padding: 5px 0 !important;
+              font-size: 12px !important;
+            }
+            .summary-discount-input {
+              width: 40px !important;
+              padding: 6px 4px !important;
+              font-size: 12px !important;
+            }
+            .summary-arrow-btn {
+              padding: 1px 5px !important;
+            }
+            .summary-percent-label {
+              font-size: 11px !important;
+            }
+            .summary-total-row {
+              padding: 8px 0 !important;
+            }
+            .summary-total-label {
+              font-size: 14px !important;
+            }
+            .summary-total-value {
+              font-size: 17px !important;
+            }
+            .summary-divider {
+              margin: 8px 0 !important;
+            }
+          }
         `}
       </style>
 
-      <div style={styles.row}>
-        <span style={styles.label}>Sub Total</span>
-        <span style={styles.value}>
-          {SETTINGS.currency}
-          {totals.subtotal.toFixed(2)}
-        </span>
-      </div>
-
-      <div style={styles.row}>
-        <span style={styles.label}>
-          Tax ({(SETTINGS.taxRate * 100).toFixed(0)}%)
-        </span>
-        <span style={styles.value}>
-          {SETTINGS.currency}
-          {totals.taxAmount.toFixed(2)}
-        </span>
-      </div>
-
-      <div style={styles.discountRow}>
-        <span style={styles.label}>Discount</span>
-
-        <div style={styles.discountInputSection}>
-          <div style={styles.discountInputWrapper}>
-            <input
-              type="number"
-              inputMode="numeric"
-              min="0"
-              max="100"
-              value={totals.safeDiscount}
-              onChange={(e) => handleDiscountChange(e.target.value)}
-              style={styles.discountInput}
-            />
-            <div style={styles.arrowButtons}>
-              <button
-                style={styles.arrowButton}
-                onClick={incrementDiscount}
-                onMouseEnter={(e) => e.currentTarget.style.background = theme.bgSecondary}
-                onMouseLeave={(e) => e.currentTarget.style.background = theme.bgHover}
-              >
-                <ChevronUp size={14} />
-              </button>
-              <button
-                style={styles.arrowButton}
-                onClick={decrementDiscount}
-                onMouseEnter={(e) => e.currentTarget.style.background = theme.bgSecondary}
-                onMouseLeave={(e) => e.currentTarget.style.background = theme.bgHover}
-              >
-                <ChevronDown size={14} />
-              </button>
-            </div>
-          </div>
-          <span style={styles.percentLabel}>%</span>
+      <div style={styles.summary} className="order-summary">
+        <div style={styles.row} className="summary-row">
+          <span style={styles.label}>Sub Total</span>
           <span style={styles.value}>
-            -{SETTINGS.currency}
-            {totals.discountAmount.toFixed(2)}
+            {SETTINGS.currency}
+            {totals.subtotal.toFixed(2)}
+          </span>
+        </div>
+
+        <div style={styles.row} className="summary-row">
+          <span style={styles.label}>
+            Tax ({(SETTINGS.taxRate * 100).toFixed(0)}%)
+          </span>
+          <span style={styles.value}>
+            {SETTINGS.currency}
+            {totals.taxAmount.toFixed(2)}
+          </span>
+        </div>
+
+        <div style={styles.discountRow} className="summary-row summary-discount-row">
+          <span style={styles.label}>Discount</span>
+
+          <div style={styles.discountInputSection} className="summary-discount-section">
+            <div style={styles.discountInputWrapper}>
+              <input
+                type="number"
+                inputMode="numeric"
+                min="0"
+                max="100"
+                value={totals.safeDiscount}
+                onChange={(e) => handleDiscountChange(e.target.value)}
+                style={styles.discountInput}
+                className="summary-discount-input"
+              />
+              <div style={styles.arrowButtons}>
+                <button
+                  style={styles.arrowButton}
+                  className="summary-arrow-btn"
+                  onClick={incrementDiscount}
+                  onMouseEnter={(e) => e.currentTarget.style.background = theme.bgSecondary}
+                  onMouseLeave={(e) => e.currentTarget.style.background = theme.bgHover}
+                >
+                  <ChevronUp size={14} />
+                </button>
+                <button
+                  style={styles.arrowButton}
+                  className="summary-arrow-btn"
+                  onClick={decrementDiscount}
+                  onMouseEnter={(e) => e.currentTarget.style.background = theme.bgSecondary}
+                  onMouseLeave={(e) => e.currentTarget.style.background = theme.bgHover}
+                >
+                  <ChevronDown size={14} />
+                </button>
+              </div>
+            </div>
+            <span style={styles.percentLabel} className="summary-percent-label">%</span>
+            <span style={styles.value}>
+              -{SETTINGS.currency}
+              {totals.discountAmount.toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        <div style={styles.divider} className="summary-divider" />
+
+        <div style={styles.totalRow} className="summary-total-row">
+          <span style={styles.totalLabel} className="summary-total-label">Total</span>
+          <span style={styles.totalValue} className="summary-total-value">
+            {SETTINGS.currency}
+            {totals.total.toFixed(2)}
           </span>
         </div>
       </div>
-
-      <div style={styles.divider} />
-
-      <div style={styles.totalRow}>
-        <span style={styles.totalLabel}>Total</span>
-        <span style={styles.totalValue}>
-          {SETTINGS.currency}
-          {totals.total.toFixed(2)}
-        </span>
-      </div>
-    </div>
+    </>
   );
 };
 

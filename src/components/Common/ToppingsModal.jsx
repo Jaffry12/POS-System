@@ -6,7 +6,6 @@ import { TOPPINGS, CATEGORIES } from '../../data/menuItems';
 import { formatCurrency } from '../../utils/calculations';
 import { usePOS } from '../../hooks/usePOS';
 
-// Inline Styles
 const styles = {
   itemInfo: {
     background: COLORS.gray100,
@@ -69,7 +68,6 @@ const ToppingsModal = ({ isOpen, onClose, item }) => {
   const availableToppings = TOPPINGS[toppingType] || [];
 
   const toggleTopping = (topping) => {
-    // Allow multiple toppings for drinks
     setSelectedToppings(prev => {
       const exists = prev.find(t => t.id === topping.id);
       if (exists) {
@@ -100,53 +98,162 @@ const ToppingsModal = ({ isOpen, onClose, item }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add Toppings">
-      <div style={styles.itemInfo}>
-        <div style={styles.itemName}>{item.name}</div>
-        <div style={styles.itemPrice}>{formatCurrency(item.price)}</div>
-      </div>
+    <>
+      <style>{`
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .toppings-item-info {
+            padding: 16px !important;
+            margin-bottom: 20px !important;
+          }
+          .toppings-item-name {
+            font-size: 17px !important;
+          }
+          .toppings-item-price {
+            font-size: 15px !important;
+          }
+          .toppings-grid {
+            gap: 10px !important;
+            margin-bottom: 20px !important;
+          }
+          .toppings-button {
+            padding: 10px !important;
+          }
+          .toppings-name {
+            font-size: 13px !important;
+          }
+          .toppings-price {
+            font-size: 12px !important;
+          }
+          .toppings-button-group {
+            gap: 10px !important;
+          }
+        }
 
-      {availableToppings.length > 0 && (
-        <>
-          <h3 style={{ marginBottom: SPACING.md }}>Add Drink Toppings</h3>
-          <div style={styles.toppingsGrid}>
-            {availableToppings.map(topping => {
-              const isSelected = selectedToppings.find(t => t.id === topping.id);
-              return (
-                <button
-                  key={topping.id}
-                  style={{
-                    ...styles.toppingButton,
-                    ...(isSelected ? styles.toppingButtonSelected : {}),
-                  }}
-                  onClick={() => toggleTopping(topping)}
-                >
-                  <div style={styles.toppingName}>
-                    {isSelected && '✓ '}
-                    {topping.name}
-                  </div>
-                  <div style={styles.toppingPrice}>
-                    {topping.free || topping.price === 0 
-                      ? 'FREE' 
-                      : `+${formatCurrency(topping.price)}`}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </>
-      )}
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .toppings-item-info {
+            padding: 16px !important;
+            margin-bottom: 18px !important;
+          }
+          .toppings-item-name {
+            font-size: 18px !important;
+          }
+          .toppings-item-price {
+            font-size: 16px !important;
+          }
+          .toppings-heading {
+            font-size: 16px !important;
+            margin-bottom: 12px !important;
+          }
+          .toppings-grid {
+            grid-template-columns: 1fr !important;
+            gap: 10px !important;
+            margin-bottom: 18px !important;
+          }
+          .toppings-button {
+            padding: 12px !important;
+          }
+          .toppings-name {
+            font-size: 14px !important;
+          }
+          .toppings-price {
+            font-size: 13px !important;
+          }
+          .toppings-button-group {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+        }
 
-      <div style={styles.buttonGroup}>
-        <Button variant="secondary" fullWidth onClick={handleSkipToppings}>
-          Skip Toppings
-        </Button>
-        <Button variant="primary" fullWidth onClick={handleAddToOrder}>
-          Add to Order
-          {selectedToppings.length > 0 && ` (${selectedToppings.length})`}
-        </Button>
-      </div>
-    </Modal>
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .toppings-item-info {
+            padding: 14px !important;
+            margin-bottom: 16px !important;
+          }
+          .toppings-item-name {
+            font-size: 17px !important;
+            margin-bottom: 6px !important;
+          }
+          .toppings-item-price {
+            font-size: 15px !important;
+          }
+          .toppings-heading {
+            font-size: 15px !important;
+            margin-bottom: 10px !important;
+          }
+          .toppings-grid {
+            gap: 8px !important;
+            margin-bottom: 16px !important;
+          }
+          .toppings-button {
+            padding: 10px !important;
+          }
+          .toppings-name {
+            font-size: 13px !important;
+            margin-bottom: 4px !important;
+          }
+          .toppings-price {
+            font-size: 12px !important;
+          }
+          .toppings-button-group {
+            gap: 8px !important;
+          }
+        }
+      `}</style>
+
+      <Modal isOpen={isOpen} onClose={onClose} title="Add Toppings">
+        <div style={styles.itemInfo} className="toppings-item-info">
+          <div style={styles.itemName} className="toppings-item-name">{item.name}</div>
+          <div style={styles.itemPrice} className="toppings-item-price">{formatCurrency(item.price)}</div>
+        </div>
+
+        {availableToppings.length > 0 && (
+          <>
+            <h3 style={{ marginBottom: SPACING.md }} className="toppings-heading">
+              Add Drink Toppings
+            </h3>
+            <div style={styles.toppingsGrid} className="toppings-grid">
+              {availableToppings.map(topping => {
+                const isSelected = selectedToppings.find(t => t.id === topping.id);
+                return (
+                  <button
+                    key={topping.id}
+                    style={{
+                      ...styles.toppingButton,
+                      ...(isSelected ? styles.toppingButtonSelected : {}),
+                    }}
+                    className="toppings-button"
+                    onClick={() => toggleTopping(topping)}
+                  >
+                    <div style={styles.toppingName} className="toppings-name">
+                      {isSelected && '✓ '}
+                      {topping.name}
+                    </div>
+                    <div style={styles.toppingPrice} className="toppings-price">
+                      {topping.free || topping.price === 0 
+                        ? 'FREE' 
+                        : `+${formatCurrency(topping.price)}`}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <div style={styles.buttonGroup} className="toppings-button-group">
+          <Button variant="secondary" fullWidth onClick={handleSkipToppings}>
+            Skip Toppings
+          </Button>
+          <Button variant="primary" fullWidth onClick={handleAddToOrder}>
+            Add to Order
+            {selectedToppings.length > 0 && ` (${selectedToppings.length})`}
+          </Button>
+        </div>
+      </Modal>
+    </>
   );
 };
 

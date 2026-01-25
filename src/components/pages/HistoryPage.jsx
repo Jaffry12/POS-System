@@ -8,18 +8,15 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const HistoryPage = () => {
   const { theme } = useTheme();
 
-  // âœ… stable date keys (computed once)
   const [dateKeys] = useState(() => {
     const today = new Date();
     const todayKey = today.toISOString().slice(0, 10);
-
     const yesterday = new Date(today.getTime() - DAY_MS);
     const yesterdayKey = yesterday.toISOString().slice(0, 10);
-
     return { todayKey, yesterdayKey };
   });
 
-  const [filterMode, setFilterMode] = useState("all"); // all | today | yesterday | date
+  const [filterMode, setFilterMode] = useState("all");
   const [selectedDate, setSelectedDate] = useState(() => {
     return new Date().toISOString().slice(0, 10);
   });
@@ -65,7 +62,6 @@ const HistoryPage = () => {
       fontSize: "14px",
       color: theme.textSecondary,
     },
-
     filters: {
       display: "flex",
       gap: "10px",
@@ -108,7 +104,6 @@ const HistoryPage = () => {
       fontWeight: "700",
       fontSize: "13px",
     },
-
     daySection: { marginTop: "18px" },
     dayHeader: {
       background: theme.cardBg,
@@ -155,7 +150,6 @@ const HistoryPage = () => {
       fontSize: "12px",
       fontWeight: "900",
     },
-
     transactionsList: {
       display: "flex",
       flexDirection: "column",
@@ -223,7 +217,6 @@ const HistoryPage = () => {
       fontWeight: "900",
       color: theme.success,
     },
-
     emptyState: {
       background: theme.cardBg,
       borderRadius: "16px",
@@ -271,7 +264,6 @@ const HistoryPage = () => {
     return subtotal + tax - discount;
   };
 
-  // âœ… group only (no formatDayTitle call here)
   const grouped = useMemo(() => {
     let filtered = transactions;
 
@@ -301,7 +293,6 @@ const HistoryPage = () => {
     });
   }, [transactions, filterMode, selectedDate, dateKeys.todayKey, dateKeys.yesterdayKey]);
 
-  // âœ… title computed during render (no memo issues)
   const getDayTitle = (dayKey) => {
     if (dayKey === dateKeys.todayKey) return "Today";
     if (dayKey === dateKeys.yesterdayKey) return "Yesterday";
@@ -318,17 +309,17 @@ const HistoryPage = () => {
 
   if (transactions.length === 0) {
     return (
-      <div style={styles.container}>
-        <div style={styles.header}>
+      <div style={styles.container} className="history-container">
+        <div style={styles.header} className="history-header">
           <div>
-            <div style={styles.title}>Order History</div>
-            <div style={styles.subtitle}>View past transactions</div>
+            <div style={styles.title} className="history-title">Order History</div>
+            <div style={styles.subtitle} className="history-subtitle">View past transactions</div>
           </div>
         </div>
 
-        <div style={styles.emptyState}>
-          <FiFileText style={styles.emptyIcon} />
-          <div style={styles.emptyText}>No order history yet</div>
+        <div style={styles.emptyState} className="history-empty">
+          <FiFileText style={styles.emptyIcon} className="history-empty-icon" />
+          <div style={styles.emptyText} className="history-empty-text">No order history yet</div>
         </div>
       </div>
     );
@@ -342,28 +333,229 @@ const HistoryPage = () => {
           height: 0;
           display: none;
         }
+
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .history-header {
+            padding: 32px 32px 0 32px !important;
+            margin-bottom: 16px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .history-title {
+            font-size: 28px !important;
+          }
+          .history-subtitle {
+            font-size: 13px !important;
+          }
+          .history-scroll {
+            padding: 0 32px 60px 32px !important;
+          }
+          .history-filters {
+            width: 100% !important;
+          }
+          .history-day-header {
+            padding: 12px 14px !important;
+          }
+          .history-card {
+            padding: 14px !important;
+          }
+        }
+
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .history-header {
+            padding: 24px 20px 0 20px !important;
+            margin-bottom: 14px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .history-title {
+            font-size: 24px !important;
+            margin-bottom: 4px !important;
+          }
+          .history-subtitle {
+            font-size: 13px !important;
+          }
+          .history-scroll {
+            padding: 0 20px 60px 20px !important;
+          }
+          .history-filters {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            padding: 8px !important;
+          }
+          .history-chip {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px !important;
+          }
+          .history-date-wrap {
+            width: 100% !important;
+            padding: 10px !important;
+          }
+          .history-day-section {
+            margin-top: 16px !important;
+          }
+          .history-day-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            padding: 12px !important;
+            gap: 10px !important;
+          }
+          .history-day-title {
+            font-size: 15px !important;
+          }
+          .history-card {
+            padding: 14px !important;
+          }
+          .history-card-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
+          .history-order-id {
+            font-size: 15px !important;
+          }
+          .history-timestamp {
+            font-size: 12px !important;
+          }
+          .history-item {
+            font-size: 12px !important;
+          }
+          .history-footer {
+            gap: 8px !important;
+          }
+          .history-total {
+            font-size: 15px !important;
+          }
+          .history-empty {
+            padding: 40px 20px !important;
+            margin-top: 16px !important;
+          }
+          .history-empty-icon {
+            font-size: 56px !important;
+          }
+          .history-empty-text {
+            font-size: 16px !important;
+          }
+        }
+
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .history-header {
+            padding: 20px 16px 0 16px !important;
+            margin-bottom: 12px !important;
+          }
+          .history-title {
+            font-size: 22px !important;
+          }
+          .history-subtitle {
+            font-size: 12px !important;
+          }
+          .history-scroll {
+            padding: 0 16px 60px 16px !important;
+          }
+          .history-filters {
+            padding: 6px !important;
+            gap: 6px !important;
+          }
+          .history-chip {
+            padding: 8px !important;
+            font-size: 12px !important;
+          }
+          .history-date-wrap {
+            padding: 8px !important;
+          }
+          .history-day-section {
+            margin-top: 14px !important;
+          }
+          .history-day-header {
+            padding: 10px !important;
+            border-radius: 12px !important;
+          }
+          .history-day-title {
+            font-size: 14px !important;
+            gap: 8px !important;
+          }
+          .history-day-meta {
+            gap: 8px !important;
+          }
+          .history-pill {
+            font-size: 11px !important;
+            padding: 5px 8px !important;
+          }
+          .history-card {
+            padding: 12px !important;
+            border-radius: 10px !important;
+          }
+          .history-card-header {
+            margin-bottom: 8px !important;
+            padding-bottom: 8px !important;
+          }
+          .history-order-id {
+            font-size: 14px !important;
+          }
+          .history-timestamp {
+            font-size: 11px !important;
+            gap: 6px !important;
+          }
+          .history-items {
+            margin-bottom: 8px !important;
+          }
+          .history-item {
+            font-size: 11px !important;
+            padding: 5px 0 !important;
+            gap: 8px !important;
+          }
+          .history-footer {
+            padding-top: 8px !important;
+            gap: 6px !important;
+          }
+          .history-payment {
+            font-size: 11px !important;
+            gap: 6px !important;
+          }
+          .history-total {
+            font-size: 14px !important;
+          }
+          .history-empty {
+            padding: 32px 16px !important;
+            margin-top: 12px !important;
+          }
+          .history-empty-icon {
+            font-size: 48px !important;
+            margin-bottom: 16px !important;
+          }
+          .history-empty-text {
+            font-size: 15px !important;
+          }
+        }
       `}</style>
-      <div style={styles.container}>
-        <div style={styles.header}>
+      <div style={styles.container} className="history-container">
+        <div style={styles.header} className="history-header">
           <div>
-            <div style={styles.title}>Order History</div>
-            <div style={styles.subtitle}>
-              {transactions.length} total transactions â€¢ grouped by day
+            <div style={styles.title} className="history-title">Order History</div>
+            <div style={styles.subtitle} className="history-subtitle">
+              {transactions.length} total transactions • grouped by day
             </div>
           </div>
 
-          <div style={styles.filters}>
-            <div style={styles.chip(filterMode === "all")} onClick={() => setFilterMode("all")}>
+          <div style={styles.filters} className="history-filters">
+            <div style={styles.chip(filterMode === "all")} className="history-chip" onClick={() => setFilterMode("all")}>
               All Days
             </div>
             <div
               style={styles.chip(filterMode === "today")}
+              className="history-chip"
               onClick={() => setFilterMode("today")}
             >
               Today
             </div>
             <div
               style={styles.chip(filterMode === "yesterday")}
+              className="history-chip"
               onClick={() => setFilterMode("yesterday")}
             >
               Yesterday
@@ -371,6 +563,7 @@ const HistoryPage = () => {
 
             <div
               style={styles.chip(filterMode === "date")}
+              className="history-chip"
               onClick={() => setFilterMode("date")}
             >
               <FiCalendar />
@@ -378,7 +571,7 @@ const HistoryPage = () => {
             </div>
 
             {filterMode === "date" && (
-              <div style={styles.dateInputWrap}>
+              <div style={styles.dateInputWrap} className="history-date-wrap">
                 <FiCalendar style={{ color: theme.textSecondary }} />
                 <input
                   type="date"
@@ -391,24 +584,24 @@ const HistoryPage = () => {
           </div>
         </div>
 
-        <div className={grouped.length > 0 ? "history-scroll" : ""} style={grouped.length > 0 ? styles.scrollableContent : {flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+        <div className={grouped.length > 0 ? "history-scroll" : ""} style={grouped.length > 0 ? styles.scrollableContent : {flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px'}}>
           {grouped.length === 0 ? (
-            <div style={styles.emptyState}>
-              <FiFileText style={styles.emptyIcon} />
-              <div style={styles.emptyText}>No orders found for this filter</div>
+            <div style={styles.emptyState} className="history-empty">
+              <FiFileText style={styles.emptyIcon} className="history-empty-icon" />
+              <div style={styles.emptyText} className="history-empty-text">No orders found for this filter</div>
             </div>
           ) : (
             grouped.map((day) => (
-          <div key={day.dayKey} style={styles.daySection}>
-            <div style={styles.dayHeader}>
-              <div style={styles.dayTitle}>
+          <div key={day.dayKey} style={styles.daySection} className="history-day-section">
+            <div style={styles.dayHeader} className="history-day-header">
+              <div style={styles.dayTitle} className="history-day-title">
                 <FiCalendar style={{ color: theme.textSecondary }} />
                 {getDayTitle(day.dayKey)}
               </div>
 
-              <div style={styles.dayMeta}>
-                <div style={styles.pill}>{day.list.length} orders</div>
-                <div style={styles.pillSuccess}>
+              <div style={styles.dayMeta} className="history-day-meta">
+                <div style={styles.pill} className="history-pill">{day.list.length} orders</div>
+                <div style={styles.pillSuccess} className="history-pill">
                   {SETTINGS.currency}
                   {day.daySales.toFixed(2)} sales
                 </div>
@@ -417,19 +610,19 @@ const HistoryPage = () => {
 
             <div style={styles.transactionsList}>
               {day.list.map((transaction) => (
-                <div key={transaction.id} style={styles.transactionCard}>
-                  <div style={styles.cardHeader}>
-                    <div style={styles.orderId}>{transaction.id}</div>
+                <div key={transaction.id} style={styles.transactionCard} className="history-card">
+                  <div style={styles.cardHeader} className="history-card-header">
+                    <div style={styles.orderId} className="history-order-id">{transaction.id}</div>
 
-                    <div style={styles.timestamp}>
+                    <div style={styles.timestamp} className="history-timestamp">
                       <FiClock style={styles.inlineIcon} />
                       {formatDateTime(transaction.timestamp)}
                     </div>
                   </div>
 
-                  <div style={styles.items}>
+                  <div style={styles.items} className="history-items">
                     {transaction.items.map((item, idx) => (
-                      <div key={idx} style={styles.item}>
+                      <div key={idx} style={styles.item} className="history-item">
                         <span>
                           {item.name}
                           {item.size ? ` (${item.size})` : ""} x{item.quantity}
@@ -442,13 +635,13 @@ const HistoryPage = () => {
                     ))}
                   </div>
 
-                  <div style={styles.footer}>
-                    <div style={styles.paymentMethod}>
+                  <div style={styles.footer} className="history-footer">
+                    <div style={styles.paymentMethod} className="history-payment">
                       <FiCreditCard style={styles.inlineIcon} />
                       {transaction.paymentMethod}
                     </div>
 
-                    <div style={styles.total}>
+                    <div style={styles.total} className="history-total">
                       {SETTINGS.currency}
                       {calculateTotal(transaction).toFixed(2)}
                     </div>

@@ -42,22 +42,87 @@ const MenuGrid = () => {
   };
 
   return (
-    <div style={styles.container}>
-      {items.length === 0 ? (
-        <div style={styles.emptyState}>
-          <div style={styles.emptyIconWrap}>
-            <Search size={22} color={theme.textSecondary} />
+    <>
+      <style>{`
+        /* Desktop (default - unchanged) */
+        .menu-grid-container {
+          padding: 24px;
+        }
+
+        .menu-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 20px;
+        }
+
+        /* Tablet: Reduce gap and padding */
+        @media (max-width: 1024px) {
+          .menu-grid-container {
+            padding: 20px !important;
+          }
+
+          .menu-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+            gap: 16px !important;
+          }
+        }
+
+        /* Mobile: 2 columns, smaller gap */
+        @media (max-width: 768px) {
+          .menu-grid-container {
+            padding: 16px !important;
+          }
+
+          .menu-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 12px !important;
+          }
+
+          .menu-empty-state {
+            padding: 40px 16px !important;
+          }
+        }
+
+        /* Small Mobile: Smaller gap */
+        @media (max-width: 480px) {
+          .menu-grid-container {
+            padding: 12px !important;
+          }
+
+          .menu-grid {
+            gap: 10px !important;
+          }
+
+          .menu-empty-icon {
+            width: 48px !important;
+            height: 48px !important;
+          }
+
+          .menu-empty-text {
+            font-size: 14px !important;
+          }
+        }
+      `}</style>
+
+      <div className="menu-grid-container" style={styles.container}>
+        {items.length === 0 ? (
+          <div className="menu-empty-state" style={styles.emptyState}>
+            <div className="menu-empty-icon" style={styles.emptyIconWrap}>
+              <Search size={22} color={theme.textSecondary} />
+            </div>
+            <div className="menu-empty-text" style={styles.emptyText}>
+              No items found
+            </div>
           </div>
-          <div style={styles.emptyText}>No items found</div>
-        </div>
-      ) : (
-        <div style={styles.grid}>
-          {items.map((item) => (
-            <MenuItem key={item.id} item={item} />
-          ))}
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="menu-grid" style={styles.grid}>
+            {items.map((item) => (
+              <MenuItem key={item.id} item={item} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

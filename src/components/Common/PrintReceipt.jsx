@@ -19,10 +19,8 @@ const PrintReceipt = ({ transaction, onClose }) => {
     console.log('✅ [MANUAL PRINT] Print dialog opened');
   };
 
-  // ✅ Get items (already in dollars for receipts)
   const items = transaction.items || [];
 
-  // ✅ Use transaction totals if available, otherwise calculate
   const subtotal = typeof transaction.subtotal === 'number' 
     ? transaction.subtotal 
     : items.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 0)), 0);
@@ -43,14 +41,12 @@ const PrintReceipt = ({ transaction, onClose }) => {
     ? transaction.totalQty
     : items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
-  // ✅ Date on receipt (use transaction timestamp if available)
   const receiptDate = transaction.timestampISO
     ? formatDateTime(new Date(transaction.timestampISO))
     : transaction.timestamp
     ? formatDateTime(new Date(transaction.timestamp))
     : formatDateTime(new Date());
 
-  // ✅ Transaction type badge
   const getTransactionTypeBadge = () => {
     if (transaction.type === 'split') {
       return 'SPLIT PAYMENT';
@@ -61,7 +57,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
     return 'FULL PAYMENT';
   };
 
-  // Print-optimized styles to match professional receipt
   const receiptStyles = `
     @media print {
       @page {
@@ -88,11 +83,10 @@ const PrintReceipt = ({ transaction, onClose }) => {
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE/Edge */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
       }
       
-      /* Hide scrollbar for receipt container */
       .receipt-container::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -103,11 +97,10 @@ const PrintReceipt = ({ transaction, onClose }) => {
         max-height: 40vh;
         overflow-y: auto;
         overflow-x: hidden;
-        scrollbar-width: none; /* Firefox */
-        -ms-overflow-style: none; /* IE/Edge */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
       }
       
-      /* Hide scrollbar completely but keep scroll functionality */
       .items-scroll::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -312,18 +305,95 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
     .btn-print { background: #16a34a; color: #fff; }
     .btn-close { background: #6b7280; color: #fff; }
+
+    /* Mobile Responsive Styles */
+    @media screen and (max-width: 768px) {
+      .receipt-container {
+        max-height: 75vh;
+      }
+      
+      .receipt-wrap {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      .items-scroll {
+        max-height: 30vh;
+      }
+
+      .buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px 14px;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .receipt-wrap {
+        padding: 8px;
+        font-size: 11px;
+      }
+
+      .shop-name {
+        font-size: 16px;
+      }
+
+      .shop-sub {
+        font-size: 10px;
+      }
+
+      .type-badge {
+        font-size: 8px;
+        padding: 2px 5px;
+      }
+
+      .order-block, .row {
+        font-size: 10px;
+      }
+
+      .table-head, .cols {
+        font-size: 10px;
+      }
+
+      .product-name {
+        font-size: 10px;
+      }
+
+      .product-subline {
+        font-size: 9px;
+      }
+
+      .total-line {
+        font-size: 11px;
+      }
+
+      .amount-due .label {
+        font-size: 12px;
+      }
+
+      .amount-due .value {
+        font-size: 22px;
+      }
+
+      .btn {
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+    }
   `;
 
-  // Helper: show modifiers/toppings for an item
   const getItemModifiers = (item) => {
     const modLines = [];
 
-    // Show size if available
     if (item.size) {
       modLines.push(`- Size: ${item.size}`);
     }
 
-    // Show modifiers
     if (item.modifiers && item.modifiers.length > 0) {
       item.modifiers.forEach((group) => {
         if (group.options && group.options.length > 0) {
@@ -346,136 +416,126 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
       <div className="receipt-container">
         <div className="receipt-wrap">
-          {/* Header */}
           <div className="header center">
             <div className="shop-name">{SETTINGS.shopName}</div>
             <div className="shop-sub">{SETTINGS.shopSubtitle || ''}</div>
             <div className="shop-sub">{SETTINGS.shopEmail || ''}</div>
             
-            {/* Transaction Type Badge */}
             <div className="type-badge">{getTransactionTypeBadge()}</div>
           </div>
 
-          {/* Order Details block */}
           <div className="order-block">
             <div className="row">
               <span><b>Order Details (Exc Tax)</b></span>
               <span><b>{receiptDate}</b></span>
             </div>
 
-          <div className="row">
-            <span>Order ID</span>
-            <span>{transaction.id || 'N/A'}</span>
-          </div>
-
-          <div className="row">
-            <span>Payment Method</span>
-            <span style={{ textTransform: 'capitalize' }}>{transaction.paymentMethod || 'Cash'}</span>
-          </div>
-
-          <div className="row">
-            <span>Staff</span>
-            <span>Manager</span>
-          </div>
-
-          <div className="row">
-            <span>Device</span>
-            <span>Till2</span>
-          </div>
-        </div>
-
-        <div className="divider" />
-
-        {/* Table header */}
-        <div className="table-head">
-          <div>PRODUCT</div>
-          <div className="mid">PRICE QTY</div>
-          <div className="right">TOTAL</div>
-        </div>
-
-        {/* Items - Scrollable for long lists */}
-        <div className="items-scroll">
-          {items.map((item, index) => {
-            // Item price is already in dollars
-            const price = Number(item.price || 0);
-            const qty = Number(item.quantity || 0);
-            const lineTotal = price * qty;
-            const modLines = getItemModifiers(item);
-
-            return (
-              <div key={index} className="table-row">
-                <div className="product-name">{item.name}</div>
-
-                <div className="cols">
-                  <div></div>
-                  <div className="mid">
-                    {SETTINGS.currency}{price.toFixed(2)}&nbsp;&nbsp;{qty}
-                  </div>
-                  <div className="right">{SETTINGS.currency}{lineTotal.toFixed(2)}</div>
-                </div>
-
-                {/* Show modifiers */}
-                {modLines.map((modLine, idx) => (
-                  <div key={idx} className="product-subline">{modLine}</div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="qty-line">Total Qty {totalQty}</div>
-
-        <div className="divider" />
-
-        {/* Totals */}
-        <div className="totals">
-          <div className="total-line">
-            <span>Sub Total</span>
-            <span><b>{SETTINGS.currency}{subtotal.toFixed(2)}</b></span>
-          </div>
-
-          {discountAmount > 0 && (
-            <div className="total-line">
-              <span>Discount ({transaction.discount || 0}%)</span>
-              <span><b>-{SETTINGS.currency}{discountAmount.toFixed(2)}</b></span>
+            <div className="row">
+              <span>Order ID</span>
+              <span>{transaction.id || 'N/A'}</span>
             </div>
-          )}
 
-          <div className="total-line">
-            <span>Tax</span>
-            <span><b>{SETTINGS.currency}{tax.toFixed(2)}</b></span>
+            <div className="row">
+              <span>Payment Method</span>
+              <span style={{ textTransform: 'capitalize' }}>{transaction.paymentMethod || 'Cash'}</span>
+            </div>
+
+            <div className="row">
+              <span>Staff</span>
+              <span>Manager</span>
+            </div>
+
+            <div className="row">
+              <span>Device</span>
+              <span>Till2</span>
+            </div>
           </div>
 
-          <div className="total-line">
-            <span>Total</span>
-            <span><b>{SETTINGS.currency}{total.toFixed(2)}</b></span>
+          <div className="divider" />
+
+          <div className="table-head">
+            <div>PRODUCT</div>
+            <div className="mid">PRICE QTY</div>
+            <div className="right">TOTAL</div>
           </div>
 
-          <div className="amount-due">
-            <span className="label">Amount Due</span>
-            <span className="value">{SETTINGS.currency}{total.toFixed(2)}</span>
+          <div className="items-scroll">
+            {items.map((item, index) => {
+              const price = Number(item.price || 0);
+              const qty = Number(item.quantity || 0);
+              const lineTotal = price * qty;
+              const modLines = getItemModifiers(item);
+
+              return (
+                <div key={index} className="table-row">
+                  <div className="product-name">{item.name}</div>
+
+                  <div className="cols">
+                    <div></div>
+                    <div className="mid">
+                      {SETTINGS.currency}{price.toFixed(2)}&nbsp;&nbsp;{qty}
+                    </div>
+                    <div className="right">{SETTINGS.currency}{lineTotal.toFixed(2)}</div>
+                  </div>
+
+                  {modLines.map((modLine, idx) => (
+                    <div key={idx} className="product-subline">{modLine}</div>
+                  ))}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Tax rate table */}
-          <div className="tax-table-head">
-            <span>TAX RATE</span>
-            <span className="center">PERCENTAGE</span>
-            <span className="right">TAX</span>
-          </div>
-          <div className="tax-table-row">
-            <span>HST/VAT</span>
-            <span className="center">{(SETTINGS.taxRate * 100).toFixed(2)}%</span>
-            <span className="right">{SETTINGS.currency}{tax.toFixed(2)}</span>
-          </div>
+          <div className="qty-line">Total Qty {totalQty}</div>
 
-          <div className="footer">
-            {SETTINGS.receiptFooter || 'Thank you for shopping with us'}
+          <div className="divider" />
+
+          <div className="totals">
+            <div className="total-line">
+              <span>Sub Total</span>
+              <span><b>{SETTINGS.currency}{subtotal.toFixed(2)}</b></span>
+            </div>
+
+            {discountAmount > 0 && (
+              <div className="total-line">
+                <span>Discount ({transaction.discount || 0}%)</span>
+                <span><b>-{SETTINGS.currency}{discountAmount.toFixed(2)}</b></span>
+              </div>
+            )}
+
+            <div className="total-line">
+              <span>Tax</span>
+              <span><b>{SETTINGS.currency}{tax.toFixed(2)}</b></span>
+            </div>
+
+            <div className="total-line">
+              <span>Total</span>
+              <span><b>{SETTINGS.currency}{total.toFixed(2)}</b></span>
+            </div>
+
+            <div className="amount-due">
+              <span className="label">Amount Due</span>
+              <span className="value">{SETTINGS.currency}{total.toFixed(2)}</span>
+            </div>
+
+            <div className="tax-table-head">
+              <span>TAX RATE</span>
+              <span className="center">PERCENTAGE</span>
+              <span className="right">TAX</span>
+            </div>
+            <div className="tax-table-row">
+              <span>HST/VAT</span>
+              <span className="center">{(SETTINGS.taxRate * 100).toFixed(2)}%</span>
+              <span className="right">{SETTINGS.currency}{tax.toFixed(2)}</span>
+            </div>
+
+            <div className="footer">
+              {SETTINGS.receiptFooter || 'Thank you for shopping with us'}
+            </div>
           </div>
         </div>
       </div>
-      </div>
 
-      {/* Buttons (not printed) */}
       <div className="buttons no-print">
         <button className="btn btn-print" onClick={handlePrint}>
           <Printer size={18} style={{ marginRight: '8px' }} />
@@ -490,5 +550,3 @@ const PrintReceipt = ({ transaction, onClose }) => {
 };
 
 export default PrintReceipt;
-
-

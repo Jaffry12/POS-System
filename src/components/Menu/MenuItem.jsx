@@ -46,7 +46,76 @@ const MenuItem = ({ item }) => {
 
   return (
     <>
+      <style>{`
+        /* Desktop (default - unchanged) */
+        .menu-item-card {
+          padding: 16px;
+          min-height: 80px;
+        }
+
+        .menu-item-name {
+          font-size: 15px;
+          margin-bottom: 8px;
+        }
+
+        .menu-item-price {
+          font-size: 18px;
+        }
+
+        /* Tablet: Slightly smaller */
+        @media (max-width: 1024px) {
+          .menu-item-card {
+            padding: 14px !important;
+            min-height: 75px !important;
+          }
+
+          .menu-item-name {
+            font-size: 14px !important;
+          }
+
+          .menu-item-price {
+            font-size: 17px !important;
+          }
+        }
+
+        /* Mobile: Compact card */
+        @media (max-width: 768px) {
+          .menu-item-card {
+            padding: 12px !important;
+            min-height: 70px !important;
+            border-radius: 10px !important;
+          }
+
+          .menu-item-name {
+            font-size: 13px !important;
+            margin-bottom: 6px !important;
+            line-height: 1.2 !important;
+          }
+
+          .menu-item-price {
+            font-size: 16px !important;
+          }
+        }
+
+        /* Small Mobile: Very compact */
+        @media (max-width: 480px) {
+          .menu-item-card {
+            padding: 10px !important;
+            min-height: 65px !important;
+          }
+
+          .menu-item-name {
+            font-size: 12px !important;
+          }
+
+          .menu-item-price {
+            font-size: 15px !important;
+          }
+        }
+      `}</style>
+
       <div
+        className="menu-item-card"
         style={styles.card}
         onClick={() => setShowModal(true)}
         onMouseEnter={(e) => {
@@ -60,8 +129,8 @@ const MenuItem = ({ item }) => {
           e.currentTarget.style.borderColor = theme.border;
         }}
       >
-        <div style={styles.name}>{item.name}</div>
-        <div style={styles.price}>{priceDisplay}</div>
+        <div className="menu-item-name" style={styles.name}>{item.name}</div>
+        <div className="menu-item-price" style={styles.price}>{priceDisplay}</div>
       </div>
 
       {showModal && (

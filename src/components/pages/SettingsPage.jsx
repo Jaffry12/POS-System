@@ -127,79 +127,195 @@ const SettingsPage = () => {
           height: 0;
           display: none;
         }
+
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .settings-header {
+            padding: 32px 32px 0 32px !important;
+            margin-bottom: 28px !important;
+          }
+          .settings-title {
+            font-size: 28px !important;
+          }
+          .settings-subtitle {
+            font-size: 15px !important;
+          }
+          .settings-scroll {
+            padding: 0 32px 60px 32px !important;
+          }
+          .settings-section {
+            padding: 20px !important;
+            margin-bottom: 20px !important;
+          }
+        }
+
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .settings-header {
+            padding: 24px 20px 0 20px !important;
+            margin-bottom: 24px !important;
+          }
+          .settings-title {
+            font-size: 24px !important;
+          }
+          .settings-subtitle {
+            font-size: 14px !important;
+          }
+          .settings-scroll {
+            padding: 0 20px 60px 20px !important;
+          }
+          .settings-section {
+            padding: 18px !important;
+            margin-bottom: 18px !important;
+          }
+          .settings-section-title {
+            font-size: 16px !important;
+            margin-bottom: 14px !important;
+          }
+          .settings-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            padding: 12px 0 !important;
+            gap: 8px !important;
+          }
+          .settings-label {
+            font-size: 13px !important;
+          }
+          .settings-value {
+            font-size: 13px !important;
+          }
+          .settings-button-group {
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 10px !important;
+          }
+          .settings-button {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .settings-header {
+            padding: 20px 16px 0 16px !important;
+            margin-bottom: 20px !important;
+          }
+          .settings-title {
+            font-size: 22px !important;
+          }
+          .settings-subtitle {
+            font-size: 13px !important;
+          }
+          .settings-scroll {
+            padding: 0 16px 60px 16px !important;
+          }
+          .settings-section {
+            padding: 16px !important;
+            margin-bottom: 16px !important;
+          }
+          .settings-section-title {
+            font-size: 15px !important;
+            margin-bottom: 12px !important;
+          }
+          .settings-row {
+            padding: 10px 0 !important;
+            gap: 6px !important;
+          }
+          .settings-label {
+            font-size: 12px !important;
+          }
+          .settings-value {
+            font-size: 12px !important;
+          }
+          .settings-button-group {
+            gap: 8px !important;
+            margin-top: 12px !important;
+          }
+          .settings-button {
+            padding: 10px 14px !important;
+            font-size: 13px !important;
+            gap: 8px !important;
+          }
+          .settings-icon {
+            font-size: 16px !important;
+          }
+        }
       `}</style>
-      <div style={styles.container}>
-        <div style={styles.header}>
-          <div style={styles.title}>Settings</div>
-          <div style={styles.subtitle}>Configure your POS system</div>
+      <div style={styles.container} className="settings-container">
+        <div style={styles.header} className="settings-header">
+          <div style={styles.title} className="settings-title">Settings</div>
+          <div style={styles.subtitle} className="settings-subtitle">Configure your POS system</div>
         </div>
 
         <div className="settings-scroll" style={styles.scrollableContent}>
           {/* Shop Information */}
-          <div style={styles.section}>
-        <div style={styles.sectionTitle}>Shop Information</div>
-        <div style={styles.settingRow}>
-          <div style={styles.settingLabel}>Shop Name</div>
-          <div style={styles.settingValue}>{SETTINGS.shopName}</div>
-        </div>
-        <div style={styles.settingRow}>
-          <div style={styles.settingLabel}>Subtitle</div>
-          <div style={styles.settingValue}>{SETTINGS.shopSubtitle}</div>
-        </div>
-        <div style={styles.settingRow}>
-          <div style={styles.settingLabel}>Currency</div>
-          <div style={styles.settingValue}>{SETTINGS.currency}</div>
-        </div>
-        <div style={styles.settingRow}>
-          <div style={styles.settingLabel}>Tax Rate</div>
-          <div style={styles.settingValue}>
-            {(SETTINGS.taxRate * 100).toFixed(0)}%
+          <div style={styles.section} className="settings-section">
+            <div style={styles.sectionTitle} className="settings-section-title">Shop Information</div>
+            <div style={styles.settingRow} className="settings-row">
+              <div style={styles.settingLabel} className="settings-label">Shop Name</div>
+              <div style={styles.settingValue} className="settings-value">{SETTINGS.shopName}</div>
+            </div>
+            <div style={styles.settingRow} className="settings-row">
+              <div style={styles.settingLabel} className="settings-label">Subtitle</div>
+              <div style={styles.settingValue} className="settings-value">{SETTINGS.shopSubtitle}</div>
+            </div>
+            <div style={styles.settingRow} className="settings-row">
+              <div style={styles.settingLabel} className="settings-label">Currency</div>
+              <div style={styles.settingValue} className="settings-value">{SETTINGS.currency}</div>
+            </div>
+            <div style={styles.settingRow} className="settings-row">
+              <div style={styles.settingLabel} className="settings-label">Tax Rate</div>
+              <div style={styles.settingValue} className="settings-value">
+                {(SETTINGS.taxRate * 100).toFixed(0)}%
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Data Management */}
-      <div style={styles.section}>
-        <div style={styles.sectionTitle}>Data Management</div>
-        <p style={{ color: theme.textSecondary, fontSize: "14px", marginBottom: "16px" }}>
-          Export your transaction data or clear all records from the system.
-        </p>
+          {/* Data Management */}
+          <div style={styles.section} className="settings-section">
+            <div style={styles.sectionTitle} className="settings-section-title">Data Management</div>
+            <p style={{ color: theme.textSecondary, fontSize: "14px", marginBottom: "16px" }}>
+              Export your transaction data or clear all records from the system.
+            </p>
 
-        <div style={styles.buttonGroup}>
-          <button
-            style={{ ...styles.button, ...styles.primaryButton }}
-            onClick={handleExportData}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            <FiDownload style={styles.icon} />
-            Export Data
-          </button>
+            <div style={styles.buttonGroup} className="settings-button-group">
+              <button
+                style={{ ...styles.button, ...styles.primaryButton }}
+                className="settings-button"
+                onClick={handleExportData}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <FiDownload style={styles.icon} className="settings-icon" />
+                Export Data
+              </button>
 
-          <button
-            style={{ ...styles.button, ...styles.dangerButton }}
-            onClick={handleClearData}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            <FiTrash2 style={styles.icon} />
-            Clear All Data
-          </button>
-        </div>
-      </div>
+              <button
+                style={{ ...styles.button, ...styles.dangerButton }}
+                className="settings-button"
+                onClick={handleClearData}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <FiTrash2 style={styles.icon} className="settings-icon" />
+                Clear All Data
+              </button>
+            </div>
+          </div>
 
-      {/* System Info */}
-      <div style={styles.section}>
-        <div style={styles.sectionTitle}>System Information</div>
-        <div style={styles.settingRow}>
-          <div style={styles.settingLabel}>Version</div>
-          <div style={styles.settingValue}>1.0.0</div>
-        </div>
-        <div style={styles.settingRow}>
-          <div style={styles.settingLabel}>Last Updated</div>
-          <div style={styles.settingValue}>January 2026</div>
-        </div>
-      </div>
+          {/* System Info */}
+          <div style={styles.section} className="settings-section">
+            <div style={styles.sectionTitle} className="settings-section-title">System Information</div>
+            <div style={styles.settingRow} className="settings-row">
+              <div style={styles.settingLabel} className="settings-label">Version</div>
+              <div style={styles.settingValue} className="settings-value">1.0.0</div>
+            </div>
+            <div style={styles.settingRow} className="settings-row">
+              <div style={styles.settingLabel} className="settings-label">Last Updated</div>
+              <div style={styles.settingValue} className="settings-value">January 2026</div>
+            </div>
+          </div>
         </div>
       </div>
     </>

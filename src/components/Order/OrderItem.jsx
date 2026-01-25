@@ -104,77 +104,186 @@ const OrderItem = ({ item }) => {
     },
   };
 
-  // Convert cents to dollars
   const unit = Number(item?.price || 0) / 100;
   const lineTotal = unit * Number(item?.quantity || 1);
-
-  // Display size if available
   const sizeDisplay = item.size ? ` (${item.size})` : '';
 
   return (
-    <div style={styles.item}>
-      <div style={styles.details}>
-        {/* Top Row: Name and Unit Price */}
-        <div style={styles.topRow}>
-          <div style={styles.name}>
-            {item.name}{sizeDisplay}
+    <>
+      <style>{`
+        /* Tablet: 768px - 1024px */
+        @media (max-width: 1024px) and (min-width: 768px) {
+          .order-item {
+            padding: 10px !important;
+            gap: 10px !important;
+            margin-bottom: 8px !important;
+          }
+          .order-item-name {
+            font-size: 13px !important;
+          }
+          .order-item-price {
+            font-size: 12px !important;
+          }
+          .order-item-modifiers {
+            font-size: 10px !important;
+            margin-bottom: 5px !important;
+          }
+          .order-item-total {
+            font-size: 11px !important;
+          }
+          .order-item-controls {
+            gap: 6px !important;
+          }
+          .order-item-btn {
+            width: 26px !important;
+            height: 26px !important;
+          }
+          .order-item-qty {
+            font-size: 13px !important;
+            min-width: 18px !important;
+          }
+        }
+
+        /* Mobile: 480px - 768px */
+        @media (max-width: 768px) {
+          .order-item {
+            padding: 10px !important;
+            gap: 8px !important;
+            margin-bottom: 8px !important;
+          }
+          .order-item-top {
+            flex-wrap: wrap !important;
+            gap: 4px !important;
+          }
+          .order-item-name {
+            font-size: 13px !important;
+            flex: 1 1 100% !important;
+          }
+          .order-item-price {
+            font-size: 12px !important;
+          }
+          .order-item-modifiers {
+            font-size: 10px !important;
+            margin-bottom: 5px !important;
+          }
+          .order-item-bottom {
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+          }
+          .order-item-total {
+            font-size: 11px !important;
+            flex: 1 1 100% !important;
+          }
+          .order-item-controls {
+            gap: 6px !important;
+            width: 100% !important;
+            justify-content: flex-end !important;
+          }
+          .order-item-btn {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .order-item-qty {
+            font-size: 14px !important;
+            min-width: 24px !important;
+          }
+        }
+
+        /* Small Mobile: < 480px */
+        @media (max-width: 480px) {
+          .order-item {
+            padding: 8px !important;
+            gap: 6px !important;
+            margin-bottom: 6px !important;
+          }
+          .order-item-name {
+            font-size: 12px !important;
+          }
+          .order-item-price {
+            font-size: 11px !important;
+          }
+          .order-item-modifiers {
+            font-size: 9px !important;
+            margin-bottom: 4px !important;
+          }
+          .order-item-total {
+            font-size: 10px !important;
+          }
+          .order-item-btn {
+            width: 30px !important;
+            height: 30px !important;
+          }
+          .order-item-qty {
+            font-size: 13px !important;
+            min-width: 20px !important;
+          }
+        }
+      `}</style>
+
+      <div style={styles.item} className="order-item">
+        <div style={styles.details}>
+          <div style={styles.topRow} className="order-item-top">
+            <div style={styles.name} className="order-item-name">
+              {item.name}{sizeDisplay}
+            </div>
+            <div style={styles.unitPrice} className="order-item-price">
+              {SETTINGS.currency}{unit.toFixed(2)}
+            </div>
           </div>
-          <div style={styles.unitPrice}>
-            {SETTINGS.currency}{unit.toFixed(2)}
-          </div>
-        </div>
 
-        {/* Modifiers */}
-        {hasModifiers && (
-          <div style={styles.modifiers}>
-            {modifierLines.map((m, idx) => (
-              <div key={idx} style={styles.modifierText}>
-                {m.name}
-                {m.price > 0 && ` +${SETTINGS.currency}${(Number(m.price || 0) / 100).toFixed(2)}`}
-              </div>
-            ))}
-          </div>
-        )}
+          {hasModifiers && (
+            <div style={styles.modifiers} className="order-item-modifiers">
+              {modifierLines.map((m, idx) => (
+                <div key={idx} style={styles.modifierText}>
+                  {m.name}
+                  {m.price > 0 && ` +${SETTINGS.currency}${(Number(m.price || 0) / 100).toFixed(2)}`}
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* Bottom Row: Line Total and Controls */}
-        <div style={styles.bottomRow}>
-          <div style={styles.lineTotal}>
-            Line: {SETTINGS.currency}{lineTotal.toFixed(2)}
-          </div>
+          <div style={styles.bottomRow} className="order-item-bottom">
+            <div style={styles.lineTotal} className="order-item-total">
+              Line: {SETTINGS.currency}{lineTotal.toFixed(2)}
+            </div>
 
-          <div style={styles.controls}>
-            <button
-              style={styles.quantityButton}
-              onClick={() => updateQuantity(item.orderId, item.quantity - 1)}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              <Minus size={14} />
-            </button>
+            <div style={styles.controls} className="order-item-controls">
+              <button
+                style={styles.quantityButton}
+                className="order-item-btn"
+                onClick={() => updateQuantity(item.orderId, item.quantity - 1)}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <Minus size={14} />
+              </button>
 
-            <div style={styles.quantity}>{item.quantity}</div>
+              <div style={styles.quantity} className="order-item-qty">{item.quantity}</div>
 
-            <button
-              style={styles.quantityButton}
-              onClick={() => updateQuantity(item.orderId, item.quantity + 1)}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              <Plus size={14} />
-            </button>
+              <button
+                style={styles.quantityButton}
+                className="order-item-btn"
+                onClick={() => updateQuantity(item.orderId, item.quantity + 1)}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <Plus size={14} />
+              </button>
 
-            <button
-              style={styles.removeButton}
-              onClick={() => removeFromOrder(item.orderId)}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-            >
-              <Trash2 size={14} />
-            </button>
+              <button
+                style={styles.removeButton}
+                className="order-item-btn"
+                onClick={() => removeFromOrder(item.orderId)}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.8")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
