@@ -78,9 +78,18 @@ const HomePage = () => {
       inset: 0,
       background: 'rgba(0, 0, 0, 0.5)',
       zIndex: 90,
-      opacity: showMobileCart ? 1 : 0,
-      pointerEvents: showMobileCart ? 'auto' : 'none',
-      transition: 'opacity 0.3s ease',
+      display: showMobileCart ? 'block' : 'none',
+    },
+    
+    // Mobile modal wrapper
+    mobileModalWrapper: {
+      position: 'fixed',
+      inset: 0,
+      display: showMobileCart ? 'flex' : 'none',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 100,
+      padding: '20px',
     },
   };
 
@@ -105,6 +114,10 @@ const HomePage = () => {
           }
 
           .mobile-cart-btn {
+            display: none;
+          }
+          
+          .mobile-modal-wrapper {
             display: none;
           }
 
@@ -133,20 +146,27 @@ const HomePage = () => {
               display: flex !important;
             }
             
-            /* Mobile cart drawer */
-            .mobile-order-panel {
+            /* Mobile cart centered modal wrapper */
+            .mobile-modal-wrapper {
               position: fixed !important;
-              bottom: 0;
-              left: 0;
-              right: 0;
-              width: 100% !important;
-              height: 70vh !important;
-              max-height: 600px;
-              border-radius: 20px 20px 0 0 !important;
-              transform: translateY(${showMobileCart ? '0' : '100%'});
-              transition: transform 0.3s ease;
-              z-index: 100;
-              box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+              inset: 0 !important;
+              display: ${showMobileCart ? 'flex' : 'none'} !important;
+              align-items: center !important;
+              justify-content: center !important;
+              z-index: 100 !important;
+              padding: 20px !important;
+            }
+            
+            .mobile-order-panel-container {
+              width: 90% !important;
+              max-width: 480px !important;
+              max-height: 85vh !important;
+              border-radius: 20px !important;
+              overflow: hidden !important;
+              box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+              opacity: ${showMobileCart ? '1' : '0'};
+              transform: scale(${showMobileCart ? '1' : '0.95'});
+              transition: all 0.3s ease !important;
             }
           }
 
@@ -163,8 +183,13 @@ const HomePage = () => {
               height: 56px !important;
             }
             
-            .mobile-order-panel {
-              max-height: 75vh !important;
+            .mobile-modal-wrapper {
+              padding: 16px !important;
+            }
+            
+            .mobile-order-panel-container {
+              width: 92% !important;
+              max-height: 82vh !important;
             }
           }
 
@@ -175,8 +200,13 @@ const HomePage = () => {
               height: 52px !important;
             }
             
-            .mobile-order-panel {
-              max-height: 80vh !important;
+            .mobile-modal-wrapper {
+              padding: 12px !important;
+            }
+            
+            .mobile-order-panel-container {
+              width: 94% !important;
+              max-height: 88vh !important;
             }
           }
         `}
@@ -216,14 +246,14 @@ const HomePage = () => {
           onClick={() => setShowMobileCart(false)}
         />
 
-        {/* Mobile Order Panel (bottom sheet) */}
-        {showMobileCart && (
-          <div className="mobile-order-panel">
+        {/* Mobile Order Panel (centered modal) */}
+        <div className="mobile-modal-wrapper" style={styles.mobileModalWrapper}>
+          <div className="mobile-order-panel-container">
             <OrderPanel 
               onClose={() => setShowMobileCart(false)}
             />
           </div>
-        )}
+        </div>
       </div>
     </>
   );

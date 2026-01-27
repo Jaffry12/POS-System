@@ -61,6 +61,25 @@ const PaymentModal = ({ isOpen, onClose }) => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Prevent body scroll when modal is open on mobile
+  useEffect(() => {
+    if (isOpen && vw <= 1024) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isOpen, vw]);
+
   const device = useMemo(() => {
     if (vw <= 480) return "xs"; // small mobile
     if (vw <= 768) return "sm"; // mobile
@@ -104,44 +123,44 @@ const PaymentModal = ({ isOpen, onClose }) => {
       modalWidth = "100%";
       bodyDir = "column";
       rightWidth = "100%";
-      leftMaxH = "38vh";
-      rightMaxH = "30vh";
-      overlayPad = 0;
-
-      headerPad = "12px 14px";
-      leftPad = 12;
-      rightPad = 12;
-
-      amountFont = 20;
-      quickCols = 4;
-      numGap = 8;
-      numPad = 10;
-      numFont = 16;
-
-      discountCols = 4;
-      discountGap = 8;
-    }
-
-    if (device === "xs") {
-      modalWidth = "100%";
-      bodyDir = "column";
-      rightWidth = "100%";
-      leftMaxH = "36vh";
-      rightMaxH = "28vh";
+      leftMaxH = "45vh"; // Allow scrolling with max height
+      rightMaxH = "auto"; // Let it fit naturally with actions visible
       overlayPad = 0;
 
       headerPad = "10px 12px";
       leftPad = 10;
       rightPad = 10;
 
-      amountFont = 19;
-      quickCols = 4;
+      amountFont = 18;
+      quickCols = 4; // quick buttons in a row on mobile
       numGap = 6;
       numPad = 8;
-      numFont = 15;
+      numFont = 14;
 
       discountCols = 4;
-      discountGap = 8;
+      discountGap = 6;
+    }
+
+    if (device === "xs") {
+      modalWidth = "100%";
+      bodyDir = "column";
+      rightWidth = "100%";
+      leftMaxH = "42vh";
+      rightMaxH = "auto"; // Let it fit naturally with actions visible
+      overlayPad = 0;
+
+      headerPad = "8px 10px";
+      leftPad = 8;
+      rightPad = 8;
+
+      amountFont = 17;
+      quickCols = 4;
+      numGap = 4;
+      numPad = 6;
+      numFont = 13;
+
+      discountCols = 4;
+      discountGap = 4;
     }
 
     return {
@@ -258,25 +277,22 @@ const PaymentModal = ({ isOpen, onClose }) => {
 
     return {
       id: `PREVIEW-${Date.now()}`,
+      date: new Date().toISOString(),
       items: itemsForPreview,
-      paymentMethod,
-      discount,
       subtotal: previewSubtotal,
       tax: previewTax,
-      discountAmount: previewDiscountAmount,
+      discount: previewDiscountAmount,
       total: previewTotal,
-      totalQty: previewTotalQty,
-      timestamp: Date.now(),
-      timestampISO: new Date().toISOString(),
-      status: "preview",
-      type: "preview",
+      totalQuantity: previewTotalQty,
+      paymentMethod: "Preview",
+      amountReceived: 0,
+      change: 0,
     };
   };
 
   const handlePrintPreview = () => {
-    setError("");
-    const tx = buildPreviewTransaction();
-    setReceiptTransaction(tx);
+    const preview = buildPreviewTransaction();
+    setReceiptTransaction(preview);
     setAutoPrint(false);
     setShowReceipt(true);
   };
@@ -422,10 +438,11 @@ const PaymentModal = ({ isOpen, onClose }) => {
       bottom: 0,
       background: "rgba(0, 0, 0, 0.7)",
       display: "flex",
-      alignItems: "stretch",
+      alignItems: ui.isMobileSheet ? "flex-start" : "center",
       justifyContent: "center",
       zIndex: 2000,
       padding: 0,
+      overflow: ui.isMobileSheet ? "hidden" : "auto",
     },
 
     modal: {
@@ -505,14 +522,14 @@ const PaymentModal = ({ isOpen, onClose }) => {
       borderBottom: ui.bodyDir === "column" ? `2px solid ${theme.border}` : "none",
       display: "flex",
       flexDirection: "column",
-      gap: "12px",
+      gap: "8px",
       overflowY: "auto",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
       maxHeight: ui.leftMaxH,
     },
 
-    // ✅ important: right panel is not scrolling anymore; inner content scrolls
+    // Right panel - scrolling enabled on mobile within the panel
     rightPanel: {
       width:
         typeof ui.rightWidth === "number" ? `${ui.rightWidth}px` : ui.rightWidth,
@@ -523,48 +540,43 @@ const PaymentModal = ({ isOpen, onClose }) => {
       overflow: "hidden",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
-      maxHeight: ui.rightMaxH,
       background: theme.cardBg,
+      flexShrink: 0,
     },
 
-    // ✅ scrollable content area
+    // Content area - scrolling enabled on mobile with constrained height
     rightScroll: {
       flex: 1,
       minHeight: 0,
       overflowY: "auto",
-      paddingBottom: ui.isMobileSheet ? "110px" : "0px",
-// space behind sticky bar
+      paddingBottom: ui.isMobileSheet ? "8px" : "0px",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
+      maxHeight: ui.isMobileSheet ? "28vh" : "none",
     },
 
-    // ✅ sticky bar always visible on mobile
+    // Actions bar - always visible, never scrolls away
     actionsBar: {
-      position: ui.isMobileSheet ? "fixed" : "static",
+      position: ui.isMobileSheet ? "static" : "static",
       bottom: 0,
-      left: 0,
-      right: 0,
       background: theme.cardBg,
-      paddingTop: "12px",
-      paddingBottom: "12px",
-      paddingLeft: ui.isMobileSheet ? `${ui.rightPad}px` : "0px",
-      paddingRight: ui.isMobileSheet ? `${ui.rightPad}px` : "0px",
+      paddingTop: ui.isMobileSheet ? "8px" : "12px",
       borderTop: `2px solid ${theme.border}`,
-      marginTop: ui.isMobileSheet ? "0px" : "12px",
-      zIndex: 100,
+      marginTop: ui.isMobileSheet ? "8px" : "12px",
+      flexShrink: 0,
     },
 
     amountDisplay: {
       background: theme.bgSecondary,
-      padding: "10px",
+      padding: ui.isMobileSheet ? "8px" : "10px",
       borderRadius: "10px",
       border: `1px solid ${theme.border}`,
     },
 
     amountLabel: {
-      fontSize: "12px",
+      fontSize: ui.device === "xs" ? "11px" : "12px",
       color: theme.textSecondary,
-      marginBottom: "6px",
+      marginBottom: ui.isMobileSheet ? "4px" : "6px",
       fontWeight: "800",
     },
 
@@ -578,25 +590,25 @@ const PaymentModal = ({ isOpen, onClose }) => {
     paymentMethods: {
       display: "grid",
       gridTemplateColumns: "repeat(3, 1fr)",
-      gap: "8px",
-      marginBottom: "10px",
+      gap: ui.isMobileSheet ? "6px" : "8px",
+      marginBottom: ui.isMobileSheet ? "8px" : "10px",
     },
 
     paymentMethodBtn: (isActive) => ({
-      padding: "10px 8px",
+      padding: ui.isMobileSheet ? "8px 6px" : "10px 8px",
       border: `2px solid ${isActive ? theme.primary : theme.border}`,
-      borderRadius: "12px",
+      borderRadius: "10px",
       background: isActive ? `${theme.primary}15` : theme.bgSecondary,
       cursor: "pointer",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: "6px",
+      gap: "4px",
       transition: "all 0.15s ease",
     }),
 
     paymentMethodName: {
-      fontSize: "11px",
+      fontSize: ui.device === "xs" ? "10px" : "11px",
       fontWeight: "900",
       color: theme.textPrimary,
     },
@@ -608,12 +620,12 @@ const PaymentModal = ({ isOpen, onClose }) => {
     },
 
     quickBtn: {
-      padding: ui.device === "xs" ? "10px" : "12px",
+      padding: ui.device === "xs" ? "8px" : ui.device === "sm" ? "9px" : "12px",
       border: `2px solid ${theme.border}`,
-      borderRadius: "12px",
+      borderRadius: "10px",
       background: theme.bgSecondary,
       color: theme.textPrimary,
-      fontSize: "14px",
+      fontSize: ui.device === "xs" ? "12px" : ui.device === "sm" ? "13px" : "14px",
       fontWeight: "900",
       cursor: "pointer",
       transition: "all 0.15s ease",
@@ -626,190 +638,111 @@ const PaymentModal = ({ isOpen, onClose }) => {
       marginTop: "auto",
     },
 
-    numberBtn: {
+    numBtn: {
       padding: `${ui.numPad}px`,
-      border: `1px solid ${theme.border}`,
-      borderRadius: "14px",
+      border: `2px solid ${theme.border}`,
+      borderRadius: "10px",
       background: theme.bgSecondary,
       color: theme.textPrimary,
       fontSize: `${ui.numFont}px`,
       fontWeight: "900",
       cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: ui.device === "xs" ? "38px" : ui.device === "sm" ? "40px" : "48px",
       transition: "all 0.15s ease",
     },
 
     summaryRow: {
       display: "flex",
       justifyContent: "space-between",
-      padding: "6px 0",
-      fontSize: "13px",
+      marginBottom: "6px",
+      alignItems: "center",
     },
 
-    summaryLabel: { color: theme.textSecondary, fontWeight: 800 },
-    summaryValue: { fontWeight: 900, color: theme.textPrimary },
+    summaryLabel: {
+      fontSize: "13px",
+      color: theme.textSecondary,
+      fontWeight: "800",
+    },
 
-    divider: { height: "1px", background: theme.border, margin: "10px 0" },
+    summaryValue: {
+      fontSize: "13px",
+      fontWeight: "900",
+      color: theme.textPrimary,
+    },
+
+    divider: {
+      height: "2px",
+      background: theme.border,
+      margin: "8px 0",
+    },
 
     totalRow: {
       display: "flex",
       justifyContent: "space-between",
-      padding: "8px 0",
       fontSize: "16px",
       fontWeight: "900",
+      color: theme.textPrimary,
+      marginBottom: "6px",
     },
 
     changeRow: {
       display: "flex",
       justifyContent: "space-between",
-      padding: "10px",
-      background: theme.success + "14",
-      border: `1px solid ${theme.success}55`,
-      borderRadius: "12px",
-      marginTop: "10px",
+      padding: "8px",
+      background: theme.bgSecondary,
+      borderRadius: "8px",
+      marginTop: "6px",
     },
 
-    changeLabel: { fontSize: "13px", fontWeight: "900", color: theme.textPrimary },
-    changeValue: { fontSize: "15px", fontWeight: "900", color: theme.success },
+    changeLabel: {
+      fontSize: "13px",
+      fontWeight: "800",
+      color: theme.textSecondary,
+    },
+
+    changeValue: {
+      fontSize: "14px",
+      fontWeight: "900",
+      color: theme.success,
+    },
 
     actionsRow: {
-      display: "flex",
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
       gap: "10px",
     },
 
-    actionBtn: (variant) => {
-      const isPrimary = variant === "primary";
-      return {
-        flex: isPrimary ? 1.2 : 0.9,
-        height: "44px",
-        borderRadius: "12px",
-        border: isPrimary ? "none" : `2px solid ${theme.primary}`,
-        background: isPrimary ? theme.success : theme.bgSecondary,
-        color: isPrimary ? "#fff" : theme.primary,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "8px",
-        fontWeight: "900",
-        fontSize: "13px",
-        cursor: "pointer",
-        transition: "all 0.15s ease",
-        boxShadow: isPrimary ? theme.shadowMedium : "none",
-        width: "100%",
-      };
-    },
+    actionBtn: (variant) => ({
+      padding: ui.isMobileSheet ? "10px 12px" : "12px 16px",
+      border:
+        variant === "outline"
+          ? `2px solid ${theme.border}`
+          : `2px solid ${theme.primary}`,
+      borderRadius: "10px",
+      background: variant === "outline" ? "transparent" : theme.success,
+      color: variant === "outline" ? theme.textPrimary : "#FFFFFF",
+      fontSize: ui.device === "xs" ? "13px" : "14px",
+      fontWeight: "900",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "6px",
+      transition: "all 0.15s ease",
+    }),
 
     errorBox: {
-      marginTop: "10px",
-      padding: "10px",
-      borderRadius: "12px",
       background: `${theme.danger}15`,
-      border: `1px solid ${theme.danger}55`,
+      border: `2px solid ${theme.danger}`,
+      borderRadius: "10px",
+      padding: "10px",
+      fontSize: "13px",
+      fontWeight: "800",
       color: theme.danger,
-      fontSize: "12px",
-      fontWeight: 900,
-    },
-
-    sectionTitle: {
-      fontSize: "13px",
-      fontWeight: 900,
-      color: theme.textPrimary,
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      marginBottom: "8px",
-    },
-
-    discountModes: {
-      display: "flex",
-      gap: "10px",
-      marginBottom: "10px",
-      flexDirection: ui.device === "xs" ? "column" : "row",
-    },
-
-    pill: (active) => ({
-      flex: 1,
-      padding: "10px",
-      borderRadius: "12px",
-      border: `2px solid ${active ? theme.primary : theme.border}`,
-      background: active ? `${theme.primary}12` : theme.bgSecondary,
-      color: active ? theme.primary : theme.textSecondary,
-      fontWeight: 900,
-      fontSize: "13px",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "8px",
-    }),
-
-    discountGrid: {
-      display: "grid",
-      gridTemplateColumns: `repeat(${ui.discountCols}, 1fr)`,
-      gap: `${ui.discountGap}px`,
-    },
-
-    discountBtn: (active) => ({
-      padding: ui.device === "xs" ? "10px" : "12px",
-      borderRadius: "12px",
-      border: `2px solid ${active ? theme.primary : theme.border}`,
-      background: active ? `${theme.primary}12` : theme.bgSecondary,
-      color: active ? theme.primary : theme.textPrimary,
-      fontWeight: 900,
-      fontSize: "14px",
-      cursor: "pointer",
-    }),
-
-    inputWrap: {
-      display: "flex",
-      gap: "10px",
-      marginTop: "12px",
-      alignItems: "center",
-      flexDirection: ui.device === "xs" ? "column" : "row",
-    },
-
-    input: {
-      flex: 1,
-      width: ui.device === "xs" ? "100%" : "auto",
-      height: "44px",
-      borderRadius: "12px",
-      border: `1px solid ${theme.border}`,
-      background: theme.bgSecondary,
-      color: theme.textPrimary,
-      padding: "0 12px",
-      fontWeight: 900,
-      outline: "none",
-    },
-
-    smallBtn: (variant) => ({
-      height: "44px",
-      width: ui.device === "xs" ? "100%" : "auto",
-      padding: "0 12px",
-      borderRadius: "12px",
-      border:
-        variant === "danger"
-          ? `1px solid ${theme.danger}55`
-          : `1px solid ${theme.border}`,
-      background: variant === "danger" ? `${theme.danger}10` : theme.bgSecondary,
-      color: variant === "danger" ? theme.danger : theme.textPrimary,
-      fontWeight: 900,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "8px",
-    }),
-
-    discountPreview: {
-      marginTop: "12px",
-      padding: "10px",
-      borderRadius: "12px",
-      border: `1px solid ${theme.border}`,
-      background: theme.bgSecondary,
-      display: "flex",
-      justifyContent: "space-between",
-      fontWeight: 900,
-      color: theme.textPrimary,
-      fontSize: "13px",
+      marginTop: "8px",
     },
 
     successScreen: {
@@ -817,117 +750,158 @@ const PaymentModal = ({ isOpen, onClose }) => {
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      padding: ui.isMobileSheet ? "40px 18px" : "60px",
-      textAlign: "center",
+      minHeight: "200px",
+      padding: "40px",
     },
 
-    successText: { fontSize: "22px", fontWeight: "900", color: theme.success },
+    successText: {
+      fontSize: "18px",
+      fontWeight: "900",
+      color: theme.success,
+    },
 
-    splitHeader: {
+    discountButtons: {
+      display: "grid",
+      gridTemplateColumns: `repeat(${ui.discountCols}, 1fr)`,
+      gap: `${ui.discountGap}px`,
+    },
+
+    discountBtn: (isActive) => ({
+      padding: ui.device === "xs" ? "10px" : "12px",
+      border: `2px solid ${isActive ? theme.primary : theme.border}`,
+      borderRadius: "12px",
+      background: isActive ? `${theme.primary}15` : theme.bgSecondary,
+      color: isActive ? theme.primary : theme.textPrimary,
+      fontSize: ui.device === "xs" ? "13px" : "14px",
+      fontWeight: "900",
+      cursor: "pointer",
+      transition: "all 0.15s ease",
       display: "flex",
-      justifyContent: "space-between",
-      alignItems: ui.device === "xs" ? "flex-start" : "center",
-      marginBottom: "12px",
-      gap: 10,
-      flexDirection: ui.device === "xs" ? "column" : "row",
-    },
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "4px",
+    }),
 
-    splitActions: {
-      display: "flex",
-      gap: "8px",
-      width: ui.device === "xs" ? "100%" : "auto",
-    },
-
-    splitActionBtn: {
-      padding: "6px 12px",
-      borderRadius: "8px",
-      border: `1px solid ${theme.border}`,
+    discountInput: {
+      width: "100%",
+      padding: "12px",
+      border: `2px solid ${theme.border}`,
+      borderRadius: "12px",
       background: theme.bgSecondary,
       color: theme.textPrimary,
-      fontSize: "11px",
+      fontSize: "14px",
       fontWeight: "800",
-      cursor: "pointer",
-      flex: ui.device === "xs" ? 1 : "unset",
-    },
-
-    itemsList: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-      maxHeight: ui.isMobileSheet ? "unset" : "400px",
-      overflowY: "auto",
-      scrollbarWidth: "none",
-      msOverflowStyle: "none",
+      outline: "none",
     },
 
     splitItem: (isSelected) => ({
-      padding: "12px",
-      borderRadius: "10px",
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      padding: "10px",
       border: `2px solid ${isSelected ? theme.primary : theme.border}`,
-      background: isSelected ? `${theme.primary}08` : theme.bgSecondary,
+      borderRadius: "12px",
+      background: isSelected ? `${theme.primary}10` : theme.bgSecondary,
       cursor: "pointer",
       transition: "all 0.15s ease",
     }),
 
-    splitItemTop: {
+    splitItemCheckbox: (isSelected) => ({
+      width: "20px",
+      height: "20px",
+      borderRadius: "6px",
+      border: `2px solid ${isSelected ? theme.primary : theme.border}`,
+      background: isSelected ? theme.primary : "transparent",
       display: "flex",
       alignItems: "center",
-      gap: "10px",
-      marginBottom: "6px",
+      justifyContent: "center",
+      flexShrink: 0,
+    }),
+
+    splitItemDetails: {
+      flex: 1,
+      minWidth: 0,
     },
 
     splitItemName: {
-      flex: 1,
-      fontSize: "14px",
-      fontWeight: "800",
+      fontSize: "13px",
+      fontWeight: "900",
       color: theme.textPrimary,
+      marginBottom: "2px",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+    },
+
+    splitItemMeta: {
+      fontSize: "11px",
+      color: theme.textSecondary,
+      fontWeight: "800",
     },
 
     splitItemPrice: {
       fontSize: "14px",
       fontWeight: "900",
-      color: theme.primary,
+      color: theme.textPrimary,
+      flexShrink: 0,
     },
 
-    splitItemDetails: {
-      fontSize: "12px",
-      color: theme.textSecondary,
-      marginLeft: "30px",
-      lineHeight: 1.35,
+    splitSelectionBar: {
+      display: "flex",
+      gap: "8px",
+      marginBottom: "8px",
     },
 
-    splitSummary: {
-      marginTop: "12px",
-      padding: "12px",
+    splitSelectionBtn: {
+      flex: 1,
+      padding: "8px",
+      border: `2px solid ${theme.border}`,
       borderRadius: "10px",
       background: theme.bgSecondary,
-      border: `2px solid ${theme.primary}`,
+      color: theme.textPrimary,
+      fontSize: "12px",
+      fontWeight: "900",
+      cursor: "pointer",
+      transition: "all 0.15s ease",
+    },
+
+    splitSummaryCard: {
+      background: theme.bgSecondary,
+      border: `2px solid ${theme.border}`,
+      borderRadius: "12px",
+      padding: "10px",
+      marginTop: "10px",
     },
 
     splitSummaryRow: {
       display: "flex",
       justifyContent: "space-between",
-      marginBottom: "6px",
       fontSize: "13px",
-      gap: 10,
+      marginBottom: "4px",
+      fontWeight: "800",
+    },
+
+    splitItemsList: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px",
+      marginBottom: "10px",
+      overflowY: "auto",
+      maxHeight: ui.isMobileSheet ? "25vh" : "300px",
+      scrollbarWidth: "none",
+      msOverflowStyle: "none",
     },
   };
 
-  /* ------------------ Render helpers ------------------ */
+  /* ------------------ Render Left Content by Tab ------------------ */
   const renderLeftContent = () => {
     if (activeTab === "payment") {
       return (
         <>
           <div style={styles.amountDisplay}>
-            <div style={styles.amountLabel}>Amount Due</div>
-            <div style={styles.amountValue}>
-              {SETTINGS.currency}
-              {total.toFixed(2)}
+            <div style={styles.amountLabel}>
+              {paymentMethod === "cash" ? "Cash Received" : "Amount"}
             </div>
-          </div>
-
-          <div style={styles.amountDisplay}>
-            <div style={styles.amountLabel}>Tendered</div>
             <div style={styles.amountValue}>
               {SETTINGS.currency}
               {enteredAmount || "0.00"}
@@ -935,125 +909,155 @@ const PaymentModal = ({ isOpen, onClose }) => {
           </div>
 
           <div style={styles.quickAmounts}>
-            <button style={styles.quickBtn} onClick={() => handleQuickAmount(5)}>
-              {SETTINGS.currency}5
-            </button>
-            <button style={styles.quickBtn} onClick={() => handleQuickAmount(10)}>
-              {SETTINGS.currency}10
-            </button>
-            <button style={styles.quickBtn} onClick={() => handleQuickAmount(20)}>
-              {SETTINGS.currency}20
+            <button
+              style={styles.quickBtn}
+              onClick={() => handleQuickAmount(10)}
+            >
+              CA$10
             </button>
             <button
               style={styles.quickBtn}
-              onClick={() => handleQuickAmount(total.toFixed(2))}
+              onClick={() => handleQuickAmount(20)}
+            >
+              CA$20
+            </button>
+            <button
+              style={styles.quickBtn}
+              onClick={() =>
+                handleQuickAmount((activeTab === "split" ? splitTotal : total).toFixed(2))
+              }
             >
               Exact
+            </button>
+            <button
+              style={styles.quickBtn}
+              onClick={() => handleQuickAmount(50)}
+            >
+              CA$50
             </button>
           </div>
 
           <div style={styles.numberPad}>
-            {["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "×"].map(
-              (num) => (
-                <button
-                  key={num}
-                  style={styles.numberBtn}
-                  onClick={() =>
-                    handleNumberPad(num === "×" ? "backspace" : num)
-                  }
-                >
-                  {num}
-                </button>
-              )
-            )}
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, ".", 0, "←"].map((val, idx) => (
+              <button
+                key={idx}
+                style={styles.numBtn}
+                onClick={() => {
+                  if (val === "←") handleNumberPad("backspace");
+                  else handleNumberPad(String(val));
+                }}
+              >
+                {val === "←" ? "←" : val}
+              </button>
+            ))}
           </div>
         </>
       );
     }
 
     if (activeTab === "discount") {
-      const currentPct = discountMode === "percent" ? discount || 0 : 0;
-
       return (
         <>
-          <div style={styles.sectionTitle}>
-            <Tag size={18} />
-            Discount
+          <div style={{ marginBottom: "12px" }}>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: "800",
+                color: theme.textSecondary,
+                marginBottom: "8px",
+              }}
+            >
+              Percentage Discounts
+            </div>
+            <div style={styles.discountButtons}>
+              <button
+                style={styles.discountBtn(discountMode === "percent" && discount === 10)}
+                onClick={() => applyPercentDiscount(10)}
+              >
+                <Percent size={14} />
+                10%
+              </button>
+              <button
+                style={styles.discountBtn(discountMode === "percent" && discount === 20)}
+                onClick={() => applyPercentDiscount(20)}
+              >
+                <Percent size={14} />
+                20%
+              </button>
+              <button
+                style={styles.discountBtn(discountMode === "percent" && discount === 30)}
+                onClick={() => applyPercentDiscount(30)}
+              >
+                <Percent size={14} />
+                30%
+              </button>
+              <button
+                style={styles.discountBtn(discountMode === "percent" && discount === 50)}
+                onClick={() => applyPercentDiscount(50)}
+              >
+                <Percent size={14} />
+                50%
+              </button>
+            </div>
           </div>
 
-          <div style={styles.discountModes}>
-            <button
-              style={styles.pill(discountMode === "percent")}
-              onClick={() => setDiscountMode("percent")}
+          <div style={{ marginBottom: "12px" }}>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: "800",
+                color: theme.textSecondary,
+                marginBottom: "8px",
+              }}
             >
-              <Percent size={16} />
-              Percentage
-            </button>
-            <button
-              style={styles.pill(discountMode === "amount")}
-              onClick={() => setDiscountMode("amount")}
-            >
-              <Tag size={16} />
-              Fixed Amount
-            </button>
+              Fixed Amount Discount
+            </div>
+            <input
+              type="number"
+              placeholder="Enter amount"
+              value={discountInput}
+              onChange={(e) => {
+                setDiscountInput(e.target.value);
+                if (e.target.value) {
+                  setDiscountMode("amount");
+                  applyAmountDiscount();
+                }
+              }}
+              style={styles.discountInput}
+            />
           </div>
 
-          {discountMode === "percent" ? (
-            <>
-              <div style={styles.discountGrid}>
-                {[0, 5, 10, 15, 20, 25, 30, 50].map((pct) => (
-                  <button
-                    key={pct}
-                    style={styles.discountBtn(currentPct === pct)}
-                    onClick={() => applyPercentDiscount(pct)}
-                  >
-                    {pct}%
-                  </button>
-                ))}
-              </div>
+          <button
+            style={{
+              ...styles.discountBtn(false),
+              background: theme.danger,
+              color: "#FFFFFF",
+              border: `2px solid ${theme.danger}`,
+            }}
+            onClick={clearAllDiscounts}
+          >
+            <MinusCircle size={16} />
+            Clear All
+          </button>
 
-              <div style={styles.discountPreview}>
-                <span>Discount</span>
-                <span>
-                  -{SETTINGS.currency}
-                  {percentDiscountAmount.toFixed(2)}
-                </span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div style={styles.inputWrap}>
-                <input
-                  style={styles.input}
-                  value={discountInput}
-                  onChange={(e) =>
-                    setDiscountInput(e.target.value.replace(/[^\d.]/g, ""))
-                  }
-                  placeholder={`Enter discount amount (${SETTINGS.currency})`}
-                  inputMode="decimal"
-                />
-                <button style={styles.smallBtn()} onClick={applyAmountDiscount}>
-                  <Check size={18} />
-                  Apply
-                </button>
-              </div>
-
-              <div style={styles.discountPreview}>
-                <span>Discount</span>
-                <span>
-                  -{SETTINGS.currency}
-                  {discountAmount.toFixed(2)}
-                </span>
-              </div>
-            </>
+          {discountAmount > 0 && (
+            <div
+              style={{
+                marginTop: "12px",
+                padding: "10px",
+                background: `${theme.success}15`,
+                border: `2px solid ${theme.success}`,
+                borderRadius: "12px",
+                fontSize: "14px",
+                fontWeight: "900",
+                color: theme.success,
+                textAlign: "center",
+              }}
+            >
+              Discount Applied: {SETTINGS.currency}
+              {discountAmount.toFixed(2)}
+            </div>
           )}
-
-          <div style={{ marginTop: 12 }}>
-            <button style={styles.smallBtn("danger")} onClick={clearAllDiscounts}>
-              <MinusCircle size={18} />
-              Remove Discount
-            </button>
-          </div>
         </>
       );
     }
@@ -1061,69 +1065,36 @@ const PaymentModal = ({ isOpen, onClose }) => {
     if (activeTab === "split") {
       return (
         <>
-          <div style={styles.splitHeader}>
-            <div style={styles.sectionTitle}>
-              <ShoppingCart size={18} />
-              Select Items to Pay
-            </div>
-
-            <div style={styles.splitActions}>
-              <button style={styles.splitActionBtn} onClick={selectAllItems}>
-                Select All
-              </button>
-              <button style={styles.splitActionBtn} onClick={clearSelection}>
-                Clear
-              </button>
-            </div>
+          <div style={styles.splitSelectionBar}>
+            <button style={styles.splitSelectionBtn} onClick={selectAllItems}>
+              Select All
+            </button>
+            <button style={styles.splitSelectionBtn} onClick={clearSelection}>
+              Clear All
+            </button>
           </div>
 
-          <div style={styles.itemsList}>
-            {currentOrder.map((item) => {
+          <div style={styles.splitItemsList}>
+            {(currentOrder || []).map((item) => {
               const isSelected = selectedItemIds.has(item.orderId);
-              const unitPrice = (Number(item.price || 0) / 100).toFixed(2);
-              const lineTotal = (
-                (Number(item.price || 0) * item.quantity) /
-                100
-              ).toFixed(2);
-
               return (
                 <div
                   key={item.orderId}
                   style={styles.splitItem(isSelected)}
                   onClick={() => toggleItemSelection(item.orderId)}
                 >
-                  <div style={styles.splitItemTop}>
-                    {isSelected ? (
-                      <CheckSquare size={20} color={theme.primary} />
-                    ) : (
-                      <Square size={20} color={theme.textSecondary} />
-                    )}
-
-                    <div style={styles.splitItemName}>
-                      {item.name}
-                      {item.size && ` (${item.size})`}
-                    </div>
-
-                    <div style={styles.splitItemPrice}>
-                      {SETTINGS.currency}
-                      {lineTotal}
-                    </div>
+                  <div style={styles.splitItemCheckbox(isSelected)}>
+                    {isSelected && <Check size={14} color="#FFFFFF" />}
                   </div>
 
                   <div style={styles.splitItemDetails}>
+                    <div style={styles.splitItemName}>{item.name}</div>
+                    <div style={styles.splitItemMeta}>Qty: {item.quantity}</div>
+                  </div>
+
+                  <div style={styles.splitItemPrice}>
                     {SETTINGS.currency}
-                    {unitPrice} × {item.quantity}
-                    {item.modifiers?.length > 0 && (
-                      <span>
-                        {" "}
-                        •{" "}
-                        {item.modifiers.reduce(
-                          (sum, g) => sum + g.options.length,
-                          0
-                        )}{" "}
-                        mods
-                      </span>
-                    )}
+                    {((item.price * item.quantity) / 100).toFixed(2)}
                   </div>
                 </div>
               );
@@ -1131,9 +1102,16 @@ const PaymentModal = ({ isOpen, onClose }) => {
           </div>
 
           {selectedItemIds.size > 0 && (
-            <div style={styles.splitSummary}>
-              <div style={styles.splitSummaryRow}>
-                <span style={{ fontWeight: 800, color: theme.textSecondary }}>
+            <div style={styles.splitSummaryCard}>
+              <div
+                style={{
+                  ...styles.splitSummaryRow,
+                  marginBottom: "8px",
+                  paddingBottom: "6px",
+                  borderBottom: `1px solid ${theme.border}`,
+                }}
+              >
+                <span style={{ fontWeight: 900, color: theme.primary }}>
                   Selected Items ({selectedItemIds.size})
                 </span>
               </div>
@@ -1222,6 +1200,15 @@ const PaymentModal = ({ isOpen, onClose }) => {
       <style>{`
         /* Hide scrollbars (keep scrolling) */
         .pm-hide-scroll::-webkit-scrollbar { display: none; }
+        
+        /* Prevent body scroll on mobile */
+        @media (max-width: 1024px) {
+          body.modal-open {
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+          }
+        }
       `}</style>
 
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -1258,7 +1245,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
             {renderLeftContent()}
           </div>
 
-          {/* ✅ Right panel with sticky actions on mobile */}
+          {/* Right panel - no scrolling on mobile */}
           <div style={styles.rightPanel}>
             <div style={styles.rightScroll} className="pm-hide-scroll">
               <div style={styles.paymentMethods}>

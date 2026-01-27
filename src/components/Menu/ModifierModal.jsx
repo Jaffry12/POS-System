@@ -521,140 +521,139 @@ const ModifierModal = ({ item, onClose }) => {
   return (
     <div style={styles.overlay} onClick={onClose} className="modifier-modal-overlay">
       <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-        /* 📱 Tablet (768px - 1024px) */
-        @media (max-width: 1024px) and (min-width: 768px) {
-          .modifier-modal {
-            width: 650px !important;
-            height: 80vh !important;
-          }
-          .modifier-header {
-            padding: 18px 20px !important;
-          }
-          .modifier-title {
-            font-size: 18px !important;
-          }
-          .modifier-content {
-            padding: 20px !important;
-          }
-          .modifier-footer {
-            padding: 18px 20px !important;
-          }
-        }
+  /* 📱 Tablet (768px - 1024px) */
+  @media (max-width: 1024px) and (min-width: 768px) {
+    .modifier-modal {
+      width: 650px !important;
+      height: 80vh !important;
+    }
+    .modifier-header {
+      padding: 18px 20px !important;
+    }
+    .modifier-title {
+      font-size: 18px !important;
+    }
+    .modifier-content {
+      padding: 20px !important;
+    }
+    .modifier-footer {
+      padding: 18px 20px !important;
+    }
+  }
 
-        /* 📱 Mobile (480px - 768px) */
-        @media (max-width: 768px) {
-          .modifier-modal {
-            width: 100% !important;
-            height: 90vh !important;
-            max-height: 90vh !important;
-            border-radius: 16px 16px 0 0 !important;
-            margin-top: auto !important;
-          }
-          .modifier-modal-overlay {
-            align-items: flex-end !important;
-            padding: 0 !important;
-          }
-          .modifier-header {
-            padding: 16px !important;
-          }
-          .modifier-title {
-            font-size: 17px !important;
-          }
-          .modifier-content {
-            padding: 16px !important;
-          }
-          .modifier-item-info {
-            padding: 14px !important;
-            margin-bottom: 20px !important;
-          }
-          .modifier-item-name {
-            font-size: 16px !important;
-          }
-          .modifier-item-price {
-            font-size: 15px !important;
-          }
-          .modifier-section-label {
-            font-size: 15px !important;
-            margin-bottom: 10px !important;
-          }
-          .modifier-options-grid {
-            gap: 10px !important;
-            margin-bottom: 20px !important;
-          }
-          .modifier-option-btn {
-            padding: 14px !important;
-          }
-          .modifier-footer {
-            padding: 16px !important;
-          }
-          .modifier-button-group {
-            gap: 10px !important;
-          }
-          .modifier-btn {
-            padding: 13px !important;
-            font-size: 15px !important;
-          }
-        }
+  /* ✅ Mobile (<= 768px) — CENTER POPUP */
+  @media (max-width: 768px) {
+    .modifier-modal-overlay {
+      align-items: center !important;        /* ✅ center vertically */
+      justify-content: center !important;    /* ✅ center horizontally */
+      padding: 12px !important;              /* ✅ spacing from edges */
+    }
 
-        /* 📱 Small Mobile (< 480px) */
-        @media (max-width: 480px) {
-          .modifier-header {
-            padding: 14px 12px !important;
-          }
-          .modifier-title {
-            font-size: 16px !important;
-          }
-          .modifier-content {
-            padding: 12px !important;
-          }
-          .modifier-item-info {
-            padding: 12px !important;
-            margin-bottom: 16px !important;
-          }
-          .modifier-item-name {
-            font-size: 15px !important;
-          }
-          .modifier-item-price {
-            font-size: 14px !important;
-          }
-          .modifier-section-label {
-            font-size: 14px !important;
-            margin-bottom: 8px !important;
-          }
-          .modifier-options-grid {
-            gap: 8px !important;
-            margin-bottom: 16px !important;
-          }
-          .modifier-option-btn {
-            padding: 12px !important;
-          }
-          .modifier-option-name {
-            font-size: 13px !important;
-          }
-          .modifier-option-price {
-            font-size: 12px !important;
-          }
-          .modifier-footer {
-            padding: 14px 12px !important;
-          }
-          .modifier-button-group {
-            gap: 8px !important;
-          }
-          .modifier-btn {
-            padding: 12px !important;
-            font-size: 14px !important;
-          }
-        }
-      `}</style>
+    .modifier-modal {
+      width: min(520px, 94vw) !important;    /* ✅ popup width */
+      height: auto !important;
+      max-height: 90vh !important;           /* ✅ keep inside screen */
+      max-width: 94vw !important;
+      border-radius: 16px !important;        /* ✅ popup rounded all corners */
+      margin: 0 !important;
+    }
 
+    .modifier-header {
+      padding: 14px 16px !important;
+    }
+    .modifier-header-left {
+      gap: 8px !important;
+    }
+    .modifier-title {
+      font-size: 16px !important;
+    }
+    .modifier-content {
+      padding: 16px !important;
+    }
+    .modifier-item-info {
+      padding: 12px !important;
+      margin-bottom: 18px !important;
+    }
+    .modifier-item-name {
+      font-size: 15px !important;
+      margin-bottom: 4px !important;
+    }
+    .modifier-item-price {
+      font-size: 14px !important;
+    }
+    .modifier-section-label {
+      font-size: 14px !important;
+      margin-bottom: 10px !important;
+    }
+    .modifier-options-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px !important;
+      margin-bottom: 18px !important;
+    }
+    .modifier-option-btn {
+      padding: 12px 10px !important;
+      min-height: 64px !important;
+    }
+    .modifier-footer {
+      padding: 14px 16px !important;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    }
+    .modifier-button-group {
+      gap: 10px !important;
+    }
+    .modifier-btn {
+      padding: 14px 16px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      min-height: 48px !important;
+    }
+  }
+
+  /* 📱 Small Mobile (< 480px) — still centered */
+  @media (max-width: 480px) {
+    .modifier-modal-overlay {
+      padding: 10px !important;
+    }
+
+    .modifier-modal {
+      width: 94vw !important;
+      max-height: 90vh !important;
+      border-radius: 16px !important;
+    }
+
+    .modifier-header {
+      padding: 14px 12px !important;
+    }
+    .modifier-title {
+      font-size: 16px !important;
+    }
+    .modifier-content {
+      padding: 12px !important;
+    }
+    .modifier-item-info {
+      padding: 12px !important;
+      margin-bottom: 16px !important;
+    }
+    .modifier-footer {
+      padding: 14px 12px !important;
+    }
+    .modifier-button-group {
+      gap: 8px !important;
+    }
+    .modifier-btn {
+      padding: 12px !important;
+      font-size: 14px !important;
+    }
+  }
+`}</style>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()} className="modifier-modal">
         {/* Header */}
         <div style={styles.header} className="modifier-header">
-          <div style={styles.headerLeft}>
+          <div style={styles.headerLeft} className="modifier-header-left">
             {step > 1 && (
               <button style={styles.backButton} onClick={handlePrevious}>
                 <ChevronLeft size={24} />

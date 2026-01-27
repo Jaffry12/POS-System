@@ -175,13 +175,17 @@ const OrderPanel = ({ onClose = () => {} }) => {
           }
         }
 
-        /* Mobile: Full width drawer */
+        /* Mobile: Centered modal styling */
         @media (max-width: 1024px) {
           .order-panel {
             width: 100% !important;
             height: auto !important;
+            max-height: 85vh !important;
             border-left: none !important;
-            border-top: 2px solid ${theme.border};
+            border: none !important;
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
           }
 
           .order-mobile-header {
@@ -193,7 +197,8 @@ const OrderPanel = ({ onClose = () => {} }) => {
           }
 
           .order-panel-list {
-            max-height: 30vh !important;
+            max-height: 40vh !important;
+            overflow-y: auto !important;
           }
 
           .order-panel-footer {
@@ -213,7 +218,7 @@ const OrderPanel = ({ onClose = () => {} }) => {
 
           .order-panel-list {
             padding: 12px !important;
-            max-height: 25vh !important;
+            max-height: 35vh !important;
           }
 
           .order-panel-footer {
@@ -235,10 +240,6 @@ const OrderPanel = ({ onClose = () => {} }) => {
             font-size: 15px !important;
           }
 
-          .order-panel-list {
-            max-height: 22vh !important;
-          }
-
           .order-empty-state {
             padding: 30px 16px !important;
           }
@@ -251,10 +252,9 @@ const OrderPanel = ({ onClose = () => {} }) => {
           .order-empty-text {
             font-size: 13px !important;
           }
-
-          .order-place-button {
-            padding: 13px !important;
-            font-size: 14px !important;
+          
+          .order-panel-list {
+            max-height: 32vh !important;
           }
         }
       `}</style>
