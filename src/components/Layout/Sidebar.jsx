@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import * as Icons from "lucide-react";
-import { Moon, Sun, ChefHat } from "lucide-react";
+import { Moon, Sun, ChefHat, X } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { NAVIGATION_ITEMS, SETTINGS } from "../../data/menuData";
 
@@ -30,10 +30,30 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
       top: 0,
       zIndex: 100,
       transition: "transform 0.3s ease",
+      overflowY: "auto",
     },
     header: {
       padding: "24px 20px",
       borderBottom: `1px solid ${theme.border}`,
+      flexShrink: 0,
+      position: "relative",
+    },
+    closeButton: {
+      position: "absolute",
+      top: "20px",
+      right: "16px",
+      width: "32px",
+      height: "32px",
+      borderRadius: "6px",
+      border: "none",
+      background: "transparent",
+      color: theme.textPrimary,
+      display: "none",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      zIndex: 10,
     },
     logoContainer: {
       display: "flex",
@@ -79,6 +99,7 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
       flex: 1,
       padding: "20px 12px",
       overflowY: "auto",
+      minHeight: 0,
     },
     navItem: (isActive) => ({
       display: "flex",
@@ -103,6 +124,7 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
     mascot: {
       padding: "20px",
       textAlign: "center",
+      flexShrink: 0,
     },
     mascotIcon: {
       width: "64px",
@@ -115,6 +137,7 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
       borderTop: `1px solid ${theme.border}`,
       display: "flex",
       gap: "8px",
+      flexShrink: 0,
     },
     themeButton: (active) => ({
       flex: 1,
@@ -137,9 +160,21 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
   return (
     <>
       <style>{`
+        /* Hide scrollbar for sidebar */
+        .sidebar-responsive {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .sidebar-responsive::-webkit-scrollbar {
+          display: none;
+        }
+
         /* Desktop View (default - unchanged) */
         .sidebar-responsive {
           transform: translateX(0);
+          height: 100vh;
+          overflow-y: auto;
         }
 
         /* Tablet & Mobile: Drawer behavior */
@@ -148,32 +183,65 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
             transform: translateX(${isOpen ? '0' : '-100%'});
             z-index: 150 !important;
             box-shadow: ${isOpen ? '4px 0 12px rgba(0, 0, 0, 0.15)' : 'none'};
+            height: 100vh;
+            overflow-y: auto;
+          }
+          
+          /* Show close button on mobile */
+          .sidebar-close-button {
+            display: flex !important;
           }
         }
 
         /* Mobile: Smaller logo & padding */
         @media (max-width: 768px) {
           .sidebar-responsive {
-            width: 260px !important;
+            width: 280px !important;
+            height: 100vh;
+            max-height: 100vh;
           }
           
           .sidebar-header-mobile {
-            padding: 20px 16px !important;
+            padding: 18px 56px 18px 16px !important;
+          }
+          
+          .sidebar-close-button {
+            top: 18px !important;
+            right: 14px !important;
+            width: 30px !important;
+            height: 30px !important;
           }
           
           .sidebar-nav-mobile {
             padding: 16px 10px !important;
+            flex: 1 !important;
+            min-height: 0 !important;
           }
           
           .sidebar-mascot-mobile {
-            padding: 16px !important;
+            padding: 14px !important;
+          }
+          
+          .sidebar-theme-toggle-mobile {
+            padding: 14px 16px !important;
           }
         }
 
         /* Small Mobile: Even more compact */
         @media (max-width: 480px) {
           .sidebar-responsive {
-            width: 240px !important;
+            width: 260px !important;
+          }
+          
+          .sidebar-header-mobile {
+            padding: 16px 52px 16px 12px !important;
+          }
+          
+          .sidebar-close-button {
+            top: 16px !important;
+            right: 12px !important;
+            width: 28px !important;
+            height: 28px !important;
           }
           
           .sidebar-logo-mobile {
@@ -189,9 +257,21 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
             font-size: 11px !important;
           }
           
+          .sidebar-nav-mobile {
+            padding: 14px 8px !important;
+          }
+          
+          .sidebar-mascot-mobile {
+            padding: 12px !important;
+          }
+          
           .sidebar-mascot-icon {
             width: 52px !important;
             height: 52px !important;
+          }
+          
+          .sidebar-theme-toggle-mobile {
+            padding: 12px 12px !important;
           }
         }
       `}</style>
@@ -199,6 +279,21 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
       <div className="sidebar-responsive" style={styles.sidebar}>
         {/* Header */}
         <div className="sidebar-header-mobile" style={styles.header}>
+          {/* Close Button (Mobile only - right corner) */}
+          <button
+            className="sidebar-close-button"
+            style={styles.closeButton}
+            onClick={onClose}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = theme.bgHover;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <X size={22} strokeWidth={2} />
+          </button>
+
           <div style={styles.logoContainer} onClick={() => handleNavigation("/")}>
             <div className="sidebar-logo-mobile" style={styles.logo}>
               <img
@@ -251,7 +346,7 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
         </div>
 
         {/* Theme Toggle */}
-        <div style={styles.themeToggle}>
+        <div className="sidebar-theme-toggle-mobile" style={styles.themeToggle}>
           <button
             style={styles.themeButton(!isDark)}
             onClick={() => !isDark || toggleTheme()}

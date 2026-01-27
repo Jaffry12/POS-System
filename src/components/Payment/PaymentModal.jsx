@@ -104,8 +104,8 @@ const PaymentModal = ({ isOpen, onClose }) => {
       modalWidth = "100%";
       bodyDir = "column";
       rightWidth = "100%";
-      leftMaxH = "45vh";
-      rightMaxH = "35vh";
+      leftMaxH = "38vh";
+      rightMaxH = "30vh";
       overlayPad = 0;
 
       headerPad = "12px 14px";
@@ -113,7 +113,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
       rightPad = 12;
 
       amountFont = 20;
-      quickCols = 4; // ✅ quick buttons in a row on mobile
+      quickCols = 4;
       numGap = 8;
       numPad = 10;
       numFont = 16;
@@ -126,8 +126,8 @@ const PaymentModal = ({ isOpen, onClose }) => {
       modalWidth = "100%";
       bodyDir = "column";
       rightWidth = "100%";
-      leftMaxH = "45vh";
-      rightMaxH = "35vh";
+      leftMaxH = "36vh";
+      rightMaxH = "28vh";
       overlayPad = 0;
 
       headerPad = "10px 12px";
@@ -542,10 +542,16 @@ const PaymentModal = ({ isOpen, onClose }) => {
     actionsBar: {
       position: ui.isMobileSheet ? "fixed" : "static",
       bottom: 0,
+      left: 0,
+      right: 0,
       background: theme.cardBg,
       paddingTop: "12px",
+      paddingBottom: "12px",
+      paddingLeft: ui.isMobileSheet ? `${ui.rightPad}px` : "0px",
+      paddingRight: ui.isMobileSheet ? `${ui.rightPad}px` : "0px",
       borderTop: `2px solid ${theme.border}`,
-      marginTop: "12px",
+      marginTop: ui.isMobileSheet ? "0px" : "12px",
+      zIndex: 100,
     },
 
     amountDisplay: {
@@ -627,7 +633,6 @@ const PaymentModal = ({ isOpen, onClose }) => {
       background: theme.bgSecondary,
       color: theme.textPrimary,
       fontSize: `${ui.numFont}px`,
-      fontUnderstanding: "900",
       fontWeight: "900",
       cursor: "pointer",
       transition: "all 0.15s ease",

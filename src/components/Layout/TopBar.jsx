@@ -110,10 +110,15 @@ const TopBar = () => {
         .topbar-left-section {
           flex: 1;
           min-width: 0;
+          gap: 12px;
         }
 
         .topbar-search-container {
           max-width: 400px;
+        }
+
+        .topbar-add-button {
+          padding: 10px 20px;
         }
 
         .topbar-add-button-text {
@@ -127,7 +132,7 @@ const TopBar = () => {
         /* Tablet: Adjust spacing */
         @media (max-width: 1024px) {
           .topbar-responsive {
-            padding: 14px 70px 14px 20px !important;
+            padding: 14px 20px !important;
           }
           
           .topbar-search-container {
@@ -135,72 +140,88 @@ const TopBar = () => {
           }
         }
 
-        /* Mobile: Stack layout + compact */
+        /* Mobile: Compact layout with small plus button */
         @media (max-width: 768px) {
           .topbar-responsive {
-            padding: 12px 16px !important;
-            gap: 12px !important;
-            flex-direction: column;
-            align-items: stretch !important;
+            padding: 12px 16px 12px 70px !important;
+            gap: 10px !important;
+            flex-wrap: nowrap !important;
           }
           
           .topbar-left-section {
-            flex-direction: column !important;
+            flex: 1 !important;
+            min-width: 0 !important;
             gap: 10px !important;
-            width: 100%;
+            display: flex !important;
+            align-items: center !important;
           }
           
           .topbar-search-container {
-            max-width: 100% !important;
+            flex: 1 !important;
+            max-width: none !important;
+            min-width: 0 !important;
           }
           
+          .topbar-search-container input {
+            padding-left: 36px !important;
+          }
+          
+          /* Small square plus button - same size as hamburger */
           .topbar-add-button {
-            width: 100%;
+            width: 48px !important;
+            height: 48px !important;
+            min-width: 48px !important;
+            padding: 0 !important;
+            border-radius: 12px !important;
             justify-content: center !important;
-          }
-          
-          .topbar-right-section {
-            width: 100%;
-            justify-content: space-between !important;
-            padding-top: 8px;
-            border-top: 1px solid ${theme.border};
-          }
-          
-          .topbar-order-info {
-            text-align: left !important;
-          }
-        }
-
-        /* Small Mobile: Hide button text, show icon only */
-        @media (max-width: 480px) {
-          .topbar-responsive {
-            padding: 10px 12px !important;
+            flex-shrink: 0 !important;
           }
           
           .topbar-add-button-text {
             display: none !important;
           }
           
-          .topbar-add-button {
-            padding: 10px 16px !important;
-          }
-          
-          .topbar-order-date {
+          .topbar-right-section {
             display: none !important;
           }
+        }
+
+        /* Small Mobile: Even more compact */
+        @media (max-width: 480px) {
+          .topbar-responsive {
+            padding: 10px 12px 10px 64px !important;
+            gap: 8px !important;
+          }
           
-          .topbar-order-number {
-            font-size: 14px !important;
+          .topbar-left-section {
+            gap: 8px !important;
+          }
+          
+          /* Smaller square button on very small screens */
+          .topbar-add-button {
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            border-radius: 10px !important;
+          }
+          
+          .topbar-search-container input {
+            font-size: 13px !important;
+            padding: 9px 10px 9px 34px !important;
+          }
+          
+          .topbar-search-icon {
+            left: 10px !important;
           }
         }
       `}</style>
 
       <div className="topbar-responsive" style={styles.topBar}>
-        {/* Left Section */}
+        {/* Left Section - Search + Plus Button */}
         <div className="topbar-left-section" style={styles.leftSection}>
           {/* Search */}
           <div className="topbar-search-container" style={styles.searchContainer}>
-            <Search size={18} style={styles.searchIcon} />
+            <Search size={18} style={styles.searchIcon} className="topbar-search-icon" />
             <input
               type="text"
               placeholder="Search Categories or Menu..."
@@ -218,12 +239,12 @@ const TopBar = () => {
             onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
             onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
           >
-            <Plus size={18} />
+            <Plus size={20} />
             <span className="topbar-add-button-text">Add New Item</span>
           </button>
         </div>
 
-        {/* Right Section */}
+        {/* Right Section - Order Info (Hidden on mobile) */}
         <div className="topbar-right-section" style={styles.rightSection}>
           <div className="topbar-order-info" style={styles.orderInfo}>
             <div className="topbar-order-number" style={styles.orderNumber}>

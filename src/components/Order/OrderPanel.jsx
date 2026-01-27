@@ -193,7 +193,7 @@ const OrderPanel = ({ onClose = () => {} }) => {
           }
 
           .order-panel-list {
-            max-height: 35vh !important;
+            max-height: 30vh !important;
           }
 
           .order-panel-footer {
@@ -213,7 +213,7 @@ const OrderPanel = ({ onClose = () => {} }) => {
 
           .order-panel-list {
             padding: 12px !important;
-            max-height: 30vh !important;
+            max-height: 25vh !important;
           }
 
           .order-panel-footer {
@@ -235,6 +235,10 @@ const OrderPanel = ({ onClose = () => {} }) => {
             font-size: 15px !important;
           }
 
+          .order-panel-list {
+            max-height: 22vh !important;
+          }
+
           .order-empty-state {
             padding: 30px 16px !important;
           }
@@ -246,6 +250,11 @@ const OrderPanel = ({ onClose = () => {} }) => {
 
           .order-empty-text {
             font-size: 13px !important;
+          }
+
+          .order-place-button {
+            padding: 13px !important;
+            font-size: 14px !important;
           }
         }
       `}</style>

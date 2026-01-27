@@ -306,37 +306,33 @@ const PrintReceipt = ({ transaction, onClose }) => {
     .btn-print { background: #16a34a; color: #fff; }
     .btn-close { background: #6b7280; color: #fff; }
 
-    /* Mobile Responsive Styles */
+    /* Mobile: 480px - 768px */
     @media screen and (max-width: 768px) {
       .receipt-container {
-        max-height: 75vh;
+        max-height: 55vh;
       }
       
       .receipt-wrap {
         width: 100%;
-        max-width: 320px;
+        max-width: 100%;
         margin: 0 auto;
+        padding: 10px;
       }
 
       .items-scroll {
-        max-height: 30vh;
+        max-height: 25vh;
       }
 
       .buttons {
-        flex-direction: column;
-        gap: 8px;
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 16px;
       }
 
       .btn {
-        width: 100%;
-        padding: 12px 14px;
-      }
-    }
-
-    @media screen and (max-width: 480px) {
-      .receipt-wrap {
-        padding: 8px;
-        font-size: 11px;
+        flex: 1;
+        padding: 12px 10px;
+        font-size: 14px;
       }
 
       .shop-name {
@@ -347,13 +343,12 @@ const PrintReceipt = ({ transaction, onClose }) => {
         font-size: 10px;
       }
 
-      .type-badge {
-        font-size: 8px;
-        padding: 2px 5px;
+      .amount-due .label {
+        font-size: 13px;
       }
 
-      .order-block, .row {
-        font-size: 10px;
+      .amount-due .value {
+        font-size: 22px;
       }
 
       .table-head, .cols {
@@ -372,17 +367,93 @@ const PrintReceipt = ({ transaction, onClose }) => {
         font-size: 11px;
       }
 
+      .footer {
+        font-size: 11px;
+      }
+    }
+
+    /* Small Mobile: < 480px */
+    @media screen and (max-width: 480px) {
+      .receipt-container {
+        max-height: 50vh;
+      }
+
+      .receipt-wrap {
+        padding: 8px;
+        font-size: 10px;
+      }
+
+      .shop-name {
+        font-size: 15px;
+      }
+
+      .shop-sub {
+        font-size: 9px;
+      }
+
+      .type-badge {
+        font-size: 7px;
+        padding: 2px 4px;
+      }
+
+      .order-block, .row {
+        font-size: 9px;
+      }
+
+      .table-head, .cols {
+        font-size: 9px;
+        grid-template-columns: 1fr 60px 50px;
+      }
+
+      .product-name {
+        font-size: 9px;
+      }
+
+      .product-subline {
+        font-size: 8px;
+      }
+
+      .total-line {
+        font-size: 10px;
+      }
+
+      .amount-due {
+        padding: 6px 0;
+      }
+
       .amount-due .label {
-        font-size: 12px;
+        font-size: 11px;
       }
 
       .amount-due .value {
-        font-size: 22px;
+        font-size: 20px;
+      }
+
+      .tax-table-head, .tax-table-row {
+        font-size: 9px;
+      }
+
+      .footer {
+        font-size: 10px;
+      }
+
+      .items-scroll {
+        max-height: 22vh;
+      }
+
+      .buttons {
+        gap: 8px;
+        margin-top: 14px;
       }
 
       .btn {
         font-size: 13px;
-        padding: 10px 12px;
+        padding: 11px 8px;
+      }
+
+      .btn svg {
+        width: 16px;
+        height: 16px;
       }
     }
   `;
@@ -530,7 +601,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
             </div>
 
             <div className="footer">
-              {SETTINGS.receiptFooter || 'Thank you for shopping with us'}
+              {SETTINGS.receiptFooter || 'Thank you for your business!'}
             </div>
           </div>
         </div>

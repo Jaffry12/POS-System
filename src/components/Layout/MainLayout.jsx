@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { useTheme } from '../../context/ThemeContext';
@@ -41,7 +41,7 @@ const MainLayout = () => {
       border: 'none',
       background: theme.success,
       color: '#FFFFFF',
-      display: 'none',
+      display: sidebarOpen ? 'none' : 'none',
       alignItems: 'center',
       justifyContent: 'center',
       cursor: 'pointer',
@@ -89,7 +89,7 @@ const MainLayout = () => {
         /* Tablet & Mobile: Show hamburger, remove margin */
         @media (max-width: 1024px) {
           .mobile-menu-button {
-            display: flex !important;
+            display: ${sidebarOpen ? 'none' : 'flex'} !important;
           }
           
           .main-content-layout {
@@ -117,15 +117,15 @@ const MainLayout = () => {
       `}</style>
 
       <div style={styles.layout}>
-        {/* Mobile Hamburger Menu Button */}
+        {/* Mobile Hamburger Menu Button - Only shows hamburger icon */}
         <button
           className="mobile-menu-button"
           style={styles.mobileMenuButton}
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={() => setSidebarOpen(true)}
           onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+          <Menu size={22} />
         </button>
 
         {/* Mobile Overlay */}
