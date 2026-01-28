@@ -26,27 +26,43 @@ const SettingsPage = () => {
     link.href = url;
     link.download = `pos-data-${new Date().toISOString().split("T")[0]}.json`;
     link.click();
+    URL.revokeObjectURL(url);
   };
 
   const styles = {
+    // ✅ Use dvh + safe-area padding so iPhone bottom bar never cuts content
     container: {
-      height: "100vh",
+      minHeight: "100dvh",
+      height: "100dvh",
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
+      background: theme.bgPrimary,
+      boxSizing: "border-box",
+      paddingBottom: "env(safe-area-inset-bottom)",
     },
+
+    // ✅ Only THIS scrolls
     scrollableContent: {
-      flex: 1,
+      flex: "1 1 auto",
+      minHeight: 0,
       overflowY: "auto",
       overflowX: "hidden",
-      padding: "0 40px 80px 40px",
+
+      // ✅ bottom padding includes safe area so last section is fully visible
+      padding: "0 40px calc(80px + env(safe-area-inset-bottom)) 40px",
+
       scrollbarWidth: "none",
       msOverflowStyle: "none",
+      WebkitOverflowScrolling: "touch",
+      boxSizing: "border-box",
     },
+
     header: {
       padding: "40px 40px 0 40px",
       marginBottom: "32px",
       flexShrink: 0,
+      boxSizing: "border-box",
     },
     title: {
       fontSize: "32px",
@@ -58,12 +74,15 @@ const SettingsPage = () => {
       fontSize: "16px",
       color: theme.textSecondary,
     },
+
     section: {
       background: theme.cardBg,
       borderRadius: "16px",
       padding: "24px",
       marginBottom: "24px",
       boxShadow: theme.shadow,
+      border: `1px solid ${theme.border}`,
+      boxSizing: "border-box",
     },
     sectionTitle: {
       fontSize: "18px",
@@ -77,6 +96,7 @@ const SettingsPage = () => {
       alignItems: "center",
       padding: "16px 0",
       borderBottom: `1px solid ${theme.border}`,
+      gap: "14px",
     },
     settingLabel: {
       fontSize: "14px",
@@ -86,7 +106,10 @@ const SettingsPage = () => {
     settingValue: {
       fontSize: "14px",
       color: theme.textSecondary,
+      textAlign: "right",
+      wordBreak: "break-word",
     },
+
     button: {
       padding: "10px 16px",
       border: "none",
@@ -97,7 +120,9 @@ const SettingsPage = () => {
       transition: "all 0.2s ease",
       display: "inline-flex",
       alignItems: "center",
+      justifyContent: "center",
       gap: "10px",
+      whiteSpace: "nowrap",
     },
     primaryButton: {
       background: theme.primary,
@@ -122,10 +147,24 @@ const SettingsPage = () => {
   return (
     <>
       <style>{`
+        /* Hide scrollbar */
         .settings-scroll::-webkit-scrollbar {
           width: 0;
           height: 0;
           display: none;
+        }
+
+        /* Fallback if 100dvh not supported */
+        @supports not (height: 100dvh) {
+          .settings-container {
+            height: 100vh !important;
+            min-height: 100vh !important;
+          }
+        }
+
+        /* iPhone safe area (extra protection) */
+        .settings-scroll {
+          padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
         }
 
         /* Tablet: 768px - 1024px */
@@ -141,7 +180,7 @@ const SettingsPage = () => {
             font-size: 15px !important;
           }
           .settings-scroll {
-            padding: 0 32px 60px 32px !important;
+            padding: 0 32px calc(60px + env(safe-area-inset-bottom)) 32px !important;
           }
           .settings-section {
             padding: 20px !important;
@@ -149,11 +188,11 @@ const SettingsPage = () => {
           }
         }
 
-        /* Mobile: 480px - 768px */
+        /* Mobile: <= 768px */
         @media (max-width: 768px) {
           .settings-header {
             padding: 24px 20px 0 20px !important;
-            margin-bottom: 24px !important;
+            margin-bottom: 20px !important;
           }
           .settings-title {
             font-size: 24px !important;
@@ -162,7 +201,7 @@ const SettingsPage = () => {
             font-size: 14px !important;
           }
           .settings-scroll {
-            padding: 0 20px 60px 20px !important;
+            padding: 0 20px calc(72px + env(safe-area-inset-bottom)) 20px !important;
           }
           .settings-section {
             padding: 18px !important;
@@ -176,13 +215,10 @@ const SettingsPage = () => {
             flex-direction: column !important;
             align-items: flex-start !important;
             padding: 12px 0 !important;
-            gap: 8px !important;
-          }
-          .settings-label {
-            font-size: 13px !important;
+            gap: 6px !important;
           }
           .settings-value {
-            font-size: 13px !important;
+            text-align: left !important;
           }
           .settings-button-group {
             flex-direction: column !important;
@@ -191,7 +227,6 @@ const SettingsPage = () => {
           }
           .settings-button {
             width: 100% !important;
-            justify-content: center !important;
           }
         }
 
@@ -199,7 +234,7 @@ const SettingsPage = () => {
         @media (max-width: 480px) {
           .settings-header {
             padding: 20px 16px 0 16px !important;
-            margin-bottom: 20px !important;
+            margin-bottom: 16px !important;
           }
           .settings-title {
             font-size: 22px !important;
@@ -208,7 +243,7 @@ const SettingsPage = () => {
             font-size: 13px !important;
           }
           .settings-scroll {
-            padding: 0 16px 60px 16px !important;
+            padding: 0 16px calc(72px + env(safe-area-inset-bottom)) 16px !important;
           }
           .settings-section {
             padding: 16px !important;
@@ -217,20 +252,6 @@ const SettingsPage = () => {
           .settings-section-title {
             font-size: 15px !important;
             margin-bottom: 12px !important;
-          }
-          .settings-row {
-            padding: 10px 0 !important;
-            gap: 6px !important;
-          }
-          .settings-label {
-            font-size: 12px !important;
-          }
-          .settings-value {
-            font-size: 12px !important;
-          }
-          .settings-button-group {
-            gap: 8px !important;
-            margin-top: 12px !important;
           }
           .settings-button {
             padding: 10px 14px !important;
@@ -242,29 +263,38 @@ const SettingsPage = () => {
           }
         }
       `}</style>
+
       <div style={styles.container} className="settings-container">
         <div style={styles.header} className="settings-header">
           <div style={styles.title} className="settings-title">Settings</div>
-          <div style={styles.subtitle} className="settings-subtitle">Configure your POS system</div>
+          <div style={styles.subtitle} className="settings-subtitle">
+            Configure your POS system
+          </div>
         </div>
 
         <div className="settings-scroll" style={styles.scrollableContent}>
           {/* Shop Information */}
           <div style={styles.section} className="settings-section">
-            <div style={styles.sectionTitle} className="settings-section-title">Shop Information</div>
+            <div style={styles.sectionTitle} className="settings-section-title">
+              Shop Information
+            </div>
+
             <div style={styles.settingRow} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Shop Name</div>
               <div style={styles.settingValue} className="settings-value">{SETTINGS.shopName}</div>
             </div>
+
             <div style={styles.settingRow} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Subtitle</div>
               <div style={styles.settingValue} className="settings-value">{SETTINGS.shopSubtitle}</div>
             </div>
-            <div style={styles.settingRow} className="settings-row">
+
+            <div style={{ ...styles.settingRow, borderBottom: "none" }} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Currency</div>
               <div style={styles.settingValue} className="settings-value">{SETTINGS.currency}</div>
             </div>
-            <div style={styles.settingRow} className="settings-row">
+
+            <div style={{ ...styles.settingRow, borderBottom: "none", paddingTop: 0 }} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Tax Rate</div>
               <div style={styles.settingValue} className="settings-value">
                 {(SETTINGS.taxRate * 100).toFixed(0)}%
@@ -274,7 +304,10 @@ const SettingsPage = () => {
 
           {/* Data Management */}
           <div style={styles.section} className="settings-section">
-            <div style={styles.sectionTitle} className="settings-section-title">Data Management</div>
+            <div style={styles.sectionTitle} className="settings-section-title">
+              Data Management
+            </div>
+
             <p style={{ color: theme.textSecondary, fontSize: "14px", marginBottom: "16px" }}>
               Export your transaction data or clear all records from the system.
             </p>
@@ -306,12 +339,16 @@ const SettingsPage = () => {
 
           {/* System Info */}
           <div style={styles.section} className="settings-section">
-            <div style={styles.sectionTitle} className="settings-section-title">System Information</div>
+            <div style={styles.sectionTitle} className="settings-section-title">
+              System Information
+            </div>
+
             <div style={styles.settingRow} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Version</div>
               <div style={styles.settingValue} className="settings-value">1.0.0</div>
             </div>
-            <div style={styles.settingRow} className="settings-row">
+
+            <div style={{ ...styles.settingRow, borderBottom: "none" }} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Last Updated</div>
               <div style={styles.settingValue} className="settings-value">January 2026</div>
             </div>

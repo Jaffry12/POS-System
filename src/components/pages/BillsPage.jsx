@@ -10,10 +10,7 @@ const BillsPage = () => {
     const transactions = JSON.parse(localStorage.getItem("transactions") || "[]");
 
     const totalSales = transactions.reduce((sum, t) => {
-      const subtotal = t.items.reduce(
-        (s, item) => s + item.price * item.quantity,
-        0
-      );
+      const subtotal = t.items.reduce((s, item) => s + item.price * item.quantity, 0);
       const tax = subtotal * SETTINGS.taxRate;
       const discount = t.discount ? (subtotal * t.discount) / 100 : 0;
       return sum + (subtotal + tax - discount);
@@ -26,25 +23,34 @@ const BillsPage = () => {
   });
 
   const styles = {
+    // ✅ dvh + safe-area so iPhone bottom bar never cuts content
     container: {
-      height: "100vh",
+      minHeight: "100dvh",
+      height: "100dvh",
       overflow: "hidden",
       background: theme.bgPrimary,
       display: "flex",
       flexDirection: "column",
+      boxSizing: "border-box",
+      paddingBottom: "env(safe-area-inset-bottom)",
     },
     header: {
       padding: "40px 40px 0 40px",
       marginBottom: "32px",
       flexShrink: 0,
+      boxSizing: "border-box",
     },
+    // ✅ Only THIS scrolls + extra bottom padding for long content
     scrollableContent: {
-      flex: 1,
+      flex: "1 1 auto",
+      minHeight: 0,
       overflowY: "auto",
       overflowX: "hidden",
-      padding: "0 40px 80px 40px",
+      padding: "0 40px calc(96px + env(safe-area-inset-bottom)) 40px",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
+      WebkitOverflowScrolling: "touch",
+      boxSizing: "border-box",
     },
     title: {
       fontSize: "32px",
@@ -138,8 +144,16 @@ const BillsPage = () => {
   return (
     <div style={styles.container} className="bills-container">
       <style>{`
-        .bills-scroll::-webkit-scrollbar {
-          display: none;
+        .bills-scroll::-webkit-scrollbar { display: none; }
+
+        /* ✅ Fallback if dvh not supported */
+        @supports not (height: 100dvh) {
+          .bills-container { height: 100vh !important; min-height: 100vh !important; }
+        }
+
+        /* ✅ extra safe-area bottom padding (prevents cut off) */
+        .bills-scroll {
+          padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
         }
 
         /* Tablet: 768px - 1024px */
@@ -148,74 +162,48 @@ const BillsPage = () => {
             padding: 32px 32px 0 32px !important;
             margin-bottom: 28px !important;
           }
-          .bills-title {
-            font-size: 28px !important;
-          }
-          .bills-subtitle {
-            font-size: 15px !important;
-          }
+          .bills-title { font-size: 28px !important; }
+          .bills-subtitle { font-size: 15px !important; }
           .bills-scroll {
-            padding: 0 32px 60px 32px !important;
+            padding: 0 32px calc(84px + env(safe-area-inset-bottom)) 32px !important;
           }
-          .bills-stats-grid {
-            gap: 20px !important;
-          }
-          .bills-stat-card {
-            padding: 20px !important;
-          }
-          .bills-content {
-            padding: 32px !important;
-          }
+          .bills-stats-grid { gap: 20px !important; }
+          .bills-stat-card { padding: 20px !important; }
+          .bills-content { padding: 32px !important; }
         }
 
-        /* Mobile: 480px - 768px */
+        /* Mobile: <= 768px */
         @media (max-width: 768px) {
           .bills-header {
             padding: 24px 20px 0 20px !important;
             margin-bottom: 24px !important;
           }
-          .bills-title {
-            font-size: 24px !important;
-          }
-          .bills-subtitle {
-            font-size: 14px !important;
-          }
+          .bills-title { font-size: 24px !important; }
+          .bills-subtitle { font-size: 14px !important; }
           .bills-scroll {
-            padding: 0 20px 60px 20px !important;
+            padding: 0 20px calc(84px + env(safe-area-inset-bottom)) 20px !important;
           }
           .bills-stats-grid {
             grid-template-columns: 1fr !important;
             gap: 16px !important;
             margin-bottom: 24px !important;
           }
-          .bills-stat-card {
-            padding: 18px !important;
-          }
+          .bills-stat-card { padding: 18px !important; }
           .bills-stat-icon {
             width: 36px !important;
             height: 36px !important;
             margin-bottom: 10px !important;
           }
-          .bills-stat-label {
-            font-size: 13px !important;
-          }
-          .bills-stat-value {
-            font-size: 26px !important;
-          }
-          .bills-content {
-            padding: 24px !important;
-          }
+          .bills-stat-label { font-size: 13px !important; }
+          .bills-stat-value { font-size: 26px !important; }
+          .bills-content { padding: 24px !important; }
           .bills-icon {
             width: 48px !important;
             height: 48px !important;
             margin-bottom: 16px !important;
           }
-          .bills-message {
-            font-size: 16px !important;
-          }
-          .bills-description {
-            font-size: 13px !important;
-          }
+          .bills-message { font-size: 16px !important; }
+          .bills-description { font-size: 13px !important; }
           .bills-feature-list {
             padding: 0 16px !important;
             margin-top: 20px !important;
@@ -232,68 +220,39 @@ const BillsPage = () => {
             padding: 20px 16px 0 16px !important;
             margin-bottom: 20px !important;
           }
-          .bills-title {
-            font-size: 22px !important;
-          }
-          .bills-subtitle {
-            font-size: 13px !important;
-          }
+          .bills-title { font-size: 22px !important; }
+          .bills-subtitle { font-size: 13px !important; }
           .bills-scroll {
-            padding: 0 16px 60px 16px !important;
+            padding: 0 16px calc(84px + env(safe-area-inset-bottom)) 16px !important;
           }
-          .bills-stats-grid {
-            gap: 14px !important;
-            margin-bottom: 20px !important;
-          }
-          .bills-stat-card {
-            padding: 16px !important;
-          }
+          .bills-stats-grid { gap: 14px !important; margin-bottom: 20px !important; }
+          .bills-stat-card { padding: 16px !important; }
           .bills-stat-icon {
             width: 32px !important;
             height: 32px !important;
             margin-bottom: 8px !important;
           }
-          .bills-stat-label {
-            font-size: 12px !important;
-            margin-bottom: 6px !important;
-          }
-          .bills-stat-value {
-            font-size: 24px !important;
-          }
-          .bills-content {
-            padding: 20px !important;
-          }
+          .bills-stat-label { font-size: 12px !important; margin-bottom: 6px !important; }
+          .bills-stat-value { font-size: 24px !important; }
+          .bills-content { padding: 20px !important; }
           .bills-icon {
             width: 44px !important;
             height: 44px !important;
             margin-bottom: 14px !important;
           }
-          .bills-message {
-            font-size: 15px !important;
-            margin-bottom: 14px !important;
-          }
-          .bills-description {
-            font-size: 12px !important;
-          }
-          .bills-feature-list {
-            padding: 0 12px !important;
-            margin-top: 18px !important;
-          }
-          .bills-feature-item {
-            font-size: 12px !important;
-            margin-bottom: 8px !important;
-            gap: 8px !important;
-          }
-          .bills-check-icon {
-            width: 16px !important;
-            height: 16px !important;
-          }
+          .bills-message { font-size: 15px !important; margin-bottom: 14px !important; }
+          .bills-description { font-size: 12px !important; }
+          .bills-feature-list { padding: 0 12px !important; margin-top: 18px !important; }
+          .bills-feature-item { font-size: 12px !important; margin-bottom: 8px !important; gap: 8px !important; }
+          .bills-check-icon { width: 16px !important; height: 16px !important; }
         }
       `}</style>
-      
+
       <div style={styles.header} className="bills-header">
         <div style={styles.title} className="bills-title">Bills & Reports</div>
-        <div style={styles.subtitle} className="bills-subtitle">Financial overview and analytics</div>
+        <div style={styles.subtitle} className="bills-subtitle">
+          Financial overview and analytics
+        </div>
       </div>
 
       <div style={styles.scrollableContent} className="bills-scroll">
@@ -332,7 +291,14 @@ const BillsPage = () => {
           </div>
 
           <div style={styles.featureList} className="bills-feature-list">
-            {['Daily, Weekly, and Monthly Sales Reports', 'Product Performance Analytics', 'Peak Hours and Trends Analysis', 'Export to Excel, PDF, and CSV', 'Tax Reports and Financial Summaries', 'Custom Date Range Reports'].map((feature, idx) => (
+            {[
+              "Daily, Weekly, and Monthly Sales Reports",
+              "Product Performance Analytics",
+              "Peak Hours and Trends Analysis",
+              "Export to Excel, PDF, and CSV",
+              "Tax Reports and Financial Summaries",
+              "Custom Date Range Reports",
+            ].map((feature, idx) => (
               <div key={idx} style={styles.featureItem} className="bills-feature-item">
                 <svg
                   style={styles.checkIcon}
