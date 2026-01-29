@@ -92,9 +92,10 @@ const Sidebar = ({ isOpen = true, onClose = () => {} }) => {
       color: theme.textPrimary,
       marginBottom: "2px",
       lineHeight: "1.2",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
+      whiteSpace: "normal",
+      overflow: "visible",
+      textOverflow: "clip",
+      wordBreak: "break-word",
     },
 
     shopSubtitle: {

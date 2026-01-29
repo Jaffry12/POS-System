@@ -67,16 +67,19 @@ const PaymentModal = ({ isOpen, onClose }) => {
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.width = '100%';
+      document.body.style.top = '0';
     } else {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      document.body.style.top = '';
     }
     
     return () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
+      document.body.style.top = '';
     };
   }, [isOpen, vw]);
 
@@ -123,41 +126,41 @@ const PaymentModal = ({ isOpen, onClose }) => {
       modalWidth = "100%";
       bodyDir = "column";
       rightWidth = "100%";
-      leftMaxH = "45vh"; // Allow scrolling with max height
-      rightMaxH = "auto"; // Let it fit naturally with actions visible
+      leftMaxH = "30vh";
+      rightMaxH = "auto";
       overlayPad = 0;
 
-      headerPad = "10px 12px";
-      leftPad = 10;
-      rightPad = 10;
+      headerPad = "8px 12px";
+      leftPad = 6;
+      rightPad = 6;
 
-      amountFont = 18;
-      quickCols = 4; // quick buttons in a row on mobile
-      numGap = 6;
-      numPad = 8;
-      numFont = 14;
+      amountFont = 17;
+      quickCols = 4;
+      numGap = 3;
+      numPad = 5;
+      numFont = 13;
 
       discountCols = 4;
-      discountGap = 6;
+      discountGap = 5;
     }
 
     if (device === "xs") {
       modalWidth = "100%";
       bodyDir = "column";
       rightWidth = "100%";
-      leftMaxH = "42vh";
-      rightMaxH = "auto"; // Let it fit naturally with actions visible
+      leftMaxH = "30vh";
+      rightMaxH = "auto";
       overlayPad = 0;
 
-      headerPad = "8px 10px";
-      leftPad = 8;
-      rightPad = 8;
+      headerPad = "6px 10px";
+      leftPad = 5;
+      rightPad = 5;
 
-      amountFont = 17;
+      amountFont = 16;
       quickCols = 4;
-      numGap = 4;
-      numPad = 6;
-      numFont = 13;
+      numGap = 2;
+      numPad = 4;
+      numFont = 12;
 
       discountCols = 4;
       discountGap = 4;
@@ -300,7 +303,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (!showReceipt || !autoPrint) return;
     const t = setTimeout(() => {
-      window.print();
+      // window.print();
     }, 350);
     return () => clearTimeout(t);
   }, [showReceipt, autoPrint]);
@@ -401,7 +404,6 @@ const PaymentModal = ({ isOpen, onClose }) => {
   };
 
   const applyAmountDiscount = () => {
-    // fixed amount is handled in discountAmount calculation using discountInput
     setDiscount(0);
   };
 
@@ -442,7 +444,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
       justifyContent: "center",
       zIndex: 2000,
       padding: 0,
-      overflow: ui.isMobileSheet ? "hidden" : "auto",
+      overflow: "hidden",
     },
 
     modal: {
@@ -451,7 +453,6 @@ const PaymentModal = ({ isOpen, onClose }) => {
       width:
         typeof ui.modalWidth === "number" ? `${ui.modalWidth}px` : ui.modalWidth,
       maxWidth: "100%",
-      
       height: ui.isMobileSheet ? "100vh" : "auto",
       maxHeight: ui.isMobileSheet ? "100vh" : "calc(100vh - 40px)",
       overflow: "hidden",
@@ -504,32 +505,38 @@ const PaymentModal = ({ isOpen, onClose }) => {
       textTransform: "uppercase",
     }),
 
-   body: {
-  display: "flex",
-  flex: 1,
-  overflow: "hidden",
+    body: {
+      display: "flex",
+      flex: 1,
+      overflow: "hidden",
+      minHeight: 0,
+      height: "100%",
+      flexDirection: ui.bodyDir,
+    },
+
+    leftPanel: {
+  // ✅ only grow on desktop row layout
+  flex: ui.bodyDir === "row" ? 1 : "unset",
+  flexGrow: ui.bodyDir === "row" ? 1 : 0,
+
   minHeight: 0,
-  height: "100%",
-  flexDirection: ui.bodyDir,
+  padding: `${ui.leftPad}px`,
+  borderRight: ui.bodyDir === "row" ? `2px solid ${theme.border}` : "none",
+  borderBottom: ui.bodyDir === "column" ? `2px solid ${theme.border}` : "none",
+
+  display: "flex",
+  flexDirection: "column",
+  gap: ui.isMobileSheet ? "2px" : "8px",
+
+  overflowY: "auto",
+  scrollbarWidth: "none",
+  msOverflowStyle: "none",
+
+  // keep your limit
+  maxHeight: ui.leftMaxH,
 },
 
 
-    leftPanel: {
-      flex: 1,
-      minHeight: 0,
-      padding: `${ui.leftPad}px`,
-      borderRight: ui.bodyDir === "row" ? `2px solid ${theme.border}` : "none",
-      borderBottom: ui.bodyDir === "column" ? `2px solid ${theme.border}` : "none",
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-      overflowY: "auto",
-      scrollbarWidth: "none",
-      msOverflowStyle: "none",
-      maxHeight: ui.leftMaxH,
-    },
-
-    // Right panel - scrolling enabled on mobile within the panel
     rightPanel: {
       width:
         typeof ui.rightWidth === "number" ? `${ui.rightWidth}px` : ui.rightWidth,
@@ -544,39 +551,41 @@ const PaymentModal = ({ isOpen, onClose }) => {
       flexShrink: 0,
     },
 
-    // Content area - scrolling enabled on mobile with constrained height
     rightScroll: {
       flex: 1,
       minHeight: 0,
       overflowY: "auto",
-      paddingBottom: ui.isMobileSheet ? "8px" : "0px",
+      paddingBottom: ui.isMobileSheet ? "4px" : "0px",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
-      maxHeight: ui.isMobileSheet ? "28vh" : "none",
+      maxHeight: ui.isMobileSheet ? "auto" : "none",
     },
 
-    // Actions bar - always visible, never scrolls away
     actionsBar: {
-      position: ui.isMobileSheet ? "static" : "static",
-      bottom: 0,
-      background: theme.cardBg,
-      paddingTop: ui.isMobileSheet ? "8px" : "12px",
-      borderTop: `2px solid ${theme.border}`,
-      marginTop: ui.isMobileSheet ? "8px" : "12px",
-      flexShrink: 0,
-    },
+  position: "static",
+  bottom: 0,
+  background: theme.cardBg,
+
+  // 🔧 TIGHTEN
+  paddingTop: ui.isMobileSheet ? "6px" : "12px",
+  marginTop: ui.isMobileSheet ? "6px" : "12px",
+
+  borderTop: `2px solid ${theme.border}`,
+  flexShrink: 0,
+},
+
 
     amountDisplay: {
       background: theme.bgSecondary,
-      padding: ui.isMobileSheet ? "8px" : "10px",
+      padding: ui.isMobileSheet ? "16px 18px" : "20px",
       borderRadius: "10px",
       border: `1px solid ${theme.border}`,
     },
 
     amountLabel: {
-      fontSize: ui.device === "xs" ? "11px" : "12px",
+      fontSize: ui.device === "xs" ? "10px" : "12px",
       color: theme.textSecondary,
-      marginBottom: ui.isMobileSheet ? "4px" : "6px",
+      marginBottom: ui.isMobileSheet ? "2px" : "6px",
       fontWeight: "800",
     },
 
@@ -590,12 +599,12 @@ const PaymentModal = ({ isOpen, onClose }) => {
     paymentMethods: {
       display: "grid",
       gridTemplateColumns: "repeat(3, 1fr)",
-      gap: ui.isMobileSheet ? "6px" : "8px",
-      marginBottom: ui.isMobileSheet ? "8px" : "10px",
+      gap: ui.isMobileSheet ? "4px" : "8px",
+      marginBottom: ui.isMobileSheet ? "4px" : "10px",
     },
 
     paymentMethodBtn: (isActive) => ({
-      padding: ui.isMobileSheet ? "8px 6px" : "10px 8px",
+      padding: ui.isMobileSheet ? "6px 5px" : "10px 8px",
       border: `2px solid ${isActive ? theme.primary : theme.border}`,
       borderRadius: "10px",
       background: isActive ? `${theme.primary}15` : theme.bgSecondary,
@@ -614,29 +623,33 @@ const PaymentModal = ({ isOpen, onClose }) => {
     },
 
     quickAmounts: {
-      display: "grid",
-      gridTemplateColumns: `repeat(${ui.quickCols}, 1fr)`,
-      gap: ui.device === "xs" ? "8px" : "10px",
-    },
+  display: "grid",
+  gridTemplateColumns: `repeat(${ui.quickCols}, 1fr)`,
+  gap: ui.isMobileSheet ? "3px" : "10px",
+},
 
     quickBtn: {
-      padding: ui.device === "xs" ? "8px" : ui.device === "sm" ? "9px" : "12px",
+      padding: ui.device === "xs" ? "4px" : ui.device === "sm" ? "5px" : "12px",
       border: `2px solid ${theme.border}`,
       borderRadius: "10px",
       background: theme.bgSecondary,
       color: theme.textPrimary,
-      fontSize: ui.device === "xs" ? "12px" : ui.device === "sm" ? "13px" : "14px",
+      fontSize: ui.device === "xs" ? "11px" : ui.device === "sm" ? "12px" : "14px",
       fontWeight: "900",
       cursor: "pointer",
       transition: "all 0.15s ease",
     },
 
     numberPad: {
-      display: "grid",
-      gridTemplateColumns: "repeat(3, 1fr)",
-      gap: `${ui.numGap}px`,
-      marginTop: "auto",
-    },
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: `${ui.numGap}px`,
+
+  // 🔧 CHANGE THIS
+  marginTop: ui.isMobileSheet ? "6px" : "auto",
+  marginBottom: ui.isMobileSheet ? "6px" : "0px",
+},
+
 
     numBtn: {
       padding: `${ui.numPad}px`,
@@ -650,14 +663,14 @@ const PaymentModal = ({ isOpen, onClose }) => {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      minHeight: ui.device === "xs" ? "38px" : ui.device === "sm" ? "40px" : "48px",
+      minHeight: ui.device === "xs" ? "30px" : ui.device === "sm" ? "32px" : "48px",
       transition: "all 0.15s ease",
     },
 
     summaryRow: {
       display: "flex",
       justifyContent: "space-between",
-      marginBottom: "6px",
+      marginBottom: ui.isMobileSheet ? "3px" : "6px",
       alignItems: "center",
     },
 
@@ -676,7 +689,7 @@ const PaymentModal = ({ isOpen, onClose }) => {
     divider: {
       height: "2px",
       background: theme.border,
-      margin: "8px 0",
+      margin: ui.isMobileSheet ? "6px 0" : "8px 0",
     },
 
     totalRow: {
@@ -685,16 +698,16 @@ const PaymentModal = ({ isOpen, onClose }) => {
       fontSize: "16px",
       fontWeight: "900",
       color: theme.textPrimary,
-      marginBottom: "6px",
+      marginBottom: ui.isMobileSheet ? "4px" : "6px",
     },
 
     changeRow: {
       display: "flex",
       justifyContent: "space-between",
-      padding: "8px",
+      padding: ui.isMobileSheet ? "6px" : "8px",
       background: theme.bgSecondary,
       borderRadius: "8px",
-      marginTop: "6px",
+      marginTop: ui.isMobileSheet ? "4px" : "6px",
     },
 
     changeLabel: {
@@ -716,23 +729,44 @@ const PaymentModal = ({ isOpen, onClose }) => {
     },
 
     actionBtn: (variant) => ({
-      padding: ui.isMobileSheet ? "10px 12px" : "12px 16px",
-      border:
-        variant === "outline"
-          ? `2px solid ${theme.border}`
-          : `2px solid ${theme.primary}`,
-      borderRadius: "10px",
-      background: variant === "outline" ? "transparent" : theme.success,
-      color: variant === "outline" ? theme.textPrimary : "#FFFFFF",
-      fontSize: ui.device === "xs" ? "13px" : "14px",
-      fontWeight: "900",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "6px",
-      transition: "all 0.15s ease",
-    }),
+  padding: ui.isMobileSheet ? "10px 12px" : "12px 16px",
+
+  // Border logic
+  border:
+    variant === "outline"
+      ? `2px solid ${theme.border}`      // Outline button (Print)
+      : "2px solid transparent",         // Primary button (Complete) → NO BORDER
+
+  borderRadius: "10px",
+
+  // Background
+  background:
+    variant === "outline"
+      ? "transparent"
+      : theme.success,                   // Green Complete button
+
+  color:
+    variant === "outline"
+      ? theme.textPrimary
+      : "#FFFFFF",
+
+  fontSize: ui.device === "xs" ? "13px" : "14px",
+  fontWeight: "900",
+  cursor: "pointer",
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "6px",
+
+  transition: "all 0.15s ease",
+
+  // 🔥 Kill browser focus / active outline
+  outline: "none",
+  boxShadow: "none",
+}),
+
+
 
     errorBox: {
       background: `${theme.danger}15`,
@@ -746,19 +780,27 @@ const PaymentModal = ({ isOpen, onClose }) => {
     },
 
     successScreen: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      minHeight: "200px",
-      padding: "40px",
-    },
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
 
-    successText: {
-      fontSize: "18px",
-      fontWeight: "900",
-      color: theme.success,
-    },
+  minHeight: ui.isMobileSheet ? "140px" : "200px",
+  padding: ui.isMobileSheet ? "20px" : "40px",
+},
+
+successText: {
+  fontSize: ui.device === "xs"
+    ? "14px"
+    : ui.device === "sm"
+    ? "15px"
+    : "18px",   // desktop stays big
+
+  fontWeight: "900",
+  color: theme.success,
+  textAlign: "center",
+},
+
 
     discountButtons: {
       display: "grid",
@@ -1245,7 +1287,6 @@ const PaymentModal = ({ isOpen, onClose }) => {
             {renderLeftContent()}
           </div>
 
-          {/* Right panel - no scrolling on mobile */}
           <div style={styles.rightPanel}>
             <div style={styles.rightScroll} className="pm-hide-scroll">
               <div style={styles.paymentMethods}>

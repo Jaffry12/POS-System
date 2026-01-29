@@ -168,6 +168,7 @@ const MenuManagementPage = () => {
   const styles = {
     container: {
       padding: "40px",
+      paddingBottom: "180px",
       background: theme.bgPrimary,
       height: "100%",
       display: "flex",
@@ -502,7 +503,6 @@ const MenuManagementPage = () => {
       minHeight: "100px",
       resize: "vertical",
     },
-    row2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" },
     pricesBox: {
       background: theme.bgSecondary,
       border: `1px solid ${theme.border}`,
@@ -536,6 +536,18 @@ const MenuManagementPage = () => {
       alignItems: "center",
       gap: "8px",
     }),
+    categoryBadge: {
+      padding: "6px 12px",
+      borderRadius: "8px",
+      fontSize: "12px",
+      fontWeight: "800",
+      background: theme.bgSecondary,
+      color: theme.textPrimary,
+      border: `2px solid ${theme.border}`,
+      display: "inline-flex",
+      alignItems: "center",
+      gap: "8px",
+    },
   };
 
   return (
@@ -553,6 +565,7 @@ const MenuManagementPage = () => {
         @media (max-width: 1024px) and (min-width: 768px) {
           .menu-container {
             padding: 32px !important;
+            padding-bottom: 160px !important;
             gap: 16px !important;
           }
           .menu-header-top {
@@ -591,6 +604,7 @@ const MenuManagementPage = () => {
         @media (max-width: 768px) {
           .menu-container {
             padding: 20px !important;
+            padding-bottom: 160px !important;
             gap: 14px !important;
           }
           .menu-header-top {
@@ -683,15 +697,13 @@ const MenuManagementPage = () => {
             padding: 14px !important;
             max-height: 60vh !important;
           }
-          .menu-modal-row2 {
-            grid-template-columns: 1fr !important;
-          }
         }
 
         /* Small Mobile: < 480px */
         @media (max-width: 480px) {
           .menu-container {
             padding: 16px !important;
+            padding-bottom: 180px !important;
             gap: 12px !important;
           }
           .menu-title {
@@ -1082,6 +1094,47 @@ const MenuManagementPage = () => {
               </div>
 
               <div>
+                <div style={styles.label} className="menu-modal-label">Category</div>
+                <div style={styles.categoryBadge}>
+                  <Package size={14} />
+                  {editCategory.toUpperCase()}
+                </div>
+              </div>
+
+              {!editItem.prices ? (
+                <div>
+                  <div style={styles.label} className="menu-modal-label">Price ({SETTINGS.currency})</div>
+                  <input
+                    style={styles.input}
+                    className="menu-modal-input"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    placeholder="e.g. 4.99"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <div style={styles.label} className="menu-modal-label">Sizes & Prices ({SETTINGS.currency})</div>
+                  <div style={styles.pricesBox}>
+                    {Object.keys(editItem.prices).map((k) => (
+                      <div key={k} style={styles.priceRow}>
+                        <div style={{ fontWeight: "800", color: theme.textPrimary }}>{k}</div>
+                        <input
+                          style={styles.input}
+                          className="menu-modal-input"
+                          value={editPrices[k] ?? ""}
+                          onChange={(e) =>
+                            setEditPrices((p) => ({ ...p, [k]: e.target.value }))
+                          }
+                          placeholder="e.g. 3.50"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
                 <div style={styles.label} className="menu-modal-label">Description</div>
                 <textarea
                   style={styles.textarea}
@@ -1090,57 +1143,6 @@ const MenuManagementPage = () => {
                   onChange={(e) => setEditDesc(e.target.value)}
                   placeholder="Optional description..."
                 />
-              </div>
-
-              <div style={styles.row2} className="menu-modal-row2">
-                <div>
-                  <div style={styles.label} className="menu-modal-label">Category</div>
-                  <select
-                    style={styles.input}
-                    className="menu-modal-input"
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value)}
-                  >
-                    {allCategories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {!editItem.prices ? (
-                  <div>
-                    <div style={styles.label} className="menu-modal-label">Price ({SETTINGS.currency})</div>
-                    <input
-                      style={styles.input}
-                      className="menu-modal-input"
-                      value={editPrice}
-                      onChange={(e) => setEditPrice(e.target.value)}
-                      placeholder="e.g. 4.99"
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    <div style={styles.label} className="menu-modal-label">Sizes & Prices ({SETTINGS.currency})</div>
-                    <div style={styles.pricesBox}>
-                      {Object.keys(editItem.prices).map((k) => (
-                        <div key={k} style={styles.priceRow}>
-                          <div style={{ fontWeight: "800", color: theme.textPrimary }}>{k}</div>
-                          <input
-                            style={styles.input}
-                            className="menu-modal-input"
-                            value={editPrices[k] ?? ""}
-                            onChange={(e) =>
-                              setEditPrices((p) => ({ ...p, [k]: e.target.value }))
-                            }
-                            placeholder="e.g. 3.50"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 

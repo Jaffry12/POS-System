@@ -36,7 +36,7 @@ const OrdersPage = () => {
       flex: 1,
       overflowY: "auto",
       overflowX: "hidden",
-      padding: "0 40px 80px 40px",
+      padding: "0 40px 140px 40px",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
     },
@@ -197,7 +197,7 @@ const OrdersPage = () => {
             font-size: 15px !important;
           }
           .orders-scroll {
-            padding: 0 32px 60px 32px !important;
+            padding: 0 32px 140px 32px !important;
           }
           .orders-grid {
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
@@ -221,7 +221,7 @@ const OrdersPage = () => {
             font-size: 14px !important;
           }
           .orders-scroll {
-            padding: 0 20px 60px 20px !important;
+            padding: 0 20px 140px 20px !important;
           }
           .orders-grid {
             grid-template-columns: 1fr !important;
@@ -289,7 +289,7 @@ const OrdersPage = () => {
             font-size: 13px !important;
           }
           .orders-scroll {
-            padding: 0 16px 60px 16px !important;
+            padding: 0 16px 160px 16px !important;
           }
           .orders-grid {
             gap: 14px !important;

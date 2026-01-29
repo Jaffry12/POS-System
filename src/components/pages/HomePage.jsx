@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { ShoppingCart, X } from 'lucide-react';
+import { ShoppingCart, X, Package } from 'lucide-react';
 import CategoryPills from '../../components/Menu/CategoryPills';
 import MenuGrid from '../../components/Menu/MenuGrid';
 import OrderPanel from '../../components/Order/OrderPanel';
@@ -8,7 +8,7 @@ import { usePOS } from '../../hooks/usePOS';
 
 const HomePage = () => {
   const { theme } = useTheme();
-  const { currentOrder } = usePOS();
+  const { currentOrder, activeCategory } = usePOS();
   const [showMobileCart, setShowMobileCart] = useState(false);
 
   const styles = {
@@ -34,6 +34,39 @@ const HomePage = () => {
       paddingBottom: '40px',
       scrollbarWidth: 'none',
       msOverflowStyle: 'none',
+    },
+    
+    // Empty state
+    emptyState: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100%',
+      padding: '40px 20px',
+      textAlign: 'center',
+    },
+    emptyIcon: {
+      width: '120px',
+      height: '120px',
+      borderRadius: '50%',
+      background: theme.bgSecondary,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: '24px',
+    },
+    emptyTitle: {
+      fontSize: '24px',
+      fontWeight: '700',
+      color: theme.textPrimary,
+      marginBottom: '12px',
+    },
+    emptyDescription: {
+      fontSize: '16px',
+      color: theme.textSecondary,
+      maxWidth: '400px',
+      lineHeight: '1.5',
     },
     
     // Mobile floating cart button
@@ -191,6 +224,19 @@ const HomePage = () => {
               width: 92% !important;
               max-height: 82vh !important;
             }
+            
+            .empty-icon-mobile {
+              width: 100px !important;
+              height: 100px !important;
+            }
+            
+            .empty-title-mobile {
+              font-size: 20px !important;
+            }
+            
+            .empty-description-mobile {
+              font-size: 14px !important;
+            }
           }
 
           /* Small Mobile: Even more compact */
@@ -208,6 +254,19 @@ const HomePage = () => {
               width: 94% !important;
               max-height: 88vh !important;
             }
+            
+            .empty-icon-mobile {
+              width: 80px !important;
+              height: 80px !important;
+            }
+            
+            .empty-title-mobile {
+              font-size: 18px !important;
+            }
+            
+            .empty-description-mobile {
+              font-size: 13px !important;
+            }
           }
         `}
       </style>
@@ -217,7 +276,21 @@ const HomePage = () => {
         <div className="home-left-section" style={styles.leftSection}>
           <CategoryPills />
           <div style={styles.menuArea} className="menu-scrollable">
-            <MenuGrid />
+            {!activeCategory ? (
+              <div style={styles.emptyState}>
+                <div style={styles.emptyIcon} className="empty-icon-mobile">
+                  <Package size={60} color={theme.textSecondary} />
+                </div>
+                <div style={styles.emptyTitle} className="empty-title-mobile">
+                  Select a Category
+                </div>
+                <div style={styles.emptyDescription} className="empty-description-mobile">
+                  Choose a category from above to view available menu items
+                </div>
+              </div>
+            ) : (
+              <MenuGrid />
+            )}
           </div>
         </div>
 

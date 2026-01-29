@@ -1,7 +1,7 @@
 import { Printer } from "lucide-react";
 import { SETTINGS } from "../../data/menuData";
 import { formatDateTime } from "../../utils/dateUtils";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 
 const PrintReceipt = ({ transaction, onClose }) => {
@@ -15,53 +15,95 @@ const PrintReceipt = ({ transaction, onClose }) => {
   console.log("📊 [RECEIPT] Transaction type:", transaction.type || "full");
   console.log("💰 [RECEIPT] Total amount:", transaction.total);
 
+//   const handlePrint = () => {
+//   try {
+//     const el = receiptRef.current;
+//     if (!el) {
+//       console.log("❌ Receipt ref not found");
+//       return;
+//     }
 
-  
+//     // Open new small print window
+//     const printWindow = window.open("", "PRINT", "height=700,width=500");
+//     if (!printWindow) {
+//       alert("Popup blocked. Please allow popups for printing.");
+//       return;
+//     }
+
+//     printWindow.document.open();
+//     printWindow.document.write(`
+//       <html>
+//         <head>
+//           <title>Receipt</title>
+//           <style>
+//             @page { size: 80mm auto; margin: 0; }
+//             html, body { margin: 0; padding: 0; background: #fff; }
+//           </style>
+//         </head>
+//         <body>
+//           ${el.outerHTML}
+//         </body>
+//       </html>
+//     `);
+//     printWindow.document.close();
+
+//     // Wait for render then print
+//     printWindow.focus();
+//     setTimeout(() => {
+//       printWindow.print();
+//       printWindow.close();
+//     }, 250);
+//   } catch (e) {
+//     console.error("❌ Print error:", e);
+//   }
+// };
 
 
+const handlePrint = () => {
+  const el = receiptRef.current;
+  if (!el) return;
 
-  const handlePrint = () => {
-  try {
-    const el = receiptRef.current;
-    if (!el) {
-      console.log("❌ Receipt ref not found");
-      return;
-    }
+  const printWindow = window.open("", "PRINT", "height=900,width=700");
+  if (!printWindow) return;
 
-    // Open new small print window
-    const printWindow = window.open("", "PRINT", "height=700,width=500");
-    if (!printWindow) {
-      alert("Popup blocked. Please allow popups for printing.");
-      return;
-    }
+  const css = receiptStyles;
 
-    printWindow.document.open();
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Receipt</title>
-          <style>
-            @page { size: 80mm auto; margin: 0; }
-            html, body { margin: 0; padding: 0; background: #fff; }
-          </style>
-        </head>
-        <body>
-          ${el.outerHTML}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+  printWindow.document.open();
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Receipt</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          ${css}
 
-    // Wait for render then print
-    printWindow.focus();
+          /* ✅ FORCE normal page for PDF preview */
+          @page { size: A4; margin: 30mm; }
+
+          @media print {
+            body { display:flex; justify-content:center; }
+            .receipt-wrap {
+              width: 100% !important;
+              max-width: 700px !important; /* make big */
+            }
+          }
+        </style>
+      </head>
+      <body>${el.outerHTML}</body>
+    </html>
+  `);
+  printWindow.document.close();
+
+  printWindow.onload = () => {
     setTimeout(() => {
+      printWindow.focus();
       printWindow.print();
       printWindow.close();
-    }, 250);
-  } catch (e) {
-    console.error("❌ Print error:", e);
-  }
+    }, 500);
+  };
 };
+
+
 
 
 
@@ -257,23 +299,18 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
     @media print {
   .product-name {
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
 
-
-  /* optional: give more space to PRODUCT by shrinking other columns */
-  @media print {
   .table-head, .product-line {
     grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
     column-gap: 4px;
   }
-}
-
 }
 
 
@@ -496,10 +533,17 @@ const PrintReceipt = ({ transaction, onClose }) => {
               </span>
             </div>
 
-            <div className="row">
-              <span>Order ID</span>
-              <span>{transaction.id || "N/A"}</span>
-            </div>
+          <div className="row">
+  <span>Order No</span>
+  <span>{transaction.orderNumber ?? "N/A"}</span>
+</div>
+
+<div className="row">
+  <span>Order ID</span>
+  <span>{transaction.id || "N/A"}</span>
+</div>
+
+
 
             <div className="row">
               <span>Payment Method</span>

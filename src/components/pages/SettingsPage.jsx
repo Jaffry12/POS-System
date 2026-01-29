@@ -50,7 +50,7 @@ const SettingsPage = () => {
       overflowX: "hidden",
 
       // ✅ bottom padding includes safe area so last section is fully visible
-      padding: "0 40px calc(80px + env(safe-area-inset-bottom)) 40px",
+      padding: "0 40px calc(140px + env(safe-area-inset-bottom)) 40px",
 
       scrollbarWidth: "none",
       msOverflowStyle: "none",
@@ -74,7 +74,6 @@ const SettingsPage = () => {
       fontSize: "16px",
       color: theme.textSecondary,
     },
-
     section: {
       background: theme.cardBg,
       borderRadius: "16px",
@@ -82,7 +81,6 @@ const SettingsPage = () => {
       marginBottom: "24px",
       boxShadow: theme.shadow,
       border: `1px solid ${theme.border}`,
-      boxSizing: "border-box",
     },
     sectionTitle: {
       fontSize: "18px",
@@ -109,7 +107,6 @@ const SettingsPage = () => {
       textAlign: "right",
       wordBreak: "break-word",
     },
-
     button: {
       padding: "10px 16px",
       border: "none",
@@ -164,7 +161,7 @@ const SettingsPage = () => {
 
         /* iPhone safe area (extra protection) */
         .settings-scroll {
-          padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+          padding-bottom: calc(140px + env(safe-area-inset-bottom)) !important;
         }
 
         /* Tablet: 768px - 1024px */
@@ -180,7 +177,7 @@ const SettingsPage = () => {
             font-size: 15px !important;
           }
           .settings-scroll {
-            padding: 0 32px calc(60px + env(safe-area-inset-bottom)) 32px !important;
+            padding: 0 32px calc(140px + env(safe-area-inset-bottom)) 32px !important;
           }
           .settings-section {
             padding: 20px !important;
@@ -201,7 +198,7 @@ const SettingsPage = () => {
             font-size: 14px !important;
           }
           .settings-scroll {
-            padding: 0 20px calc(72px + env(safe-area-inset-bottom)) 20px !important;
+            padding: 0 20px calc(140px + env(safe-area-inset-bottom)) 20px !important;
           }
           .settings-section {
             padding: 18px !important;
@@ -243,7 +240,7 @@ const SettingsPage = () => {
             font-size: 13px !important;
           }
           .settings-scroll {
-            padding: 0 16px calc(72px + env(safe-area-inset-bottom)) 16px !important;
+            padding: 0 16px calc(160px + env(safe-area-inset-bottom)) 16px !important;
           }
           .settings-section {
             padding: 16px !important;

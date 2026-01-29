@@ -3,13 +3,33 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { POSContext } from "./createPOSContext";
 import { DEFAULT_MENU, SETTINGS } from "../data/menuData";
 
-const ORDER_NO_KEY = "pos_order_number";
-const ORDER_DATE_KEY = "pos_order_date";
+const ORDER_NO_KEY = "pos_weekly_order_number";
+const ORDER_WEEK_KEY = "pos_order_week_key";
 const TX_KEY = "transactions";
 const CUSTOM_MENU_KEY = "pos_custom_menu_items";
 const DELETED_ITEM_IDS_KEY = "pos_deleted_item_ids";
+const TX_SEQ_KEY = "pos_tx_seq"; // never reset
 
-const getTodayKey = () => new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+// ✅ Week key that changes on SUNDAY (week starts Sunday)
+const getWeekKey = (date = new Date()) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+
+  // Sunday of current week
+  const start = new Date(d);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(d.getDate() - d.getDay()); // d.getDay(): Sun=0
+
+  // First Sunday of the year
+  const firstSunday = new Date(year, 0, 1);
+  firstSunday.setHours(0, 0, 0, 0);
+  firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
+
+  const weekNo = Math.floor((start - firstSunday) / 86400000 / 7) + 1;
+  const pad = String(weekNo).padStart(2, "0");
+
+  return `${year}-WS${pad}`; // WS = Week starting Sunday
+};
 
 const safeParseArray = (value, fallback = []) => {
   try {
@@ -72,40 +92,54 @@ export const POSProvider = ({ children }) => {
   });
 
   const [currentOrder, setCurrentOrder] = useState([]);
-  const [activeCategory, setActiveCategory] = useState("subs");
+  const [activeCategory, setActiveCategory] = useState(""); // ✅ Changed from "subs" to ""
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [discount, setDiscount] = useState(0);
 
   // ---------------------------
-  // ✅ Daily-reset Order Number
+  // ✅ Weekly-reset Order Number (resets every Sunday)
   // ---------------------------
   const [orderNumber, setOrderNumber] = useState(() => {
-    const today = getTodayKey();
-    const savedDate = localStorage.getItem(ORDER_DATE_KEY);
+    const weekKey = getWeekKey();
+    const savedWeek = localStorage.getItem(ORDER_WEEK_KEY);
     const savedOrder = Number(localStorage.getItem(ORDER_NO_KEY));
 
-    if (savedDate === today && Number.isFinite(savedOrder) && savedOrder > 0) {
+    if (savedWeek === weekKey && Number.isFinite(savedOrder) && savedOrder > 0) {
       return savedOrder;
     }
 
-    localStorage.setItem(ORDER_DATE_KEY, today);
+    localStorage.setItem(ORDER_WEEK_KEY, weekKey);
     localStorage.setItem(ORDER_NO_KEY, "1");
     return 1;
   });
+
+  // ---------------------------
+  // ✅ Transaction sequence (never resets)
+  // ---------------------------
+  const [txSeq, setTxSeq] = useState(() => {
+    const saved = Number(localStorage.getItem(TX_SEQ_KEY));
+    if (Number.isFinite(saved) && saved > 0) return saved;
+    localStorage.setItem(TX_SEQ_KEY, "1");
+    return 1;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(TX_SEQ_KEY, String(txSeq));
+  }, [txSeq]);
 
   useEffect(() => {
     localStorage.setItem(ORDER_NO_KEY, String(orderNumber));
   }, [orderNumber]);
 
-  // also handle "new day" while app is open
+  // also handle "new week" while app is open
   useEffect(() => {
     const interval = setInterval(() => {
-      const today = getTodayKey();
-      const savedDate = localStorage.getItem(ORDER_DATE_KEY);
+      const wk = getWeekKey();
+      const savedWeek = localStorage.getItem(ORDER_WEEK_KEY);
 
-      if (savedDate !== today) {
-        localStorage.setItem(ORDER_DATE_KEY, today);
+      if (savedWeek !== wk) {
+        localStorage.setItem(ORDER_WEEK_KEY, wk);
         localStorage.setItem(ORDER_NO_KEY, "1");
         setOrderNumber(1);
       }
@@ -240,6 +274,7 @@ export const POSProvider = ({ children }) => {
       if (menu[category]?.length === 1 && activeCategory === category) {
         const cats = Object.keys(menu).filter((c) => (menu[c] || []).length > 0);
         if (cats.length > 0) setActiveCategory(cats[0]);
+        else setActiveCategory(""); // ✅ Set to empty if no categories left
       }
 
       return true;
@@ -277,6 +312,7 @@ export const POSProvider = ({ children }) => {
           (cat) => cat !== category && (menu[cat] || []).length > 0
         );
         if (categories.length > 0) setActiveCategory(categories[0]);
+        else setActiveCategory(""); // ✅ Set to empty if no categories left
       }
 
       return true;
@@ -429,9 +465,12 @@ export const POSProvider = ({ children }) => {
     const itemsForReceipt = toReceiptItems(currentOrder);
     const { subtotal, tax, discountAmount, total, totalQty } = computeTotals(itemsForReceipt, discount);
 
+    const dateKey = new Date().toISOString().slice(0, 10);
+
     const transaction = {
-      id: `ORD-${orderNumber}`,
-      orderNumber,
+      id: `ORD-${dateKey}-${txSeq}`, // ✅ never reset
+      txSeq,
+      orderNumber, // ✅ weekly reset
       items: itemsForReceipt,
       paymentMethod,
       discount,
@@ -447,10 +486,13 @@ export const POSProvider = ({ children }) => {
 
     persistTransaction(transaction);
 
-    setOrderNumber((prev) => prev + 1);
+    setTxSeq((prev) => prev + 1);        // ✅ increment forever
+    setOrderNumber((prev) => prev + 1);  // ✅ increment weekly
     clearOrder();
+
     return transaction;
   }, [
+    txSeq,
     orderNumber,
     currentOrder,
     paymentMethod,
@@ -472,8 +514,6 @@ export const POSProvider = ({ children }) => {
 
       const itemsForReceipt = toReceiptItems(selectedCents);
 
-      // Best practice for MVP:
-      // Do NOT apply global % discount to split bills until proportional discount is implemented
       const splitDiscount = 0;
 
       const { subtotal, tax, discountAmount, total, totalQty } = computeTotals(
@@ -481,8 +521,11 @@ export const POSProvider = ({ children }) => {
         splitDiscount
       );
 
+      const dateKey = new Date().toISOString().slice(0, 10);
+
       const transaction = {
-        id: `ORD-${orderNumber}-SPLIT-${Date.now()}`,
+        id: `ORD-${dateKey}-${txSeq}-SPLIT`,
+        txSeq,
         orderNumber,
         items: itemsForReceipt,
         paymentMethod,
@@ -500,6 +543,8 @@ export const POSProvider = ({ children }) => {
 
       persistTransaction(transaction);
 
+      setTxSeq((prev) => prev + 1); // ✅ increment forever
+
       // remove only paid items from cart
       setCurrentOrder((prev) => {
         const remaining = (prev || []).filter((it) => !ids.has(it.orderId));
@@ -515,7 +560,15 @@ export const POSProvider = ({ children }) => {
 
       return transaction;
     },
-    [currentOrder, orderNumber, paymentMethod, toReceiptItems, computeTotals, persistTransaction]
+    [
+      txSeq,
+      currentOrder,
+      orderNumber,
+      paymentMethod,
+      toReceiptItems,
+      computeTotals,
+      persistTransaction,
+    ]
   );
 
   const getFilteredItems = useCallback(() => {
@@ -542,6 +595,7 @@ export const POSProvider = ({ children }) => {
       discount,
       setDiscount,
       orderNumber,
+      txSeq,
       addToOrder,
       updateQuantity,
       removeFromOrder,
@@ -564,6 +618,7 @@ export const POSProvider = ({ children }) => {
       paymentMethod,
       discount,
       orderNumber,
+      txSeq,
       addToOrder,
       updateQuantity,
       removeFromOrder,

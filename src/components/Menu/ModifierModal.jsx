@@ -3,6 +3,8 @@ import { X, ChevronLeft } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import { SETTINGS, SUB_MODIFIERS, DRINK_MODIFIERS } from "../../data/menuData";
+import {  useEffect, useRef } from "react";
+
 
 const ModifierModal = ({ item, onClose }) => {
   const { theme } = useTheme();
@@ -109,6 +111,18 @@ const ModifierModal = ({ item, onClose }) => {
       setStep(hasSizes ? 2 : 2);
     }
   };
+const autoAddedRef = useRef(false);
+
+useEffect(() => {
+  if (hasModifiers || hasSizes) return;
+
+  // ✅ guard against StrictMode double-invoke in dev
+  if (autoAddedRef.current) return;
+  autoAddedRef.current = true;
+
+  addToOrder(item, null, []);
+  onClose();
+}, [hasModifiers, hasSizes, addToOrder, item, onClose]);
 
   // Navigation
   const handleNext = () => {
@@ -512,11 +526,7 @@ const ModifierModal = ({ item, onClose }) => {
   };
 
   // If no modifiers and no sizes, add immediately
-  if (!hasModifiers && !hasSizes) {
-    addToOrder(item, null, []);
-    onClose();
-    return null;
-  }
+  
 
   return (
     <div style={styles.overlay} onClick={onClose} className="modifier-modal-overlay">

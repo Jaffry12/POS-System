@@ -745,8 +745,10 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
                 <option value="">Choose category...</option>
                 <option value="subs">Subs</option>
                 <option value="drinks">Drinks</option>
+                <option value="hots">Hots</option>
+                <option value="saladrolls">Salad Rolls</option>
                 {existingCategories
-                  .filter(cat => !['subs', 'coffee', 'fruittea', 'milktea'].includes(cat.id))
+                  .filter(cat => !['subs', 'drinks', 'hots', 'saladrolls', 'coffee', 'fruittea', 'milktea'].includes(cat.id))
                   .map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.name}
