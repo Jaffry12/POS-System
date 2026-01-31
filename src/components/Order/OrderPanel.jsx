@@ -1,22 +1,52 @@
-import { useState } from "react";
+// src/components/Order/OrderPanel.jsx
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import OrderItem from "./OrderItem";
 import OrderSummary from "./OrderSummary";
 import PaymentMethods from "./PaymentMethods";
 import PaymentModal from "../Payment/PaymentModal";
-import { ShoppingCart, X } from "lucide-react";
+import { ShoppingCart, X, Archive } from "lucide-react";
 
 const OrderPanel = ({ onClose = () => {} }) => {
   const { theme } = useTheme();
-  const { currentOrder } = usePOS();
+  const { currentOrder, holdOrder } = usePOS();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [modalKey, setModalKey] = useState(0);
+
+  // ✅ measure footer height so list never hides under it
+  const footerRef = useRef(null);
+  const [footerHeight, setFooterHeight] = useState(180);
+
+  useLayoutEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const h = Math.ceil(el.getBoundingClientRect().height || 0);
+      // Add a little buffer + safe-area
+      setFooterHeight(h + 16);
+    };
+
+    update();
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, [currentOrder.length]);
 
   const styles = {
     panel: {
       width: "400px",
-      height: "100vh",
+      height: "100dvh",
       background: theme.cardBg,
       borderLeft: `1px solid ${theme.border}`,
       display: "flex",
@@ -24,16 +54,20 @@ const OrderPanel = ({ onClose = () => {} }) => {
       position: "fixed",
       right: 0,
       top: 0,
-      boxSizing: "border-box", // ✅ important so safe-area padding doesn't clip content
+      boxSizing: "border-box",
+
+      /* ✅ keep clean layout */
+      overflow: "hidden",
     },
 
-    // Mobile header with close button
     mobileHeader: {
       display: "none",
       padding: "16px",
       borderBottom: `2px solid ${theme.border}`,
       alignItems: "center",
       justifyContent: "space-between",
+      flexShrink: 0,
+      background: theme.cardBg,
     },
     mobileHeaderTitle: {
       fontSize: "18px",
@@ -59,6 +93,8 @@ const OrderPanel = ({ onClose = () => {} }) => {
     header: {
       padding: "20px",
       borderBottom: `1px solid ${theme.border}`,
+      flexShrink: 0,
+      background: theme.cardBg,
     },
     headerTop: {
       display: "flex",
@@ -75,13 +111,19 @@ const OrderPanel = ({ onClose = () => {} }) => {
       fontSize: "12px",
       color: theme.textSecondary,
     },
+
     orderList: {
       flex: 1,
       overflowY: "auto",
       padding: "16px",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
+      minHeight: 0,
+
+      /* ✅ CRITICAL: never hide last item behind footer */
+      paddingBottom: `calc(${footerHeight}px + env(safe-area-inset-bottom, 0px))`,
     },
+
     emptyState: {
       textAlign: "center",
       padding: "40px 20px",
@@ -100,13 +142,50 @@ const OrderPanel = ({ onClose = () => {} }) => {
     emptyText: {
       fontSize: "14px",
     },
+
     footer: {
       padding: "16px",
       borderTop: `1px solid ${theme.border}`,
       flexShrink: 0,
+      background: theme.cardBg,
+
+      /* ✅ ALWAYS visible */
+      position: "sticky",
+      bottom: 0,
+      zIndex: 50,
+
+      /* ✅ safe area so buttons never go under device bar */
+      paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))",
+
+      boxShadow: "0 -6px 18px rgba(0,0,0,0.10)",
     },
+
+    buttonContainer: {
+      display: "flex",
+      gap: "10px",
+      marginTop: "12px",
+    },
+
+    holdButton: {
+      flex: "0 0 auto",
+      padding: "16px",
+      border: `2px solid ${theme.warning}`,
+      borderRadius: "10px",
+      background: "transparent",
+      color: theme.warning,
+      fontSize: "16px",
+      fontWeight: "600",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+      opacity: currentOrder.length === 0 ? 0.6 : 1,
+    },
+
     placeOrderButton: {
-      width: "100%",
+      flex: 1,
       padding: "16px",
       border: "none",
       borderRadius: "10px",
@@ -116,7 +195,6 @@ const OrderPanel = ({ onClose = () => {} }) => {
       fontWeight: "600",
       cursor: "pointer",
       transition: "all 0.2s ease",
-      marginTop: "12px",
       opacity: currentOrder.length === 0 ? 0.6 : 1,
     },
   };
@@ -136,65 +214,38 @@ const OrderPanel = ({ onClose = () => {} }) => {
       alert("Please add items to order");
       return;
     }
-
     setModalKey((prev) => prev + 1);
     setShowPaymentModal(true);
   };
 
-  const handleCloseModal = () => {
-    setShowPaymentModal(false);
+  const handleHoldOrder = () => {
+    if (currentOrder.length === 0) {
+      alert("Please add items to hold");
+      return;
+    }
+
+    const result = holdOrder();
+    if (result) console.log("Order held successfully!");
   };
+
+  const handleCloseModal = () => setShowPaymentModal(false);
 
   const totalItems = currentOrder.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
       <style>{`
-        /* Hide scrollbar */
-        .order-panel-list::-webkit-scrollbar {
-          display: none;
-        }
+        .order-panel-list::-webkit-scrollbar { display: none; }
 
-        /* Desktop (default - unchanged) */
-        .order-panel {
-          width: 400px;
-          height: 100vh;
-        }
+        .order-panel { width: 400px; height: 100dvh; }
+        .order-mobile-header { display: none; }
+        .order-desktop-header { display: block; }
 
-        .order-mobile-header {
-          display: none;
-        }
-
-        .order-desktop-header {
-          display: block;
-        }
-
-        /* Tablet: Reduce width */
         @media (max-width: 1280px) {
-          .order-panel {
-            width: 350px !important;
-          }
+          .order-panel { width: 350px !important; }
         }
 
-        /* ✅ TABLET SAFE AREA FIX (ONLY TABLET) */
-        @media (min-width: 1025px) and (max-width: 1280px) {
-          .order-panel {
-            /* ensures bottom UI (tablet browser bar / safe-area) doesn't hide footer button */
-            padding-bottom: env(safe-area-inset-bottom) !important;
-            box-sizing: border-box !important;
-          }
-
-          .order-panel-footer {
-            padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-          }
-
-          /* optional: keeps last items visible above the bigger footer */
-          .order-panel-list {
-            padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-          }
-        }
-
-        /* Mobile: Centered modal styling */
+        /* Mobile sheet mode */
         @media (max-width: 1024px) {
           .order-panel {
             width: 100% !important;
@@ -207,79 +258,67 @@ const OrderPanel = ({ onClose = () => {} }) => {
             top: auto !important;
           }
 
-          .order-mobile-header {
-            display: flex !important;
-          }
+          .order-mobile-header { display: flex !important; }
+          .order-desktop-header { display: none !important; }
 
-          .order-desktop-header {
-            display: none !important;
+          .order-panel-footer {
+            position: sticky !important;
+            bottom: 0 !important;
+            z-index: 50 !important;
           }
 
           .order-panel-list {
             max-height: 40vh !important;
             overflow-y: auto !important;
           }
-
-          .order-panel-footer {
-            padding: 14px !important;
-          }
         }
 
-        /* Small Mobile: More compact */
+        /* Small Mobile */
         @media (max-width: 768px) {
-          .order-mobile-header {
-            padding: 14px !important;
-          }
-
-          .order-mobile-header-title {
-            font-size: 16px !important;
-          }
+          .order-mobile-header { padding: 14px !important; }
+          .order-mobile-header-title { font-size: 16px !important; }
 
           .order-panel-list {
             padding: 12px !important;
             max-height: 35vh !important;
           }
 
-          .order-panel-footer {
-            padding: 12px !important;
+          .order-panel-footer { padding: 12px !important; }
+
+          .order-button-container { 
+            flex-direction: column !important;
+            gap: 8px !important;
           }
 
-          .order-place-button {
-            padding: 14px !important;
+          .order-hold-button, .order-place-button { 
+            padding: 14px !important; 
             font-size: 15px !important;
+            flex: 1 !important;
           }
         }
 
         @media (max-width: 480px) {
-          .order-mobile-header {
-            padding: 12px !important;
-          }
+          .order-mobile-header { padding: 12px !important; }
+          .order-mobile-header-title { font-size: 15px !important; }
 
-          .order-mobile-header-title {
-            font-size: 15px !important;
-          }
+          .order-empty-state { padding: 30px 16px !important; }
+          .order-empty-icon { width: 48px !important; height: 48px !important; }
+          .order-empty-text { font-size: 13px !important; }
 
-          .order-empty-state {
-            padding: 30px 16px !important;
-          }
+          .order-panel-list { max-height: 32vh !important; }
+        }
 
-          .order-empty-icon {
-            width: 48px !important;
-            height: 48px !important;
-          }
+        .order-hold-button:hover:not(:disabled) {
+          background: rgba(251, 191, 36, 0.1) !important;
+          transform: translateY(-1px);
+        }
 
-          .order-empty-text {
-            font-size: 13px !important;
-          }
-          
-          .order-panel-list {
-            max-height: 32vh !important;
-          }
+        .order-place-button:hover:not(:disabled) {
+          opacity: 0.9 !important;
         }
       `}</style>
 
       <div className="order-panel" style={styles.panel}>
-        {/* Mobile Header with Close Button */}
         <div className="order-mobile-header" style={styles.mobileHeader}>
           <div
             className="order-mobile-header-title"
@@ -293,7 +332,6 @@ const OrderPanel = ({ onClose = () => {} }) => {
           </button>
         </div>
 
-        {/* Desktop Header */}
         <div className="order-desktop-header" style={styles.header}>
           <div style={styles.headerTop}>
             <div style={styles.title}>New Order Bill</div>
@@ -301,7 +339,6 @@ const OrderPanel = ({ onClose = () => {} }) => {
           <div style={styles.date}>{getCurrentDate()}</div>
         </div>
 
-        {/* Order List */}
         <div className="order-panel-list" style={styles.orderList}>
           {currentOrder.length === 0 ? (
             <div className="order-empty-state" style={styles.emptyState}>
@@ -319,27 +356,36 @@ const OrderPanel = ({ onClose = () => {} }) => {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="order-panel-footer" style={styles.footer}>
+        <div
+          ref={footerRef}
+          className="order-panel-footer"
+          style={styles.footer}
+        >
           <OrderSummary />
           <PaymentMethods />
-          <button
-            className="order-place-button"
-            style={styles.placeOrderButton}
-            onClick={handlePlaceOrder}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.opacity =
-                currentOrder.length === 0 ? "0.6" : "1")
-            }
-            disabled={currentOrder.length === 0}
-          >
-            Place Order
-          </button>
+
+          <div className="order-button-container" style={styles.buttonContainer}>
+            <button
+              className="order-hold-button"
+              style={styles.holdButton}
+              onClick={handleHoldOrder}
+              disabled={currentOrder.length === 0}
+              title="Hold this order"
+            >
+              <Archive size={18} />
+            </button>
+            <button
+              className="order-place-button"
+              style={styles.placeOrderButton}
+              onClick={handlePlaceOrder}
+              disabled={currentOrder.length === 0}
+            >
+              Place Order
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Payment Modal */}
       <PaymentModal
         key={modalKey}
         isOpen={showPaymentModal}

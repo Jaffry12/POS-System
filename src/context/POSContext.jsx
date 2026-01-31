@@ -1,4 +1,4 @@
-// src/context/POSContext.jsx
+// src/contexts/POSContext.jsx
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { POSContext } from "./createPOSContext";
 import { DEFAULT_MENU, SETTINGS } from "../data/menuData";
@@ -8,19 +8,18 @@ const ORDER_WEEK_KEY = "pos_order_week_key";
 const TX_KEY = "transactions";
 const CUSTOM_MENU_KEY = "pos_custom_menu_items";
 const DELETED_ITEM_IDS_KEY = "pos_deleted_item_ids";
-const TX_SEQ_KEY = "pos_tx_seq"; // never reset
+const TX_SEQ_KEY = "pos_tx_seq";
+const HELD_ORDERS_KEY = "pos_held_orders";
 
 // ✅ Week key that changes on SUNDAY (week starts Sunday)
 const getWeekKey = (date = new Date()) => {
   const d = new Date(date);
   const year = d.getFullYear();
 
-  // Sunday of current week
   const start = new Date(d);
   start.setHours(0, 0, 0, 0);
-  start.setDate(d.getDate() - d.getDay()); // d.getDay(): Sun=0
+  start.setDate(d.getDate() - d.getDay());
 
-  // First Sunday of the year
   const firstSunday = new Date(year, 0, 1);
   firstSunday.setHours(0, 0, 0, 0);
   firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
@@ -28,7 +27,7 @@ const getWeekKey = (date = new Date()) => {
   const weekNo = Math.floor((start - firstSunday) / 86400000 / 7) + 1;
   const pad = String(weekNo).padStart(2, "0");
 
-  return `${year}-WS${pad}`; // WS = Week starting Sunday
+  return `${year}-WS${pad}`;
 };
 
 const safeParseArray = (value, fallback = []) => {
@@ -49,9 +48,6 @@ const deepCloneMenu = (menuObj) => {
 };
 
 export const POSProvider = ({ children }) => {
-  // ---------------------------
-  // Menu init: DEFAULT + custom overrides - deleted ids removed
-  // ---------------------------
   const [menu, setMenu] = useState(() => {
     const deletedIds = safeParseArray(localStorage.getItem(DELETED_ITEM_IDS_KEY), []);
     const storedCustom = localStorage.getItem(CUSTOM_MENU_KEY);
@@ -65,7 +61,6 @@ export const POSProvider = ({ children }) => {
       });
     };
 
-    // apply custom items
     customItems.forEach((item) => {
       if (!item?.id) return;
       if (deletedIds.includes(item.id)) return;
@@ -76,12 +71,10 @@ export const POSProvider = ({ children }) => {
       merged[item.category].push(item);
     });
 
-    // remove deleted ids from DEFAULT too
     Object.keys(merged).forEach((cat) => {
       merged[cat] = (merged[cat] || []).filter((it) => !deletedIds.includes(it.id));
     });
 
-    // cleanup empty custom categories
     Object.keys(merged).forEach((cat) => {
       if (!DEFAULT_MENU[cat] && (merged[cat] || []).length === 0) {
         delete merged[cat];
@@ -92,14 +85,23 @@ export const POSProvider = ({ children }) => {
   });
 
   const [currentOrder, setCurrentOrder] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(""); // ✅ Changed from "subs" to ""
+  const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [discount, setDiscount] = useState(0);
 
-  // ---------------------------
-  // ✅ Weekly-reset Order Number (resets every Sunday)
-  // ---------------------------
+  const [heldOrders, setHeldOrders] = useState(() => {
+    return safeParseArray(localStorage.getItem(HELD_ORDERS_KEY), []);
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(HELD_ORDERS_KEY, JSON.stringify(heldOrders));
+    } catch (error) {
+      console.error("Failed to save held orders:", error);
+    }
+  }, [heldOrders]);
+
   const [orderNumber, setOrderNumber] = useState(() => {
     const weekKey = getWeekKey();
     const savedWeek = localStorage.getItem(ORDER_WEEK_KEY);
@@ -114,9 +116,6 @@ export const POSProvider = ({ children }) => {
     return 1;
   });
 
-  // ---------------------------
-  // ✅ Transaction sequence (never resets)
-  // ---------------------------
   const [txSeq, setTxSeq] = useState(() => {
     const saved = Number(localStorage.getItem(TX_SEQ_KEY));
     if (Number.isFinite(saved) && saved > 0) return saved;
@@ -132,7 +131,6 @@ export const POSProvider = ({ children }) => {
     localStorage.setItem(ORDER_NO_KEY, String(orderNumber));
   }, [orderNumber]);
 
-  // also handle "new week" while app is open
   useEffect(() => {
     const interval = setInterval(() => {
       const wk = getWeekKey();
@@ -148,9 +146,6 @@ export const POSProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // ---------------------------
-  // Deleted IDs helpers (permanent delete) - ✅ memoized for lint
-  // ---------------------------
   const getDeletedIds = useCallback(() => {
     return safeParseArray(localStorage.getItem(DELETED_ITEM_IDS_KEY), []);
   }, []);
@@ -175,18 +170,13 @@ export const POSProvider = ({ children }) => {
     [getDeletedIds]
   );
 
-  // ---------------------------
-  // Menu Management Functions
-  // ---------------------------
   const addMenuItem = useCallback(
     (newItem) => {
       setMenu((prev) => {
         const updated = deepCloneMenu(prev);
 
-        // if it was deleted before, undelete it
         removeDeletedId(newItem.id);
 
-        // remove id from all categories (avoid duplicates / category moves)
         Object.keys(updated).forEach((cat) => {
           updated[cat] = (updated[cat] || []).filter((it) => it.id !== newItem.id);
         });
@@ -194,7 +184,6 @@ export const POSProvider = ({ children }) => {
         if (!updated[newItem.category]) updated[newItem.category] = [];
         updated[newItem.category].push(newItem);
 
-        // save to localStorage (custom items)
         const customItems = safeParseArray(localStorage.getItem(CUSTOM_MENU_KEY), []);
         const filtered = customItems.filter((it) => it.id !== newItem.id);
         filtered.push(newItem);
@@ -213,16 +202,13 @@ export const POSProvider = ({ children }) => {
 
         removeDeletedId(updatedItem.id);
 
-        // remove from ALL categories
         Object.keys(next).forEach((cat) => {
           next[cat] = (next[cat] || []).filter((it) => it.id !== updatedItem.id);
         });
 
-        // add to new category
         if (!next[updatedItem.category]) next[updatedItem.category] = [];
         next[updatedItem.category].push(updatedItem);
 
-        // remove empty custom category
         if (
           originalCategory &&
           next[originalCategory] &&
@@ -232,7 +218,6 @@ export const POSProvider = ({ children }) => {
           delete next[originalCategory];
         }
 
-        // persist
         const customItems = safeParseArray(localStorage.getItem(CUSTOM_MENU_KEY), []);
         const filtered = customItems.filter((it) => it.id !== updatedItem.id);
         filtered.push(updatedItem);
@@ -249,20 +234,16 @@ export const POSProvider = ({ children }) => {
       setMenu((prev) => {
         const updated = deepCloneMenu(prev);
 
-        // remove from menu
         if (updated[category]) {
           updated[category] = updated[category].filter((it) => it.id !== itemId);
 
-          // remove empty custom category
           if (updated[category].length === 0 && !DEFAULT_MENU[category]) {
             delete updated[category];
           }
         }
 
-        // mark as deleted permanently
         addDeletedId(itemId);
 
-        // remove from custom storage too
         const customItems = safeParseArray(localStorage.getItem(CUSTOM_MENU_KEY), []);
         const nextCustom = customItems.filter((it) => it.id !== itemId);
         localStorage.setItem(CUSTOM_MENU_KEY, JSON.stringify(nextCustom));
@@ -270,11 +251,10 @@ export const POSProvider = ({ children }) => {
         return updated;
       });
 
-      // if active category became empty, switch
       if (menu[category]?.length === 1 && activeCategory === category) {
         const cats = Object.keys(menu).filter((c) => (menu[c] || []).length > 0);
         if (cats.length > 0) setActiveCategory(cats[0]);
-        else setActiveCategory(""); // ✅ Set to empty if no categories left
+        else setActiveCategory("");
       }
 
       return true;
@@ -293,12 +273,10 @@ export const POSProvider = ({ children }) => {
         const updated = deepCloneMenu(prev);
         const itemsToDelete = updated[category] || [];
 
-        // mark all item ids as deleted permanently
         itemsToDelete.forEach((it) => addDeletedId(it.id));
 
         delete updated[category];
 
-        // remove these from custom storage
         const customItems = safeParseArray(localStorage.getItem(CUSTOM_MENU_KEY), []);
         const idsToDelete = new Set(itemsToDelete.map((it) => it.id));
         const nextCustom = customItems.filter((it) => !idsToDelete.has(it.id));
@@ -312,7 +290,7 @@ export const POSProvider = ({ children }) => {
           (cat) => cat !== category && (menu[cat] || []).length > 0
         );
         if (categories.length > 0) setActiveCategory(categories[0]);
-        else setActiveCategory(""); // ✅ Set to empty if no categories left
+        else setActiveCategory("");
       }
 
       return true;
@@ -320,9 +298,6 @@ export const POSProvider = ({ children }) => {
     [menu, activeCategory, addDeletedId]
   );
 
-  // ---------------------------
-  // helpers
-  // ---------------------------
   const normalizeModifiers = useCallback((modifiers = []) => {
     return (modifiers || [])
       .map((g) => ({
@@ -384,9 +359,6 @@ export const POSProvider = ({ children }) => {
     localStorage.setItem(TX_KEY, JSON.stringify(transactions));
   }, []);
 
-  // ---------------------------
-  // actions
-  // ---------------------------
   const addToOrder = useCallback(
     (item, size = null, modifiers = []) => {
       const basePrice = item.prices
@@ -424,7 +396,7 @@ export const POSProvider = ({ children }) => {
           modifiers: normalizedMods,
           modifiersTotal,
           finalUnitPrice,
-          price: finalUnitPrice, // ✅ cents
+          price: finalUnitPrice,
           quantity: 1,
           orderId: `${item.id}-${size || "nosizes"}-${Date.now()}`,
           signature,
@@ -460,7 +432,6 @@ export const POSProvider = ({ children }) => {
     setDiscount(0);
   }, []);
 
-  // ✅ FULL payment
   const completePayment = useCallback(() => {
     const itemsForReceipt = toReceiptItems(currentOrder);
     const { subtotal, tax, discountAmount, total, totalQty } = computeTotals(itemsForReceipt, discount);
@@ -468,9 +439,9 @@ export const POSProvider = ({ children }) => {
     const dateKey = new Date().toISOString().slice(0, 10);
 
     const transaction = {
-      id: `ORD-${dateKey}-${txSeq}`, // ✅ never reset
+      id: `ORD-${dateKey}-${txSeq}`,
       txSeq,
-      orderNumber, // ✅ weekly reset
+      orderNumber,
       items: itemsForReceipt,
       paymentMethod,
       discount,
@@ -486,8 +457,8 @@ export const POSProvider = ({ children }) => {
 
     persistTransaction(transaction);
 
-    setTxSeq((prev) => prev + 1);        // ✅ increment forever
-    setOrderNumber((prev) => prev + 1);  // ✅ increment weekly
+    setTxSeq((prev) => prev + 1);
+    setOrderNumber((prev) => prev + 1);
     clearOrder();
 
     return transaction;
@@ -503,7 +474,6 @@ export const POSProvider = ({ children }) => {
     persistTransaction,
   ]);
 
-  // ✅ PARTIAL payment (Split by Item)
   const completePartialPayment = useCallback(
     (selectedOrderIds = []) => {
       const ids = new Set(selectedOrderIds || []);
@@ -543,13 +513,11 @@ export const POSProvider = ({ children }) => {
 
       persistTransaction(transaction);
 
-      setTxSeq((prev) => prev + 1); // ✅ increment forever
+      setTxSeq((prev) => prev + 1);
 
-      // remove only paid items from cart
       setCurrentOrder((prev) => {
         const remaining = (prev || []).filter((it) => !ids.has(it.orderId));
 
-        // if everything is paid, move to next order number + reset discount
         if (remaining.length === 0) {
           setDiscount(0);
           setOrderNumber((n) => n + 1);
@@ -570,6 +538,45 @@ export const POSProvider = ({ children }) => {
       persistTransaction,
     ]
   );
+
+  // ✅ Updated: No staff name prompt, auto-generate hold ID
+  const holdOrder = useCallback(() => {
+    if (!currentOrder || currentOrder.length === 0) {
+      return null;
+    }
+
+    const holdId = `HOLD-${Date.now()}`;
+    const heldOrder = {
+      id: holdId,
+      items: [...currentOrder],
+      discount: discount,
+      paymentMethod: paymentMethod,
+      timestamp: Date.now(),
+      orderNumber: orderNumber,
+    };
+
+    setHeldOrders((prev) => [...prev, heldOrder]);
+    clearOrder();
+
+    return heldOrder;
+  }, [currentOrder, discount, paymentMethod, orderNumber, clearOrder]);
+
+  const unholdOrder = useCallback((holdId) => {
+    setHeldOrders((prev) => {
+      const order = prev.find((o) => o.id === holdId);
+      if (!order) return prev;
+
+      setCurrentOrder(order.items);
+      setDiscount(order.discount);
+      setPaymentMethod(order.paymentMethod);
+
+      return prev.filter((o) => o.id !== holdId);
+    });
+  }, []);
+
+  const deleteHeldOrder = useCallback((holdId) => {
+    setHeldOrders((prev) => prev.filter((o) => o.id !== holdId));
+  }, []);
 
   const getFilteredItems = useCallback(() => {
     let items = menu[activeCategory] || [];
@@ -604,11 +611,15 @@ export const POSProvider = ({ children }) => {
       completePartialPayment,
       getFilteredItems,
 
-      // menu mgmt
       addMenuItem,
       updateMenuItem,
       deleteMenuItem,
       deleteCategory,
+
+      heldOrders,
+      holdOrder,
+      unholdOrder,
+      deleteHeldOrder,
     }),
     [
       menu,
@@ -630,6 +641,10 @@ export const POSProvider = ({ children }) => {
       updateMenuItem,
       deleteMenuItem,
       deleteCategory,
+      heldOrders,
+      holdOrder,
+      unholdOrder,
+      deleteHeldOrder,
     ]
   );
 

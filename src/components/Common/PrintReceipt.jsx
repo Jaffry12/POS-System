@@ -87,90 +87,173 @@ const PrintReceipt = ({ transaction, onClose }) => {
     * { box-sizing: border-box; }
 
     /* -------------------------
-       CENTERING (APP PREVIEW)
+       FIXED SIZE RECEIPT
     -------------------------- */
     @media screen {
-      body { background: transparent; }
+      body { background: transparent; margin: 0; padding: 0; }
 
-      .receipt-container{
+      .receipt-container {
         width: 100%;
+        height: 85vh;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         padding: 20px 0;
+        overflow: hidden;
       }
 
-      .receipt-wrap{
-        margin: 0 auto;
-      }
-
-      /* Optional scrolling inside app preview */
-      .receipt-container {
-        max-height: 85vh;
-        overflow-y: auto;
+      .receipt-wrap {
+        width: 80mm;
+        height: 75vh;
+        max-height: 750px;
         display: flex;
         flex-direction: column;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+        padding: 10px;
+        font-family: "Courier New", monospace;
+        color: #000;
+        background: #fff;
+        font-size: 12px;
+        line-height: 1.35;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
-      .receipt-container::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
-      .items-scroll {
-        max-height: 40vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
+      /* ✅ Fixed header - no scroll */
+      .header {
+        flex-shrink: 0;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed #000;
+        margin-bottom: 8px;
       }
-      .items-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+      .order-block {
+        flex-shrink: 0;
+        font-size: 11px;
+        margin: 5px 0 6px 0;
+      }
+
+      .table-head {
+        flex-shrink: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
+        column-gap: 4px;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+
+      /* ✅ SCROLLABLE ITEMS ONLY */
+      /* ✅ SCROLLABLE BUT NO VISIBLE SCROLLBAR */
+.items-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  margin-bottom: 8px;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE / Edge */
+  -ms-overflow-style: none;
+}
+
+/* Chrome / Safari / Edge (WebKit) */
+.items-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+
+      .items-scroll::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-radius: 3px;
+      }
+
+      .items-scroll::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+      }
+
+      .items-scroll::-webkit-scrollbar-thumb:hover {
+        background: #999;
+      }
+
+      /* ✅ Fixed footer - no scroll */
+      .qty-line {
+        flex-shrink: 0;
+        text-align: right;
+        font-weight: 800;
+        font-size: 12px;
+        margin-top: 4px;
+      }
+
+      .totals {
+        flex-shrink: 0;
+        margin-top: 6px;
+        border-top: 1px dashed #000;
+        padding-top: 6px;
+      }
     }
 
     /* -------------------------
        PRINT SETTINGS
     -------------------------- */
-    @page { size: 80mm auto; margin: 0; }
+   @page {
+  size: A4;
+  margin: 0;
+}
 
-    @media print {
-      html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-        width: 100% !important;
-      }
 
-      /* ✅ Center receipt on print preview "page" */
-      body{
-        display: flex !important;
-        justify-content: center !important;
-        align-items: flex-start !important;
-      }
 
-      .receipt-wrap{
-        margin: 0 auto !important;
-      }
+   @media print {
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
 
-      .no-print, .buttons { display: none !important; }
-      .items-scroll { max-height: none !important; overflow: visible !important; }
-    }
+  body {
+    display: flex !important;
+    justify-content: center !important;   /* horizontal */
+    align-items: center !important;       /* ✅ vertical */
+  }
 
-    .receipt-wrap {
-      width: 80mm;
-      padding: 10px;
-      font-family: "Courier New", monospace;
-      color: #000;
-      background: #fff;
-      font-size: 12px;
-      line-height: 1.35;
-    }
+  .receipt-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
+  .receipt-wrap {
+    width: 80mm;
+    margin: 0;
+    box-shadow: none !important;
+  }
+
+  .buttons,
+  .no-print {
+    display: none !important;
+  }
+
+  .items-scroll {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+}
+
+
+
+    /* -------------------------
+       COMMON STYLES
+    -------------------------- */
     .center { text-align: center; }
     .right { text-align: right; }
-
-    .header {
-      padding-bottom: 8px;
-      border-bottom: 1px dashed #000;
-      margin-bottom: 8px;
-    }
 
     .shop-name {
       font-size: 18px;
@@ -193,8 +276,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
       letter-spacing: 0.5px;
     }
 
-    .order-block { font-size: 11px; margin: 5px 0 6px 0; }
-
     .row {
       display: flex;
       justify-content: space-between;
@@ -206,15 +287,12 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
     .divider { border-top: 1px dashed #000; margin: 6px 0; }
 
-    .table-head {
-      display: grid;
-      grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
-      column-gap: 4px;
-      align-items: center;
-      font-size: 11px;
-      font-weight: 800;
-      margin-bottom: 4px;
-    }
+    .th-product { text-align: left; }
+    .th-price { text-align: center; }
+    .th-qty { text-align: center; }
+    .th-total { text-align: right; }
+
+    .table-row { margin: 6px 0; }
 
     .product-line {
       display: grid;
@@ -223,13 +301,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
       align-items: start;
       font-size: 11px;
     }
-
-    .th-product { text-align: left; }
-    .th-price { text-align: center; }
-    .th-qty { text-align: center; }
-    .th-total { text-align: right; }
-
-    .table-row { margin: 6px 0; }
 
     .product-name {
       font-size: 11px;
@@ -248,19 +319,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
       margin-top: 2px;
       color: #444;
       line-height: 1.2;
-    }
-
-    .qty-line {
-      text-align: right;
-      font-weight: 800;
-      margin-top: 8px;
-      font-size: 12px;
-    }
-
-    .totals {
-      margin-top: 6px;
-      border-top: 1px dashed #000;
-      padding-top: 6px;
     }
 
     .total-line {
@@ -310,7 +368,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
     }
 
     .buttons {
-      margin-top: 16px;
+      margin-top: -20px;
       display: flex;
       gap: 10px;
       justify-content: center;
@@ -351,7 +409,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
       const el = receiptRef.current;
       if (!el) return;
 
-      // ✅ Hidden iframe print (no visible about:blank window)
       const iframe = document.createElement("iframe");
       iframe.setAttribute(
         "style",
@@ -376,52 +433,10 @@ const PrintReceipt = ({ transaction, onClose }) => {
             <title>Receipt - ${transaction.id}</title>
             <style>
               ${receiptStyles}
-
-              /* ✅ Make preview page look like your screenshot */
-              @media screen {
-                body{
-                  margin:0;
-                  padding:30px 0;
-                  background:#f2f2f2;
-                  display:flex;
-                  justify-content:center;
-                  align-items:flex-start;
-                  min-height:100vh;
-                }
-                .page{
-                  width:100%;
-                  display:flex;
-                  justify-content:center;
-                  background:#fff;
-                  padding:30px 0;
-                }
-              }
-
-              /* ✅ Center in print preview page */
-              @media print {
-                html, body{
-                  margin:0 !important;
-                  padding:0 !important;
-                  background:#fff !important;
-                }
-                body{
-                  display:flex !important;
-                  justify-content:center !important;
-                  align-items:flex-start !important;
-                }
-                .page{
-                  width:100%;
-                  display:flex;
-                  justify-content:center;
-                }
-                .receipt-wrap{ margin:0 auto !important; }
-              }
             </style>
           </head>
           <body>
-            <div class="page">
-              ${el.outerHTML}
-            </div>
+            ${el.outerHTML}
           </body>
         </html>
       `);
@@ -456,13 +471,14 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
       <div className="receipt-container">
         <div className="receipt-wrap" id="print-receipt" ref={receiptRef}>
+          {/* ✅ FIXED HEADER */}
           <div className="header center">
             <div className="shop-name">{SETTINGS.shopName}</div>
             <div className="shop-sub">{SETTINGS.shopSubtitle || ""}</div>
-            <div className="shop-sub">{SETTINGS.shopEmail || ""}</div>
             <div className="type-badge">{getTransactionTypeBadge()}</div>
           </div>
 
+          {/* ✅ FIXED ORDER DETAILS */}
           <div className="order-block">
             <div className="row">
               <span>
@@ -503,6 +519,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
           <div className="divider" />
 
+          {/* ✅ FIXED TABLE HEADER */}
           <div className="table-head">
             <div className="th-product">PRODUCT</div>
             <div className="th-price">PRICE</div>
@@ -510,6 +527,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
             <div className="th-total">TOTAL</div>
           </div>
 
+          {/* ✅ SCROLLABLE ITEMS SECTION ONLY */}
           <div className="items-scroll">
             {items.map((item, index) => {
               const price = Number(item.price || 0);
@@ -542,6 +560,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
             })}
           </div>
 
+          {/* ✅ FIXED FOOTER */}
           <div className="qty-line">Total Qty {totalQty}</div>
 
           <div className="divider" />

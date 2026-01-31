@@ -2,12 +2,12 @@
 
 export const DEFAULT_MENU = {
   subs: [
-    { id: 'sub-1', name: 'Sirloin Sate Beef', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=400', price: 999, category: 'subs', hasModifiers: true },
-    { id: 'sub-2', name: 'Marinated Pork Chop', image: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=400', price: 999, category: 'subs', hasModifiers: true },
-    { id: 'sub-3', name: 'Grilled Lemongrass Chicken', image: 'https://images.unsplash.com/photo-1512152272829-e3139592d56f?w=400', price: 999, category: 'subs', hasModifiers: true },
-    { id: 'sub-4', name: 'Lemongrass Tofu', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', price: 999, category: 'subs', hasModifiers: true },
-    { id: 'sub-5', name: 'Grilled Pork Sausage', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400', price: 999, category: 'subs', hasModifiers: true },
-    { id: 'sub-6', name: 'Assorted (Turkey, Ham, Pork)', image: 'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=400', price: 999, category: 'subs', hasModifiers: true },
+    { id: 'sub-1', name: 'Sirloin Sate Beef', image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?w=400', price: 990, category: 'subs', hasModifiers: true },
+    { id: 'sub-2', name: 'Marinated Pork Chop', image: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=400', price: 990, category: 'subs', hasModifiers: true },
+    { id: 'sub-3', name: 'Grilled Lemongrass Chicken', image: 'https://images.unsplash.com/photo-1512152272829-e3139592d56f?w=400', price: 990, category: 'subs', hasModifiers: true },
+    { id: 'sub-4', name: 'Lemongrass Tofu', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', price: 990, category: 'subs', hasModifiers: true },
+    { id: 'sub-5', name: 'Grilled Pork Sausage', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400', price: 990, category: 'subs', hasModifiers: true },
+    { id: 'sub-6', name: 'Assorted (Turkey, Ham, Pork)', image: 'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=400', price: 990, category: 'subs', hasModifiers: true },
   ],
   coffee: [
     { id: 'coffee-1', name: 'Vietnamese Iced Coffee', image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', price: 500, category: 'coffee', hasModifiers: false },
@@ -39,17 +39,17 @@ export const DEFAULT_MENU = {
     { id: 'mt-11', name: 'Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'milktea', hasModifiers: true },
   ],
   hots: [
-    { id: 'hot-1', name: 'Hot Regular Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-2', name: 'Hot Premium Brown Sugar Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-3', name: 'Hot Hazelnut Milk Tea', image: 'https://images.unsplash.com/photo-1577968897068-2a7b8b4f9d7d?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-4', name: 'Hot Taro Milk Tea', image: 'https://images.unsplash.com/photo-1577968897068-2a7b8b4f9d7d?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-5', name: 'Hot Honeydew Milk Tea', image: 'https://images.unsplash.com/photo-1622597467836-f3c23223e1c8?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-6', name: 'Hot Chocolate Milk Tea', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-7', name: 'Hot Matcha Green Milk Tea', image: 'https://images.unsplash.com/photo-1545875615-a67a271f0603?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-8', name: 'Hot Coconut Milk Tea', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-9', name: 'Hot Hokkaido Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-10', name: 'Hot Okinawa Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
-    { id: 'hot-11', name: 'Hot Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-1', name: 'Regular Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-2', name: 'Premium Brown Sugar Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-3', name: 'Hazelnut Milk Tea', image: 'https://images.unsplash.com/photo-1577968897068-2a7b8b4f9d7d?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-4', name: 'Taro Milk Tea', image: 'https://images.unsplash.com/photo-1577968897068-2a7b8b4f9d7d?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-5', name: 'Honeydew Milk Tea', image: 'https://images.unsplash.com/photo-1622597467836-f3c23223e1c8?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-6', name: 'Chocolate Milk Tea', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-7', name: 'Matcha Green Milk Tea', image: 'https://images.unsplash.com/photo-1545875615-a67a271f0603?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-8', name: 'Coconut Milk Tea', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-9', name: 'Hokkaido Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-10', name: 'Okinawa Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-11', name: 'Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
   ],
 };
 

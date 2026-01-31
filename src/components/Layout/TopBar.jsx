@@ -1,12 +1,15 @@
+// src/components/Layout/TopBar.jsx
 import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search, Plus, Archive } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import AddCustomItemModal from "../Order/AddCustomItemModal";
 
 const TopBar = () => {
   const { theme } = useTheme();
-  const { searchQuery, setSearchQuery, orderNumber } = usePOS();
+  const navigate = useNavigate();
+  const { searchQuery, setSearchQuery, orderNumber, heldOrders } = usePOS();
   const [showCustomItemModal, setShowCustomItemModal] = useState(false);
 
   const styles = {
@@ -50,6 +53,46 @@ const TopBar = () => {
       color: theme.textPrimary,
       fontSize: "14px",
       outline: "none",
+    },
+    buttonGroup: {
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      flexShrink: 0,
+    },
+    heldOrdersButton: {
+      padding: "10px 20px",
+      border: `2px solid ${theme.warning}`,
+      borderRadius: "8px",
+      background: "transparent",
+      color: theme.warning,
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      fontSize: "14px",
+      fontWeight: "600",
+      transition: "all 0.2s ease",
+      whiteSpace: "nowrap",
+      flexShrink: 0,
+      position: "relative",
+    },
+    heldBadge: {
+      position: "absolute",
+      top: "-6px",
+      right: "-6px",
+      background: theme.danger,
+      color: "#FFFFFF",
+      borderRadius: "50%",
+      minWidth: "20px",
+      height: "20px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: "11px",
+      fontWeight: "700",
+      padding: "0 4px",
+      border: `2px solid ${theme.bgCard}`,
     },
     addButton: {
       padding: "10px 20px",
@@ -102,7 +145,6 @@ const TopBar = () => {
   return (
     <>
       <style>{`
-        /* Desktop (default - unchanged) */
         .topbar-responsive {
           padding: 16px 24px;
         }
@@ -117,11 +159,16 @@ const TopBar = () => {
           max-width: 400px;
         }
 
+        .topbar-button-group {
+          gap: 10px;
+        }
+
+        .topbar-held-button,
         .topbar-add-button {
           padding: 10px 20px;
         }
 
-        .topbar-add-button-text {
+        .topbar-button-text {
           display: inline;
         }
 
@@ -129,7 +176,15 @@ const TopBar = () => {
           display: block;
         }
 
-        /* Tablet: Adjust spacing */
+        .topbar-held-button:hover {
+          background: rgba(251, 191, 36, 0.1);
+          transform: translateY(-1px);
+        }
+
+        .topbar-add-button:hover {
+          opacity: 0.9;
+        }
+
         @media (max-width: 1024px) {
           .topbar-responsive {
             padding: 14px 20px !important;
@@ -138,9 +193,17 @@ const TopBar = () => {
           .topbar-search-container {
             max-width: 350px !important;
           }
+
+          .topbar-button-group {
+            gap: 8px !important;
+          }
+
+          .topbar-held-button,
+          .topbar-add-button {
+            padding: 10px 16px !important;
+          }
         }
 
-        /* Mobile: Compact layout with small plus button */
         @media (max-width: 768px) {
           .topbar-responsive {
             padding: 12px 16px 12px 70px !important;
@@ -165,8 +228,12 @@ const TopBar = () => {
           .topbar-search-container input {
             padding-left: 36px !important;
           }
+
+          .topbar-button-group {
+            gap: 8px !important;
+          }
           
-          /* Small square plus button - same size as hamburger */
+          .topbar-held-button,
           .topbar-add-button {
             width: 48px !important;
             height: 48px !important;
@@ -177,7 +244,7 @@ const TopBar = () => {
             flex-shrink: 0 !important;
           }
           
-          .topbar-add-button-text {
+          .topbar-button-text {
             display: none !important;
           }
           
@@ -186,7 +253,6 @@ const TopBar = () => {
           }
         }
 
-        /* Small Mobile: Even more compact */
         @media (max-width: 480px) {
           .topbar-responsive {
             padding: 10px 12px 10px 64px !important;
@@ -196,8 +262,12 @@ const TopBar = () => {
           .topbar-left-section {
             gap: 8px !important;
           }
+
+          .topbar-button-group {
+            gap: 6px !important;
+          }
           
-          /* Smaller square button on very small screens */
+          .topbar-held-button,
           .topbar-add-button {
             width: 44px !important;
             height: 44px !important;
@@ -217,9 +287,7 @@ const TopBar = () => {
       `}</style>
 
       <div className="topbar-responsive" style={styles.topBar}>
-        {/* Left Section - Search + Plus Button */}
         <div className="topbar-left-section" style={styles.leftSection}>
-          {/* Search */}
           <div className="topbar-search-container" style={styles.searchContainer}>
             <Search size={18} style={styles.searchIcon} className="topbar-search-icon" />
             <input
@@ -231,20 +299,33 @@ const TopBar = () => {
             />
           </div>
 
-          {/* Add New Item Button */}
-          <button
-            className="topbar-add-button"
-            style={styles.addButton}
-            onClick={() => setShowCustomItemModal(true)}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            <Plus size={20} />
-            <span className="topbar-add-button-text">Add New Item</span>
-          </button>
+          <div className="topbar-button-group" style={styles.buttonGroup}>
+            {/* ✅ Navigate to held orders page */}
+            <button
+              className="topbar-held-button"
+              style={styles.heldOrdersButton}
+              onClick={() => navigate("/held-orders")}
+              title="View held orders"
+            >
+              <Archive size={20} />
+              <span className="topbar-button-text">Held Orders</span>
+              {heldOrders.length > 0 && (
+                <div style={styles.heldBadge}>{heldOrders.length}</div>
+              )}
+            </button>
+
+            <button
+              className="topbar-add-button"
+              style={styles.addButton}
+              onClick={() => setShowCustomItemModal(true)}
+              title="Add new item"
+            >
+              <Plus size={20} />
+              <span className="topbar-button-text">Add New Item</span>
+            </button>
+          </div>
         </div>
 
-        {/* Right Section - Order Info (Hidden on mobile) */}
         <div className="topbar-right-section" style={styles.rightSection}>
           <div className="topbar-order-info" style={styles.orderInfo}>
             <div className="topbar-order-number" style={styles.orderNumber}>
@@ -257,7 +338,6 @@ const TopBar = () => {
         </div>
       </div>
 
-      {/* Custom Item Modal */}
       <AddCustomItemModal
         isOpen={showCustomItemModal}
         onClose={() => setShowCustomItemModal(false)}

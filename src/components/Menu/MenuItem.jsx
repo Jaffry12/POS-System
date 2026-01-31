@@ -24,7 +24,6 @@ const MenuItem = ({ item }) => {
       addToOrder(item, null, []);
       return;
     }
-
     // ✅ Otherwise open modifier modal
     setShowModal(true);
   };
@@ -39,10 +38,12 @@ const MenuItem = ({ item }) => {
       cursor: "pointer",
       border: `2px solid ${theme.border}`,
       minHeight: "80px",
+      height: "auto", // ✅ prevent tall stretched cards
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-between",
       position: "relative",
+      alignSelf: "start", // ✅ prevent grid row stretching
     },
     name: {
       fontSize: "15px",
@@ -50,21 +51,30 @@ const MenuItem = ({ item }) => {
       color: theme.textPrimary,
       marginBottom: "8px",
       lineHeight: "1.3",
+
+      // ✅ keeps long names (like Vietnamese Iced Coffee) from making card huge
+      display: "-webkit-box",
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: "vertical",
+      overflow: "hidden",
     },
     price: {
       fontSize: "18px",
       fontWeight: "700",
       color: theme.primary,
+      whiteSpace: "nowrap",
     },
   };
 
   return (
     <>
       <style>{`
-        /* Desktop (default - unchanged) */
+        /* Desktop (default) */
         .menu-item-card {
           padding: 16px;
           min-height: 80px;
+          height: auto !important;
+          align-self: start; /* ✅ critical */
         }
 
         .menu-item-name {
@@ -76,7 +86,7 @@ const MenuItem = ({ item }) => {
           font-size: 18px;
         }
 
-        /* Tablet: Slightly smaller */
+        /* Tablet */
         @media (max-width: 1024px) {
           .menu-item-card {
             padding: 14px !important;
@@ -92,7 +102,7 @@ const MenuItem = ({ item }) => {
           }
         }
 
-        /* Mobile: Compact card */
+        /* Mobile */
         @media (max-width: 768px) {
           .menu-item-card {
             padding: 12px !important;
@@ -111,7 +121,7 @@ const MenuItem = ({ item }) => {
           }
         }
 
-        /* Small Mobile: Very compact */
+        /* Small Mobile */
         @media (max-width: 480px) {
           .menu-item-card {
             padding: 10px !important;
@@ -146,6 +156,7 @@ const MenuItem = ({ item }) => {
         <div className="menu-item-name" style={styles.name}>
           {item.name}
         </div>
+
         <div className="menu-item-price" style={styles.price}>
           {priceDisplay}
         </div>

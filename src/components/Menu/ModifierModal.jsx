@@ -4,7 +4,6 @@ import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import { SETTINGS, SUB_MODIFIERS, DRINK_MODIFIERS } from "../../data/menuData";
 
-
 const ModifierModal = ({ item, onClose }) => {
   const { theme } = useTheme();
   const { addToOrder } = usePOS();
@@ -34,6 +33,44 @@ const ModifierModal = ({ item, onClose }) => {
     hasSizes ? Object.keys(item.prices)[0] : null
   );
   const [selectedModifiers, setSelectedModifiers] = useState([]);
+
+  // ✅ Light Toppings group (built from Sub Toppings)
+  const LIGHT_TOPPINGS_GROUP = useMemo(() => {
+    const base = SUB_MODIFIERS?.subToppings;
+    const baseOptions = Array.isArray(base?.options) ? base.options : [];
+
+    const normalize = (str) =>
+      String(str || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+
+    const mapped = baseOptions
+      .map((opt) => {
+        const rawName = String(opt?.name || "").trim();
+        if (!rawName) return null;
+
+        const baseName = rawName.replace(/^no\s+/i, "").trim();
+        const finalName = baseName ? `Light ${baseName}` : `Light ${rawName}`;
+
+        const key = normalize(baseName || rawName);
+        return {
+          ...opt,
+          id: `light_${key || opt.id}`,
+          name: finalName,
+          price: 0,
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      groupId: "light_toppings",
+      groupTitle: "Light Toppings",
+      multiSelect: true,
+      options: mapped,
+    };
+  }, []);
 
   // Calculate prices
   const getBasePrice = () => {
@@ -101,11 +138,36 @@ const ModifierModal = ({ item, onClose }) => {
     return group?.options.some((o) => o.id === optionId) || false;
   };
 
+  // ✅ NEW: Clear modifiers for current step
+  const clearCurrentStepModifiers = () => {
+    setSelectedModifiers((prev) => {
+      let groupIdToClear = null;
+
+      if (isSub) {
+        if (step === 2) groupIdToClear = "sub-toppings";
+        if (step === 3) groupIdToClear = "light_toppings";
+        if (step === 4) groupIdToClear = "extras";
+      } else if (isDrink) {
+        if (step === 2) groupIdToClear = "toppings";
+      }
+
+      if (groupIdToClear) {
+        return prev.filter((g) => g.groupId !== groupIdToClear);
+      }
+
+      return prev;
+    });
+  };
+
   // Helpers: step mapping
-  const isConfirmStep = step === 4 || (isDrink && step === 3) || (isHot && step === 2) || (!isSub && !isDrink && !isHot && step === 2 && hasSizes);
+  const isConfirmStep =
+    step === 5 ||
+    (isDrink && step === 3) ||
+    (isHot && step === 2) ||
+    (!isSub && !isDrink && !isHot && step === 2 && hasSizes);
 
   const goToConfirm = () => {
-    if (isSub) setStep(4);
+    if (isSub) setStep(5);
     else if (isDrink) setStep(hasSizes ? 3 : 3);
     else if (isHot) setStep(hasSizes ? 2 : 2);
     else {
@@ -118,7 +180,6 @@ const ModifierModal = ({ item, onClose }) => {
   useEffect(() => {
     if (hasModifiers || hasSizes) return;
 
-    // ✅ guard against StrictMode double-invoke in dev
     if (autoAddedRef.current) return;
     autoAddedRef.current = true;
 
@@ -132,7 +193,8 @@ const ModifierModal = ({ item, onClose }) => {
       if (hasSizes && step === 1) return setStep(2);
       if (step === 2) return setStep(3);
       if (step === 3) return setStep(4);
-      if (step === 4) return handleAddToOrder();
+      if (step === 4) return setStep(5);
+      if (step === 5) return handleAddToOrder();
     }
 
     if (isDrink) {
@@ -154,6 +216,7 @@ const ModifierModal = ({ item, onClose }) => {
 
   const handlePrevious = () => {
     if (isSub) {
+      if (step === 5) return setStep(4);
       if (step === 4) return setStep(3);
       if (step === 3) return setStep(2);
       if (step === 2) return setStep(hasSizes ? 1 : 2);
@@ -174,10 +237,14 @@ const ModifierModal = ({ item, onClose }) => {
     if (step > 1) setStep(step - 1);
   };
 
+  // ✅ FIXED: Skip now clears current step selections before moving to next step
   const handleSkip = () => {
+    clearCurrentStepModifiers();
+
     if (isSub) {
       if (step === 2) return setStep(3);
       if (step === 3) return setStep(4);
+      if (step === 4) return setStep(5);
       return;
     }
 
@@ -369,7 +436,9 @@ const ModifierModal = ({ item, onClose }) => {
     const sizes = Object.keys(item.prices);
     return (
       <>
-        <div style={styles.sectionLabel} className="modifier-section-label">Select Size</div>
+        <div style={styles.sectionLabel} className="modifier-section-label">
+          Select Size
+        </div>
         <div style={styles.optionsGrid} className="modifier-options-grid">
           {sizes.map((size) => (
             <button
@@ -390,11 +459,14 @@ const ModifierModal = ({ item, onClose }) => {
     );
   };
 
-  // Modifier group renderer
-  const renderModifierGroup = (group) => {
+  const renderModifierGroup = (group, forceMultiSelect = false) => {
+    const multi = forceMultiSelect ? true : !!group.multiSelect;
+
     return (
       <>
-        <div style={styles.sectionLabel} className="modifier-section-label">{group.groupTitle}</div>
+        <div style={styles.sectionLabel} className="modifier-section-label">
+          {group.groupTitle}
+        </div>
         <div style={styles.optionsGrid} className="modifier-options-grid">
           {group.options.map((option) => {
             const isSelected = isOptionSelected(group.groupId, option.id);
@@ -403,12 +475,7 @@ const ModifierModal = ({ item, onClose }) => {
                 key={option.id}
                 style={styles.optionButton(isSelected)}
                 onClick={() =>
-                  toggleModifier(
-                    group.groupId,
-                    group.groupTitle,
-                    option,
-                    group.multiSelect
-                  )
+                  toggleModifier(group.groupId, group.groupTitle, option, multi)
                 }
                 className="modifier-option-btn"
               >
@@ -492,8 +559,9 @@ const ModifierModal = ({ item, onClose }) => {
   const getStepTitle = () => {
     if (hasSizes && step === 1) return "Select Size";
     if (isSub && step === 2) return "Sub Toppings";
-    if (isSub && step === 3) return "Extras";
-    if (isSub && step === 4) return "Confirm";
+    if (isSub && step === 3) return "Light Toppings";
+    if (isSub && step === 4) return "Extras";
+    if (isSub && step === 5) return "Confirm";
     if (isDrink && step === 2) return "Toppings";
     if (isDrink && step === 3) return "Confirm";
     if (isHot && step === 2) return "Confirm";
@@ -501,10 +569,12 @@ const ModifierModal = ({ item, onClose }) => {
     return "Customize";
   };
 
-  // If no modifiers and no sizes, add immediately
-
   return (
-    <div style={styles.overlay} onClick={onClose} className="modifier-modal-overlay">
+    <div
+      style={styles.overlay}
+      onClick={onClose}
+      className="modifier-modal-overlay"
+    >
       <style>{`
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
@@ -533,17 +603,17 @@ const ModifierModal = ({ item, onClose }) => {
   /* ✅ Mobile (<= 768px) — CENTER POPUP */
   @media (max-width: 768px) {
     .modifier-modal-overlay {
-      align-items: center !important;        /* ✅ center vertically */
-      justify-content: center !important;    /* ✅ center horizontally */
-      padding: 12px !important;              /* ✅ spacing from edges */
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 12px !important;
     }
 
     .modifier-modal {
-      width: min(520px, 94vw) !important;    /* ✅ popup width */
+      width: min(520px, 94vw) !important;
       height: auto !important;
-      max-height: 90vh !important;           /* ✅ keep inside screen */
+      max-height: 90vh !important;
       max-width: 94vw !important;
-      border-radius: 16px !important;        /* ✅ popup rounded all corners */
+      border-radius: 16px !important;
       margin: 0 !important;
     }
 
@@ -598,7 +668,7 @@ const ModifierModal = ({ item, onClose }) => {
     }
   }
 
-  /* 📱 Small Mobile (< 480px) — still centered */
+  /* 📱 Small Mobile (< 480px) */
   @media (max-width: 480px) {
     .modifier-modal-overlay {
       padding: 10px !important;
@@ -635,7 +705,12 @@ const ModifierModal = ({ item, onClose }) => {
     }
   }
 `}</style>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()} className="modifier-modal">
+
+      <div
+        style={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        className="modifier-modal"
+      >
         {/* Header */}
         <div style={styles.header} className="modifier-header">
           <div style={styles.headerLeft} className="modifier-header-left">
@@ -644,7 +719,9 @@ const ModifierModal = ({ item, onClose }) => {
                 <ChevronLeft size={24} />
               </button>
             )}
-            <div style={styles.title} className="modifier-title">{getStepTitle()}</div>
+            <div style={styles.title} className="modifier-title">
+              {getStepTitle()}
+            </div>
           </div>
           <button style={styles.closeButton} onClick={onClose}>
             <X size={24} />
@@ -654,7 +731,9 @@ const ModifierModal = ({ item, onClose }) => {
         {/* Scrollable Content */}
         <div style={styles.content} className="hide-scrollbar modifier-content">
           <div style={styles.itemInfo} className="modifier-item-info">
-            <div style={styles.itemName} className="modifier-item-name">{item.name}</div>
+            <div style={styles.itemName} className="modifier-item-name">
+              {item.name}
+            </div>
             <div style={styles.itemPrice} className="modifier-item-price">
               {SETTINGS.currency}
               {(getTotalPrice() / 100).toFixed(2)}
@@ -663,16 +742,22 @@ const ModifierModal = ({ item, onClose }) => {
 
           {hasSizes && step === 1 && renderSizeSelection()}
 
-          {isSub && step === 2 && renderModifierGroup(SUB_MODIFIERS.subToppings)}
-          {isSub && step === 3 && renderModifierGroup(SUB_MODIFIERS.extras)}
-          {isSub && step === 4 && renderConfirmation()}
+          {isSub && step === 2 && renderModifierGroup(SUB_MODIFIERS.subToppings, true)}
+          {isSub && step === 3 && renderModifierGroup(LIGHT_TOPPINGS_GROUP)}
+          {isSub && step === 4 && renderModifierGroup(SUB_MODIFIERS.extras)}
+          {isSub && step === 5 && renderConfirmation()}
 
           {isDrink && step === 2 && renderModifierGroup(DRINK_MODIFIERS.toppings)}
           {isDrink && step === 3 && renderConfirmation()}
 
           {isHot && step === 2 && renderConfirmation()}
 
-          {!isSub && !isDrink && !isHot && hasSizes && step === 2 && renderConfirmation()}
+          {!isSub &&
+            !isDrink &&
+            !isHot &&
+            hasSizes &&
+            step === 2 &&
+            renderConfirmation()}
         </div>
 
         {/* Footer */}
