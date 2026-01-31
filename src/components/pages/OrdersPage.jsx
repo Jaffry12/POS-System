@@ -157,6 +157,64 @@ const OrdersPage = () => {
           .orders-scroll::-webkit-scrollbar {
             display: none;
           }
+
+          /* Mobile: 480px - 768px */
+          @media (max-width: 768px) {
+            .orders-header {
+              padding: 24px 20px 0 20px !important;
+              margin-bottom: 24px !important;
+            }
+            .orders-title {
+              font-size: 24px !important;
+            }
+            .orders-subtitle {
+              font-size: 14px !important;
+            }
+            .orders-empty {
+              padding: 40px 20px !important;
+              margin: 0 20px !important;
+            }
+            .orders-empty-icon {
+              width: 56px !important;
+              height: 56px !important;
+            }
+            .orders-empty-text {
+              font-size: 16px !important;
+            }
+            .orders-empty-desc {
+              font-size: 13px !important;
+            }
+          }
+
+          /* Small Mobile: < 480px */
+          @media (max-width: 480px) {
+            .orders-header {
+              padding: 20px 16px 0 16px !important;
+              margin-bottom: 20px !important;
+            }
+            .orders-title {
+              font-size: 22px !important;
+            }
+            .orders-subtitle {
+              font-size: 13px !important;
+            }
+            .orders-empty {
+              padding: 32px 16px !important;
+              margin: 0 !important;
+            }
+            .orders-empty-icon {
+              width: 48px !important;
+              height: 48px !important;
+              margin-bottom: 16px !important;
+            }
+            .orders-empty-text {
+              font-size: 15px !important;
+              margin-bottom: 10px !important;
+            }
+            .orders-empty-desc {
+              font-size: 12px !important;
+            }
+          }
         `}</style>
         <div style={styles.header} className="orders-header">
           <div style={styles.title} className="orders-title">Current Orders</div>
@@ -221,7 +279,7 @@ const OrdersPage = () => {
             font-size: 14px !important;
           }
           .orders-scroll {
-            padding: 0 20px 140px 20px !important;
+            padding: 0 20px 100px 20px !important;
           }
           .orders-grid {
             grid-template-columns: 1fr !important;
@@ -260,20 +318,6 @@ const OrdersPage = () => {
             font-size: 11px !important;
             padding: 5px 10px !important;
           }
-          .orders-empty {
-            padding: 40px 20px !important;
-            margin: 0 20px !important;
-          }
-          .orders-empty-icon {
-            width: 56px !important;
-            height: 56px !important;
-          }
-          .orders-empty-text {
-            font-size: 16px !important;
-          }
-          .orders-empty-desc {
-            font-size: 13px !important;
-          }
         }
 
         /* Small Mobile: < 480px */
@@ -289,7 +333,7 @@ const OrdersPage = () => {
             font-size: 13px !important;
           }
           .orders-scroll {
-            padding: 0 16px 160px 16px !important;
+            padding: 0 16px 100px 16px !important;
           }
           .orders-grid {
             gap: 14px !important;
@@ -327,22 +371,6 @@ const OrdersPage = () => {
           .orders-badge {
             font-size: 10px !important;
             padding: 4px 8px !important;
-          }
-          .orders-empty {
-            padding: 32px 16px !important;
-            margin: 0 !important;
-          }
-          .orders-empty-icon {
-            width: 48px !important;
-            height: 48px !important;
-            margin-bottom: 16px !important;
-          }
-          .orders-empty-text {
-            font-size: 15px !important;
-            margin-bottom: 10px !important;
-          }
-          .orders-empty-desc {
-            font-size: 12px !important;
           }
         }
       `}</style>

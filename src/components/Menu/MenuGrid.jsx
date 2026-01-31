@@ -17,6 +17,7 @@ const MenuGrid = () => {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
       gap: "20px",
+      paddingBottom: "20px",
     },
     emptyState: {
       textAlign: "center",
@@ -44,7 +45,7 @@ const MenuGrid = () => {
   return (
     <>
       <style>{`
-        /* Desktop (default - unchanged) */
+        /* Desktop (default) */
         .menu-grid-container {
           padding: 24px;
         }
@@ -53,6 +54,7 @@ const MenuGrid = () => {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
           gap: 20px;
+          padding-bottom: 20px;
         }
 
         /* Tablet: Reduce gap and padding */
@@ -64,6 +66,7 @@ const MenuGrid = () => {
           .menu-grid {
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
             gap: 16px !important;
+            padding-bottom: 20px !important;
           }
         }
 
@@ -76,6 +79,7 @@ const MenuGrid = () => {
           .menu-grid {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 12px !important;
+            padding-bottom: 20px !important;
           }
 
           .menu-empty-state {
@@ -91,6 +95,7 @@ const MenuGrid = () => {
 
           .menu-grid {
             gap: 10px !important;
+            padding-bottom: 20px !important;
           }
 
           .menu-empty-icon {

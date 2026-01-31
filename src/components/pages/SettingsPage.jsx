@@ -30,39 +30,25 @@ const SettingsPage = () => {
   };
 
   const styles = {
-    // ✅ Use dvh + safe-area padding so iPhone bottom bar never cuts content
     container: {
-      minHeight: "100dvh",
-      height: "100dvh",
+      height: "100vh",
       overflow: "hidden",
       display: "flex",
       flexDirection: "column",
       background: theme.bgPrimary,
-      boxSizing: "border-box",
-      paddingBottom: "env(safe-area-inset-bottom)",
     },
-
-    // ✅ Only THIS scrolls
-    scrollableContent: {
-      flex: "1 1 auto",
-      minHeight: 0,
-      overflowY: "auto",
-      overflowX: "hidden",
-
-      // ✅ bottom padding includes safe area so last section is fully visible
-      padding: "0 40px calc(140px + env(safe-area-inset-bottom)) 40px",
-
-      scrollbarWidth: "none",
-      msOverflowStyle: "none",
-      WebkitOverflowScrolling: "touch",
-      boxSizing: "border-box",
-    },
-
     header: {
       padding: "40px 40px 0 40px",
       marginBottom: "32px",
       flexShrink: 0,
-      boxSizing: "border-box",
+    },
+    scrollableContent: {
+      flex: 1,
+      overflowY: "auto",
+      overflowX: "hidden",
+      padding: "0 40px 140px 40px",
+      scrollbarWidth: "none",
+      msOverflowStyle: "none",
     },
     title: {
       fontSize: "32px",
@@ -146,22 +132,7 @@ const SettingsPage = () => {
       <style>{`
         /* Hide scrollbar */
         .settings-scroll::-webkit-scrollbar {
-          width: 0;
-          height: 0;
           display: none;
-        }
-
-        /* Fallback if 100dvh not supported */
-        @supports not (height: 100dvh) {
-          .settings-container {
-            height: 100vh !important;
-            min-height: 100vh !important;
-          }
-        }
-
-        /* iPhone safe area (extra protection) */
-        .settings-scroll {
-          padding-bottom: calc(140px + env(safe-area-inset-bottom)) !important;
         }
 
         /* Tablet: 768px - 1024px */
@@ -177,7 +148,7 @@ const SettingsPage = () => {
             font-size: 15px !important;
           }
           .settings-scroll {
-            padding: 0 32px calc(140px + env(safe-area-inset-bottom)) 32px !important;
+            padding: 0 32px 140px 32px !important;
           }
           .settings-section {
             padding: 20px !important;
@@ -198,7 +169,7 @@ const SettingsPage = () => {
             font-size: 14px !important;
           }
           .settings-scroll {
-            padding: 0 20px calc(140px + env(safe-area-inset-bottom)) 20px !important;
+            padding: 0 20px 100px 20px !important;
           }
           .settings-section {
             padding: 18px !important;
@@ -240,7 +211,7 @@ const SettingsPage = () => {
             font-size: 13px !important;
           }
           .settings-scroll {
-            padding: 0 16px calc(160px + env(safe-area-inset-bottom)) 16px !important;
+            padding: 0 16px 100px 16px !important;
           }
           .settings-section {
             padding: 16px !important;

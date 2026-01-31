@@ -285,7 +285,7 @@ const MenuManagementPage = () => {
       boxShadow: theme.shadow,
       border: `1px solid ${theme.border}`,
       padding: "14px",
-      paddingBottom: "28px",
+      paddingBottom: "40px",
       maxHeight: "calc(100vh - 320px)",
       overflowY: "auto",
     },
@@ -592,7 +592,7 @@ const MenuManagementPage = () => {
           }
           .menu-items-panel {
             padding: 12px !important;
-            padding-bottom: 24px !important;
+            padding-bottom: 60px !important;
           }
           .menu-grid {
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
@@ -604,7 +604,7 @@ const MenuManagementPage = () => {
         @media (max-width: 768px) {
           .menu-container {
             padding: 20px !important;
-            padding-bottom: 160px !important;
+            padding-bottom: 100px !important;
             gap: 14px !important;
           }
           .menu-header-top {
@@ -655,7 +655,7 @@ const MenuManagementPage = () => {
           }
           .menu-items-panel {
             padding: 12px !important;
-            padding-bottom: 20px !important;
+            padding-bottom: 80px !important;
             max-height: calc(100vh - 450px) !important;
           }
           .menu-grid {
@@ -703,7 +703,7 @@ const MenuManagementPage = () => {
         @media (max-width: 480px) {
           .menu-container {
             padding: 16px !important;
-            padding-bottom: 180px !important;
+            padding-bottom: 100px !important;
             gap: 12px !important;
           }
           .menu-title {
@@ -742,7 +742,7 @@ const MenuManagementPage = () => {
           }
           .menu-items-panel {
             padding: 10px !important;
-            padding-bottom: 16px !important;
+            padding-bottom: 80px !important;
           }
           .menu-panel-title {
             font-size: 14px !important;

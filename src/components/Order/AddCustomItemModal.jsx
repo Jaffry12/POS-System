@@ -37,6 +37,7 @@ const AddCustomItemModal = ({ isOpen, onClose }) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [addedItemName, setAddedItemName] = useState('');
 
+  // ✅ Get existing categories dynamically from menu (updates when menu changes)
   const existingCategories = Object.keys(menu).map(key => ({
     id: key,
     name: key.charAt(0).toUpperCase() + key.slice(1)

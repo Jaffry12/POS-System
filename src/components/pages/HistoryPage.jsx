@@ -38,7 +38,7 @@ const HistoryPage = () => {
       flex: 1,
       overflowY: "auto",
       overflowX: "hidden",
-      padding: "0 40px 80px 40px",
+      padding: "0 40px 140px 40px",
       scrollbarWidth: "none",
       msOverflowStyle: "none",
     },
@@ -349,7 +349,7 @@ const HistoryPage = () => {
             font-size: 13px !important;
           }
           .history-scroll {
-            padding: 0 32px 60px 32px !important;
+            padding: 0 32px 140px 32px !important;
           }
           .history-filters {
             width: 100% !important;
@@ -378,7 +378,7 @@ const HistoryPage = () => {
             font-size: 13px !important;
           }
           .history-scroll {
-            padding: 0 20px 60px 20px !important;
+            padding: 0 20px 100px 20px !important;
           }
           .history-filters {
             width: 100% !important;
@@ -455,7 +455,7 @@ const HistoryPage = () => {
             font-size: 12px !important;
           }
           .history-scroll {
-            padding: 0 16px 60px 16px !important;
+            padding: 0 16px 100px 16px !important;
           }
           .history-filters {
             padding: 6px !important;

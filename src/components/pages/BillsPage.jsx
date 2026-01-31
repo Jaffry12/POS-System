@@ -178,7 +178,7 @@ const BillsPage = () => {
             font-size: 14px !important;
           }
           .bills-scroll {
-            padding: 0 20px 140px 20px !important;
+            padding: 0 20px 100px 20px !important;
           }
           .bills-stats-grid {
             grid-template-columns: 1fr !important;
@@ -236,7 +236,7 @@ const BillsPage = () => {
             font-size: 13px !important;
           }
           .bills-scroll {
-            padding: 0 16px 160px 16px !important;
+            padding: 0 16px 100px 16px !important;
           }
           .bills-stats-grid {
             gap: 14px !important;

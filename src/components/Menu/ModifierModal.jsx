@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { X, ChevronLeft } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import { SETTINGS, SUB_MODIFIERS, DRINK_MODIFIERS } from "../../data/menuData";
-import {  useEffect, useRef } from "react";
 
 
 const ModifierModal = ({ item, onClose }) => {
@@ -17,6 +16,7 @@ const ModifierModal = ({ item, onClose }) => {
     item.category === "milktea" ||
     item.category === "coffee";
   const isSub = item.category === "subs";
+  const isHot = item.category === "hots";
   const hasModifiers = item.hasModifiers;
 
   const initialStep = useMemo(() => {
@@ -102,27 +102,29 @@ const ModifierModal = ({ item, onClose }) => {
   };
 
   // Helpers: step mapping
-  const isConfirmStep = step === 4 || (isDrink && step === 3) || (!isSub && !isDrink && step === 2 && hasSizes);
+  const isConfirmStep = step === 4 || (isDrink && step === 3) || (isHot && step === 2) || (!isSub && !isDrink && !isHot && step === 2 && hasSizes);
 
   const goToConfirm = () => {
     if (isSub) setStep(4);
     else if (isDrink) setStep(hasSizes ? 3 : 3);
+    else if (isHot) setStep(hasSizes ? 2 : 2);
     else {
       setStep(hasSizes ? 2 : 2);
     }
   };
-const autoAddedRef = useRef(false);
 
-useEffect(() => {
-  if (hasModifiers || hasSizes) return;
+  const autoAddedRef = useRef(false);
 
-  // ✅ guard against StrictMode double-invoke in dev
-  if (autoAddedRef.current) return;
-  autoAddedRef.current = true;
+  useEffect(() => {
+    if (hasModifiers || hasSizes) return;
 
-  addToOrder(item, null, []);
-  onClose();
-}, [hasModifiers, hasSizes, addToOrder, item, onClose]);
+    // ✅ guard against StrictMode double-invoke in dev
+    if (autoAddedRef.current) return;
+    autoAddedRef.current = true;
+
+    addToOrder(item, null, []);
+    onClose();
+  }, [hasModifiers, hasSizes, addToOrder, item, onClose]);
 
   // Navigation
   const handleNext = () => {
@@ -137,6 +139,11 @@ useEffect(() => {
       if (hasSizes && step === 1) return setStep(2);
       if (step === 2) return setStep(3);
       if (step === 3) return handleAddToOrder();
+    }
+
+    if (isHot) {
+      if (hasSizes && step === 1) return setStep(2);
+      if (step === 2) return handleAddToOrder();
     }
 
     if (hasSizes && step === 1) return goToConfirm();
@@ -155,6 +162,11 @@ useEffect(() => {
 
     if (isDrink) {
       if (step === 3) return setStep(2);
+      if (step === 2) return setStep(hasSizes ? 1 : 2);
+      if (step === 1) return;
+    }
+
+    if (isHot) {
       if (step === 2) return setStep(hasSizes ? 1 : 2);
       if (step === 1) return;
     }
@@ -280,206 +292,169 @@ useEffect(() => {
       gap: "12px",
       marginBottom: "24px",
     },
-    optionButton: (isSelected) => ({
+    optionButton: (selected) => ({
       padding: "16px",
-      border: `2px solid ${isSelected ? theme.primary : theme.border}`,
+      background: selected ? theme.primary : theme.bgSecondary,
+      color: selected ? "#fff" : theme.textPrimary,
+      border: `2px solid ${selected ? theme.primary : theme.border}`,
       borderRadius: "12px",
-      background: isSelected ? `${theme.primary}15` : theme.cardBg,
       cursor: "pointer",
-      transition: "all 0.2s ease",
-      textAlign: "left",
-    }),
-    optionName: {
+      fontWeight: "600",
       fontSize: "14px",
-      fontWeight: "600",
-      color: theme.textPrimary,
-      marginBottom: "4px",
-    },
-    optionPrice: (price) => ({
-      fontSize: "13px",
-      fontWeight: "600",
-      color: price > 0 ? theme.success : theme.textLight,
+      transition: "all 0.2s",
+      minHeight: "70px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "4px",
     }),
-    summaryCard: {
-      border: `2px solid ${theme.border}`,
+    footer: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "20px 24px",
+      borderTop: `2px solid ${theme.border}`,
+      flexShrink: 0,
+    },
+    buttonGroup: {
+      display: "flex",
+      gap: "12px",
+      width: "100%",
+    },
+    button: (variant) => ({
+      flex: 1,
+      padding: "16px 24px",
+      background: variant === "primary" ? theme.primary : theme.bgSecondary,
+      color: variant === "primary" ? "#fff" : theme.textPrimary,
+      border: "none",
       borderRadius: "12px",
-      padding: "16px",
-      background: theme.bgSecondary,
-      marginBottom: "16px",
-    },
-    summaryRow: {
-      display: "flex",
-      justifyContent: "space-between",
-      gap: "12px",
-      padding: "8px 0",
-      borderBottom: `1px solid ${theme.border}`,
-    },
-    summaryRowLast: {
-      display: "flex",
-      justifyContent: "space-between",
-      gap: "12px",
-      padding: "8px 0",
-    },
-    summaryLabel: {
-      color: theme.textSecondary,
-      fontSize: "13px",
       fontWeight: "600",
-    },
-    summaryValue: {
-      color: theme.textPrimary,
-      fontSize: "13px",
+      fontSize: "16px",
+      cursor: "pointer",
+      transition: "all 0.2s",
+      minHeight: "56px",
+    }),
+    dangerButton: {
+      flex: 1,
+      padding: "16px 24px",
+      background: "#EF4444",
+      color: "#fff",
+      border: "none",
+      borderRadius: "12px",
       fontWeight: "600",
-      textAlign: "right",
+      fontSize: "16px",
+      cursor: "pointer",
+      transition: "all 0.2s",
+      minHeight: "56px",
     },
     chipRow: {
       display: "flex",
       flexWrap: "wrap",
       gap: "8px",
-      marginTop: "8px",
+      marginBottom: "8px",
     },
     chip: {
-      padding: "6px 10px",
-      borderRadius: "999px",
-      background: theme.cardBg,
-      border: `1px solid ${theme.border}`,
-      color: theme.textSecondary,
-      fontSize: "12px",
-      fontWeight: "600",
-    },
-    footer: {
-      padding: "20px 24px",
-      borderTop: `2px solid ${theme.border}`,
-      flexShrink: 0,
-      background: theme.cardBg,
-    },
-    buttonGroup: {
-      display: "flex",
-      gap: "12px",
-    },
-    button: (variant) => ({
-      flex: 1,
-      padding: "14px",
-      border: "none",
-      borderRadius: "10px",
-      background: variant === "primary" ? theme.primary : theme.bgSecondary,
-      color: variant === "primary" ? "#FFFFFF" : theme.textSecondary,
-      fontSize: "16px",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "all 0.2s ease",
-    }),
-    dangerButton: {
-      flex: 1,
-      padding: "14px",
-      border: "none",
-      borderRadius: "10px",
-      background: theme.danger || "#e11d48",
-      color: "#FFFFFF",
-      fontSize: "16px",
-      fontWeight: "600",
-      cursor: "pointer",
-      transition: "all 0.2s ease",
+      display: "inline-block",
+      padding: "6px 12px",
+      background: theme.bgSecondary,
+      borderRadius: "8px",
+      fontSize: "14px",
+      color: theme.textPrimary,
     },
   };
 
-  const renderSizeSelection = () => (
-    <>
-      <div style={styles.sectionLabel}>Select Size:</div>
-      <div style={styles.optionsGrid} className="modifier-options-grid">
-        {Object.keys(item.prices).map((size) => (
-          <button
-            key={size}
-            style={styles.optionButton(selectedSize === size)}
-            onClick={() => setSelectedSize(size)}
-            className="modifier-option-btn"
-          >
-            <div style={styles.optionName}>{size}</div>
-            <div style={styles.optionPrice(item.prices[size])}>
-              {SETTINGS.currency}
-              {(item.prices[size] / 100).toFixed(2)}
-            </div>
-          </button>
-        ))}
-      </div>
-    </>
-  );
-
-  const renderModifierGroup = (modifierGroup) => (
-    <>
-      <div style={styles.sectionLabel}>{modifierGroup.groupTitle}:</div>
-      <div style={styles.optionsGrid} className="modifier-options-grid">
-        {modifierGroup.options.map((option) => {
-          const selected = isOptionSelected(modifierGroup.groupId, option.id);
-          return (
+  // Size selection renderer
+  const renderSizeSelection = () => {
+    const sizes = Object.keys(item.prices);
+    return (
+      <>
+        <div style={styles.sectionLabel} className="modifier-section-label">Select Size</div>
+        <div style={styles.optionsGrid} className="modifier-options-grid">
+          {sizes.map((size) => (
             <button
-              key={option.id}
-              style={styles.optionButton(selected)}
-              onClick={() =>
-                toggleModifier(
-                  modifierGroup.groupId,
-                  modifierGroup.groupTitle,
-                  option,
-                  modifierGroup.multiSelect
-                )
-              }
+              key={size}
+              style={styles.optionButton(selectedSize === size)}
+              onClick={() => setSelectedSize(size)}
               className="modifier-option-btn"
             >
-              <div style={styles.optionName}>{option.name}</div>
-              <div style={styles.optionPrice(option.price)}>
-                {option.price > 0
-                  ? `+${SETTINGS.currency}${(option.price / 100).toFixed(2)}`
-                  : "FREE"}
+              <div>{size}</div>
+              <div style={{ fontSize: "13px", opacity: 0.9 }}>
+                {SETTINGS.currency}
+                {(item.prices[size] / 100).toFixed(2)}
               </div>
             </button>
-          );
-        })}
-      </div>
-    </>
-  );
+          ))}
+        </div>
+      </>
+    );
+  };
 
+  // Modifier group renderer
+  const renderModifierGroup = (group) => {
+    return (
+      <>
+        <div style={styles.sectionLabel} className="modifier-section-label">{group.groupTitle}</div>
+        <div style={styles.optionsGrid} className="modifier-options-grid">
+          {group.options.map((option) => {
+            const isSelected = isOptionSelected(group.groupId, option.id);
+            return (
+              <button
+                key={option.id}
+                style={styles.optionButton(isSelected)}
+                onClick={() =>
+                  toggleModifier(
+                    group.groupId,
+                    group.groupTitle,
+                    option,
+                    group.multiSelect
+                  )
+                }
+                className="modifier-option-btn"
+              >
+                <div>{option.name}</div>
+                {option.price > 0 && (
+                  <div style={{ fontSize: "13px", opacity: 0.9 }}>
+                    +{SETTINGS.currency}
+                    {(option.price / 100).toFixed(2)}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  };
+
+  // Confirmation renderer
   const renderConfirmation = () => {
-    const sizeText = hasSizes && selectedSize ? selectedSize : "Default";
-    const groups = selectedModifiers;
+    const groups = selectedModifiers.filter((g) => g.options.length > 0);
 
     return (
       <>
-        <div style={styles.sectionLabel}>Confirm Order</div>
-
-        <div style={styles.summaryCard}>
-          <div style={styles.summaryRow}>
-            <div style={styles.summaryLabel}>Item</div>
-            <div style={styles.summaryValue}>{item.name}</div>
-          </div>
-
-          <div style={styles.summaryRow}>
-            <div style={styles.summaryLabel}>Size</div>
-            <div style={styles.summaryValue}>{sizeText}</div>
-          </div>
-
-          <div style={styles.summaryRow}>
-            <div style={styles.summaryLabel}>Base Price</div>
-            <div style={styles.summaryValue}>
-              {SETTINGS.currency}
-              {(getBasePrice() / 100).toFixed(2)}
-            </div>
-          </div>
-
-          <div style={styles.summaryRow}>
-            <div style={styles.summaryLabel}>Extras / Toppings</div>
-            <div style={styles.summaryValue}>
-              {SETTINGS.currency}
-              {(getModifiersTotal() / 100).toFixed(2)}
-            </div>
-          </div>
-
-          <div style={styles.summaryRowLast}>
-            <div style={{ ...styles.summaryLabel, fontSize: "14px" }}>
-              Total
+        <div
+          style={{
+            padding: "16px",
+            background: theme.bgSecondary,
+            borderRadius: "12px",
+            marginBottom: "20px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ fontSize: "14px", color: theme.textSecondary }}>
+              {selectedSize && `Size: ${selectedSize}`}
             </div>
             <div
               style={{
-                ...styles.summaryValue,
-                fontSize: "14px",
+                fontSize: "20px",
+                fontWeight: "700",
                 color: theme.primary,
               }}
             >
@@ -521,12 +496,12 @@ useEffect(() => {
     if (isSub && step === 4) return "Confirm";
     if (isDrink && step === 2) return "Toppings";
     if (isDrink && step === 3) return "Confirm";
+    if (isHot && step === 2) return "Confirm";
     if (step === 2) return "Confirm";
     return "Customize";
   };
 
   // If no modifiers and no sizes, add immediately
-  
 
   return (
     <div style={styles.overlay} onClick={onClose} className="modifier-modal-overlay">
@@ -695,7 +670,9 @@ useEffect(() => {
           {isDrink && step === 2 && renderModifierGroup(DRINK_MODIFIERS.toppings)}
           {isDrink && step === 3 && renderConfirmation()}
 
-          {!isSub && !isDrink && hasSizes && step === 2 && renderConfirmation()}
+          {isHot && step === 2 && renderConfirmation()}
+
+          {!isSub && !isDrink && !isHot && hasSizes && step === 2 && renderConfirmation()}
         </div>
 
         {/* Footer */}

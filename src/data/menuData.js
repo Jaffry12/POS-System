@@ -38,6 +38,19 @@ export const DEFAULT_MENU = {
     { id: 'mt-10', name: 'Okinawa Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'milktea', hasModifiers: true },
     { id: 'mt-11', name: 'Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'milktea', hasModifiers: true },
   ],
+  hots: [
+    { id: 'hot-1', name: 'Hot Regular Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-2', name: 'Hot Premium Brown Sugar Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-3', name: 'Hot Hazelnut Milk Tea', image: 'https://images.unsplash.com/photo-1577968897068-2a7b8b4f9d7d?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-4', name: 'Hot Taro Milk Tea', image: 'https://images.unsplash.com/photo-1577968897068-2a7b8b4f9d7d?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-5', name: 'Hot Honeydew Milk Tea', image: 'https://images.unsplash.com/photo-1622597467836-f3c23223e1c8?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-6', name: 'Hot Chocolate Milk Tea', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-7', name: 'Hot Matcha Green Milk Tea', image: 'https://images.unsplash.com/photo-1545875615-a67a271f0603?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-8', name: 'Hot Coconut Milk Tea', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-9', name: 'Hot Hokkaido Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-10', name: 'Hot Okinawa Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+    { id: 'hot-11', name: 'Hot Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'hots', hasModifiers: false },
+  ],
 };
 
 // Category structure with main categories and subcategories
@@ -46,6 +59,7 @@ export const CATEGORIES = {
   main: [
     { id: 'subs', name: 'SUBS', icon: 'Sandwich', color: '#4F46E5' },
     { id: 'drinks', name: 'DRINKS', icon: 'Coffee', color: '#10B981', hasSubcategories: true },
+    { id: 'hots', name: 'HOTS', icon: 'Flame', color: '#F97316' },
   ],
   
   // Drink subcategories - shown when DRINKS is selected

@@ -1,111 +1,15 @@
 import { Printer } from "lucide-react";
 import { SETTINGS } from "../../data/menuData";
 import { formatDateTime } from "../../utils/dateUtils";
-import { useEffect, useRef, useState } from "react";
-
+import { useRef } from "react";
 
 const PrintReceipt = ({ transaction, onClose }) => {
   const receiptRef = useRef(null);
+
   if (!transaction) {
     console.log("⚠️ [RECEIPT] No transaction provided");
     return null;
   }
-
-  console.log("📄 [RECEIPT] Rendering receipt for:", transaction.id);
-  console.log("📊 [RECEIPT] Transaction type:", transaction.type || "full");
-  console.log("💰 [RECEIPT] Total amount:", transaction.total);
-
-//   const handlePrint = () => {
-//   try {
-//     const el = receiptRef.current;
-//     if (!el) {
-//       console.log("❌ Receipt ref not found");
-//       return;
-//     }
-
-//     // Open new small print window
-//     const printWindow = window.open("", "PRINT", "height=700,width=500");
-//     if (!printWindow) {
-//       alert("Popup blocked. Please allow popups for printing.");
-//       return;
-//     }
-
-//     printWindow.document.open();
-//     printWindow.document.write(`
-//       <html>
-//         <head>
-//           <title>Receipt</title>
-//           <style>
-//             @page { size: 80mm auto; margin: 0; }
-//             html, body { margin: 0; padding: 0; background: #fff; }
-//           </style>
-//         </head>
-//         <body>
-//           ${el.outerHTML}
-//         </body>
-//       </html>
-//     `);
-//     printWindow.document.close();
-
-//     // Wait for render then print
-//     printWindow.focus();
-//     setTimeout(() => {
-//       printWindow.print();
-//       printWindow.close();
-//     }, 250);
-//   } catch (e) {
-//     console.error("❌ Print error:", e);
-//   }
-// };
-
-
-const handlePrint = () => {
-  const el = receiptRef.current;
-  if (!el) return;
-
-  const printWindow = window.open("", "PRINT", "height=900,width=700");
-  if (!printWindow) return;
-
-  const css = receiptStyles;
-
-  printWindow.document.open();
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Receipt</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style>
-          ${css}
-
-          /* ✅ FORCE normal page for PDF preview */
-          @page { size: A4; margin: 30mm; }
-
-          @media print {
-            body { display:flex; justify-content:center; }
-            .receipt-wrap {
-              width: 100% !important;
-              max-width: 700px !important; /* make big */
-            }
-          }
-        </style>
-      </head>
-      <body>${el.outerHTML}</body>
-    </html>
-  `);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }, 500);
-  };
-};
-
-
-
-
 
   const items = transaction.items || [];
 
@@ -119,7 +23,9 @@ const handlePrint = () => {
         );
 
   const tax =
-    typeof transaction.tax === "number" ? transaction.tax : subtotal * SETTINGS.taxRate;
+    typeof transaction.tax === "number"
+      ? transaction.tax
+      : subtotal * SETTINGS.taxRate;
 
   const discountAmount =
     typeof transaction.discountAmount === "number"
@@ -127,7 +33,9 @@ const handlePrint = () => {
       : (subtotal * (transaction.discount || 0)) / 100;
 
   const total =
-    typeof transaction.total === "number" ? transaction.total : subtotal + tax - discountAmount;
+    typeof transaction.total === "number"
+      ? transaction.total
+      : subtotal + tax - discountAmount;
 
   const totalQty =
     typeof transaction.totalQty === "number"
@@ -146,36 +54,57 @@ const handlePrint = () => {
     return "FULL PAYMENT";
   };
 
-  // ✅ Fix for extras/modifiers like 0.57 showing as 57
-  // If backend stores prices in cents (57), convert to dollars (0.57).
-  // If already decimal (0.57), keep as-is.
   const normalizeMoney = (value) => {
     const n = Number(value || 0);
     if (!Number.isFinite(n)) return 0;
-    // If it's an integer >= 1, we treat as cents (common in POS data)
     if (Number.isInteger(n) && n >= 1) return n / 100;
     return n;
   };
 
-  const receiptStyles = `
+  const getItemModifiers = (item) => {
+    const modLines = [];
 
- 
+    if (item.size) modLines.push(`- Size: ${item.size}`);
 
-    @media print {
-      @page {
-        size: 80mm auto;
-        margin: 0;
-      }
-      html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-      }
-      .no-print { display: none !important; }
-      .items-scroll { max-height: none !important; overflow: visible !important; }
+    if (item.modifiers && item.modifiers.length > 0) {
+      item.modifiers.forEach((group) => {
+        if (group.options && group.options.length > 0) {
+          group.options.forEach((option) => {
+            const raw = option?.price ?? 0;
+            const p = normalizeMoney(raw);
+            const priceStr =
+              p > 0 ? ` +${SETTINGS.currency}${p.toFixed(2)}` : "";
+            modLines.push(`- ${option.name}${priceStr}`);
+          });
+        }
+      });
     }
 
+    return modLines;
+  };
+
+  const receiptStyles = `
+    * { box-sizing: border-box; }
+
+    /* -------------------------
+       CENTERING (APP PREVIEW)
+    -------------------------- */
     @media screen {
+      body { background: transparent; }
+
+      .receipt-container{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px 0;
+      }
+
+      .receipt-wrap{
+        margin: 0 auto;
+      }
+
+      /* Optional scrolling inside app preview */
       .receipt-container {
         max-height: 85vh;
         overflow-y: auto;
@@ -196,6 +125,34 @@ const handlePrint = () => {
       .items-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
     }
 
+    /* -------------------------
+       PRINT SETTINGS
+    -------------------------- */
+    @page { size: 80mm auto; margin: 0; }
+
+    @media print {
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        width: 100% !important;
+      }
+
+      /* ✅ Center receipt on print preview "page" */
+      body{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+      }
+
+      .receipt-wrap{
+        margin: 0 auto !important;
+      }
+
+      .no-print, .buttons { display: none !important; }
+      .items-scroll { max-height: none !important; overflow: visible !important; }
+    }
+
     .receipt-wrap {
       width: 80mm;
       padding: 10px;
@@ -207,6 +164,7 @@ const handlePrint = () => {
     }
 
     .center { text-align: center; }
+    .right { text-align: right; }
 
     .header {
       padding-bottom: 8px;
@@ -221,11 +179,7 @@ const handlePrint = () => {
       line-height: 1.1;
     }
 
-    .shop-sub {
-      font-size: 11px;
-      margin-top: 2px;
-      font-weight: 600;
-    }
+    .shop-sub { font-size: 11px; margin-top: 2px; font-weight: 600; }
 
     .type-badge {
       display: inline-block;
@@ -239,10 +193,7 @@ const handlePrint = () => {
       letter-spacing: 0.5px;
     }
 
-    .order-block {
-      font-size: 11px;
-      margin: 5px 0 6px 0;
-    }
+    .order-block { font-size: 11px; margin: 5px 0 6px 0; }
 
     .row {
       display: flex;
@@ -253,69 +204,41 @@ const handlePrint = () => {
       font-size: 11px;
     }
 
-    .divider {
-      border-top: 1px dashed #000;
-      margin: 6px 0;
-    }
-
-    /* HEADER */
-.table-head {
-  display: grid;
-  grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
-  column-gap: 4px;
-  align-items: center;   /* header stays centered */
-  font-size: 11px;
-  font-weight: 800;
-}
-
-/* ROWS */
-.product-line {
-  display: grid;
-  grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
-  column-gap: 4px;
-  align-items: start;    /* 🔥 TOP align row cells */
-  font-size: 11px;
-}
+    .divider { border-top: 1px dashed #000; margin: 6px 0; }
 
     .table-head {
+      display: grid;
+      grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
+      column-gap: 4px;
+      align-items: center;
+      font-size: 11px;
       font-weight: 800;
       margin-bottom: 4px;
     }
 
+    .product-line {
+      display: grid;
+      grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
+      column-gap: 4px;
+      align-items: start;
+      font-size: 11px;
+    }
+
     .th-product { text-align: left; }
-    .th-price {
-  text-align: center;
-}
-
-.cell-price {
-  text-align: center;
-  white-space: nowrap;
-}
-
+    .th-price { text-align: center; }
     .th-qty { text-align: center; }
     .th-total { text-align: right; }
 
     .table-row { margin: 6px 0; }
 
-    @media print {
-  .product-name {
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
+    .product-name {
+      font-size: 11px;
+      font-weight: 700;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
 
-  .table-head, .product-line {
-    grid-template-columns: minmax(0, 2.8fr) 42px 20px 48px;
-    column-gap: 4px;
-  }
-}
-
-
-
-    .cell-price { text-align: right; white-space: nowrap; }
+    .cell-price { text-align: center; white-space: nowrap; }
     .cell-qty { text-align: center; white-space: nowrap; }
     .cell-total { text-align: right; font-weight: 700; white-space: nowrap; }
 
@@ -406,105 +329,125 @@ const handlePrint = () => {
     }
 
     .btn-print { background: #16a34a; color: #fff; }
+    .btn-print:hover { background: #15803d; }
+
     .btn-close { background: #6b7280; color: #fff; }
+    .btn-close:hover { background: #4b5563; }
 
-    @media screen and (max-width: 768px) {
-      .receipt-container { max-height: 55vh; }
-      .receipt-wrap { width: 100%; max-width: 100%; margin: 0 auto; padding: 10px; }
-      .items-scroll { max-height: 25vh; }
-
-      .btn { flex: 1; padding: 12px 10px; font-size: 14px; }
-
-      .shop-name { font-size: 16px; }
-      .shop-sub { font-size: 10px; }
-
-      .amount-due .label { font-size: 13px; }
-      .amount-due .value { font-size: 22px; }
-
-      .table-head,
-.product-line {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) 54px 28px 58px;
-
-  column-gap: 8px;
-  align-items: center;
-}
-
-
-      .product-subline { font-size: 9px; }
-      .total-line { font-size: 11px; }
-      .footer { font-size: 11px; }
-    }
-
-    @media screen and (max-width: 480px) {
-      .receipt-container { max-height: 50vh; }
-      .receipt-wrap { padding: 8px; font-size: 10px; }
-
-      .shop-name { font-size: 15px; }
-      .shop-sub { font-size: 9px; }
-      .type-badge { font-size: 7px; padding: 2px 4px; }
-      .order-block, .row { font-size: 9px; }
-
-      .table-head {
-  align-items: center; /* headers stay centered */
-}
-
-.product-line {
-  align-items: start;
-}
-
-.cell-price,
-.cell-qty,
-.cell-total{
-  align-self: start;     /* 🔥 keeps them on first line */
-  padding-top: 0px;
-}
-
-
-
-        font-size: 9px;
-        grid-template-columns: 1fr 50px 26px 52px;
-        column-gap: 8px;
+    @media print {
+      .product-name {
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
       }
-
-      .product-subline { font-size: 8px; }
-      .total-line { font-size: 10px; }
-
-      .amount-due { padding: 6px 0; }
-      .amount-due .label { font-size: 11px; }
-      .amount-due .value { font-size: 20px; }
-
-      .tax-table-head, .tax-table-row { font-size: 9px; }
-      .footer { font-size: 10px; }
-
-      .items-scroll { max-height: 22vh; }
-
-      .btn { font-size: 13px; padding: 11px 8px; }
-      .btn svg { width: 16px; height: 16px; }
     }
   `;
 
-  const getItemModifiers = (item) => {
-    const modLines = [];
+  const handlePrint = () => {
+    try {
+      const el = receiptRef.current;
+      if (!el) return;
 
-    if (item.size) {
-      modLines.push(`- Size: ${item.size}`);
-    }
+      // ✅ Hidden iframe print (no visible about:blank window)
+      const iframe = document.createElement("iframe");
+      iframe.setAttribute(
+        "style",
+        "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;"
+      );
+      iframe.setAttribute("aria-hidden", "true");
+      document.body.appendChild(iframe);
 
-    if (item.modifiers && item.modifiers.length > 0) {
-      item.modifiers.forEach((group) => {
-        if (group.options && group.options.length > 0) {
-          group.options.forEach((option) => {
-            const raw = option?.price ?? 0;
-            const p = normalizeMoney(raw); // ✅ 57 -> 0.57
-            const priceStr = p > 0 ? ` +${SETTINGS.currency}${p.toFixed(2)}` : "";
-            modLines.push(`- ${option.name}${priceStr}`);
-          });
+      const doc = iframe.contentWindow?.document;
+      if (!doc) {
+        document.body.removeChild(iframe);
+        return;
+      }
+
+      doc.open();
+      doc.write(`
+        <!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Receipt - ${transaction.id}</title>
+            <style>
+              ${receiptStyles}
+
+              /* ✅ Make preview page look like your screenshot */
+              @media screen {
+                body{
+                  margin:0;
+                  padding:30px 0;
+                  background:#f2f2f2;
+                  display:flex;
+                  justify-content:center;
+                  align-items:flex-start;
+                  min-height:100vh;
+                }
+                .page{
+                  width:100%;
+                  display:flex;
+                  justify-content:center;
+                  background:#fff;
+                  padding:30px 0;
+                }
+              }
+
+              /* ✅ Center in print preview page */
+              @media print {
+                html, body{
+                  margin:0 !important;
+                  padding:0 !important;
+                  background:#fff !important;
+                }
+                body{
+                  display:flex !important;
+                  justify-content:center !important;
+                  align-items:flex-start !important;
+                }
+                .page{
+                  width:100%;
+                  display:flex;
+                  justify-content:center;
+                }
+                .receipt-wrap{ margin:0 auto !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="page">
+              ${el.outerHTML}
+            </div>
+          </body>
+        </html>
+      `);
+      doc.close();
+
+      const win = iframe.contentWindow;
+      const cleanup = () => {
+        setTimeout(() => {
+          try {
+            document.body.removeChild(iframe);
+          } catch {}
+        }, 300);
+      };
+
+      setTimeout(() => {
+        try {
+          win.focus();
+          win.print();
+        } finally {
+          cleanup();
         }
-      });
+      }, 250);
+    } catch (e) {
+      console.error("❌ Print error:", e);
+      alert("Failed to print. Please try again.");
     }
-
-    return modLines;
   };
 
   return (
@@ -513,13 +456,10 @@ const handlePrint = () => {
 
       <div className="receipt-container">
         <div className="receipt-wrap" id="print-receipt" ref={receiptRef}>
-
-
           <div className="header center">
             <div className="shop-name">{SETTINGS.shopName}</div>
             <div className="shop-sub">{SETTINGS.shopSubtitle || ""}</div>
             <div className="shop-sub">{SETTINGS.shopEmail || ""}</div>
-
             <div className="type-badge">{getTransactionTypeBadge()}</div>
           </div>
 
@@ -533,17 +473,15 @@ const handlePrint = () => {
               </span>
             </div>
 
-          <div className="row">
-  <span>Order No</span>
-  <span>{transaction.orderNumber ?? "N/A"}</span>
-</div>
+            <div className="row">
+              <span>Order No</span>
+              <span>{transaction.orderNumber ?? "N/A"}</span>
+            </div>
 
-<div className="row">
-  <span>Order ID</span>
-  <span>{transaction.id || "N/A"}</span>
-</div>
-
-
+            <div className="row">
+              <span>Order ID</span>
+              <span>{transaction.id || "N/A"}</span>
+            </div>
 
             <div className="row">
               <span>Payment Method</span>
@@ -565,7 +503,6 @@ const handlePrint = () => {
 
           <div className="divider" />
 
-          {/* ✅ Separate headings: PRICE + QTY */}
           <div className="table-head">
             <div className="th-product">PRODUCT</div>
             <div className="th-price">PRICE</div>
@@ -667,7 +604,9 @@ const handlePrint = () => {
             </div>
             <div className="tax-table-row">
               <span>HST/VAT</span>
-              <span className="center">{(SETTINGS.taxRate * 100).toFixed(2)}%</span>
+              <span className="center">
+                {(SETTINGS.taxRate * 100).toFixed(2)}%
+              </span>
               <span className="right">
                 {SETTINGS.currency}
                 {tax.toFixed(2)}
