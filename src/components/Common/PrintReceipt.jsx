@@ -78,29 +78,155 @@ const PrintReceipt = ({ transaction, onClose }) => {
     return modLines;
   };
 
-  // ✅ Core styles shared by screen + print (so printed looks identical)
   const receiptStyles = `
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
-    body { background: transparent; }
-
-    /* keep dark badge in print */
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
-    /* -------- Shared receipt layout -------- */
-    .receipt-wrap {
-      width: 80mm;
-      max-width: 80mm;
-      padding: 10px;
-      font-family: "Courier New", Courier, monospace;
-      color: #000;
-      background: #fff;
-      font-size: 12px;
-      line-height: 1.35;
-      display: flex;
-      flex-direction: column;
+    /* -------- Screen layout -------- */
+    @media screen {
+      .print-page {
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 16px 12px;
+        gap: 12px;
+      }
+
+      /* ✅ receipt area becomes scrollable so buttons remain visible */
+      .receipt-container {
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        padding: 10px 0;
+      }
+
+      .receipt-wrap {
+        width: 80mm;
+        max-width: 80mm;
+        padding: 10px;
+        font-family: "Courier New", Courier, monospace;
+        color: #000;
+        background: #fff;
+        font-size: 12px;
+        line-height: 1.35;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+
+      /* ✅ scroll long items INSIDE receipt */
+      .items-scroll {
+        max-height: 38vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        margin-bottom: 8px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .items-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+      .buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 800;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 240px;
+      }
+
+      .btn-print { background: #16a34a; color: #fff; }
+      .btn-print:hover { background: #15803d; }
+
+      .btn-close { background: #6b7280; color: #fff; }
+      .btn-close:hover { background: #4b5563; }
+
+      /* ✅ MOBILE FIX: keep buttons always visible */
+      @media (max-width: 520px) {
+        .print-page {
+          padding: 12px 10px;
+          gap: 10px;
+        }
+
+        .receipt-container {
+          /* leave room for sticky button bar */
+          padding: 8px 0;
+        }
+
+        .buttons {
+          position: sticky;
+          bottom: 0;
+          z-index: 10;
+
+          width: 100%;
+          padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+          background: rgba(0,0,0,0.25);
+          backdrop-filter: blur(10px);
+          border-radius: 14px;
+
+          /* keep the same look as before */
+          gap: 10px;
+        }
+
+        .btn {
+          width: 48%;
+          min-width: 0;
+        }
+      }
     }
 
+    /* -------- Print layout -------- */
+    @page { size: auto; margin: 0; }
+
+    @media print {
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+
+      body {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      .receipt-wrap {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        box-shadow: none !important;
+      }
+
+      .items-scroll {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+
+      .buttons, .no-print {
+        display: none !important;
+      }
+    }
+
+    /* -------- Common receipt styles -------- */
     .header {
       flex-shrink: 0;
       padding-bottom: 8px;
@@ -245,118 +371,9 @@ const PrintReceipt = ({ transaction, onClose }) => {
       font-size: 12px;
       font-weight: 700;
     }
-
-    /* -------- Screen layout (centered receipt + normal buttons) -------- */
-    @media screen {
-      .print-page {
-        height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 16px 12px;
-        gap: 14px;
-      }
-
-      /* ✅ receipt centered both axes */
-      .receipt-container {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        /* ✅ leave space for buttons so mobile always shows them */
-        max-height: calc(100dvh - 120px);
-        overflow: auto;
-        padding: 10px 0;
-      }
-
-      .receipt-wrap {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
-
-      /* ✅ keep items scroll inside receipt when long, not the whole modal */
-      .items-scroll {
-        max-height: 38vh;
-        overflow-y: auto;
-        overflow-x: hidden;
-        margin-bottom: 8px;
-
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-      }
-      .items-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
-
-      /* ✅ buttons like before */
-      .buttons {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .btn {
-        padding: 12px 16px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 800;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 240px;
-      }
-
-      .btn-print { background: #16a34a; color: #fff; }
-      .btn-print:hover { background: #15803d; }
-
-      .btn-close { background: #6b7280; color: #fff; }
-      .btn-close:hover { background: #4b5563; }
-
-      /* ✅ mobile button width */
-      @media (max-width: 520px) {
-        .btn { min-width: 0; width: 44vw; }
-      }
-    }
-
-    /* -------- Print layout (center on paper) -------- */
-    @page { size: auto; margin: 0; }
-
-    @media print {
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-      }
-
-      /* ✅ center receipt on page */
-      body {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-      }
-
-      .receipt-wrap {
-        width: 80mm !important;
-        max-width: 80mm !important;
-        box-shadow: none !important;
-      }
-
-      .items-scroll {
-        max-height: none !important;
-        overflow: visible !important;
-      }
-
-      .buttons, .no-print { display: none !important; }
-    }
   `;
 
-  // ✅ Safari detection (macOS + iOS Safari)
   const isSafari = () => {
-    if (typeof navigator === "undefined") return false;
     const ua = navigator.userAgent;
     const isAppleWebKit = /AppleWebKit/i.test(ua);
     const isNotChrome = !/Chrome|CriOS|Edg|OPR|Brave/i.test(ua);
@@ -371,7 +388,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
     const receiptHTML = el.outerHTML;
 
     try {
-      // ✅ Safari (Mac + iOS): new window is most reliable
       if (isSafari()) {
         const w = window.open("", "_blank");
         if (!w) {
@@ -406,7 +422,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
         return;
       }
 
-      // ✅ Chrome/Edge/Android/Windows: iframe print
       const iframe = document.createElement("iframe");
       iframe.setAttribute(
         "style",
@@ -566,7 +581,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
               {discountAmount > 0 && (
                 <div className="total-line">
-                  <span>Discount ({transaction.discount || 0}%)</span>
+                  <span>Discount</span>
                   <span>
                     <b>
                       -{SETTINGS.currency}
@@ -628,6 +643,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
           </div>
         </div>
 
+        {/* ✅ Always visible on mobile now */}
         <div className="buttons no-print">
           <button className="btn btn-print" onClick={handlePrint}>
             <Printer size={18} style={{ marginRight: 8 }} />
