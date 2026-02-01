@@ -1,11 +1,8 @@
 import { Printer } from "lucide-react";
 import { SETTINGS } from "../../data/menuData";
 import { formatDateTime } from "../../utils/dateUtils";
-import { useRef } from "react";
 
 const PrintReceipt = ({ transaction, onClose }) => {
-  const printFrameRef = useRef(null);
-
   if (!transaction) return null;
 
   const items = transaction.items || [];
@@ -37,17 +34,74 @@ const PrintReceipt = ({ transaction, onClose }) => {
   const totalQty =
     typeof transaction.totalQty === "number"
       ? transaction.totalQty
+      : typeof transaction.totalQuantity === "number"
+      ? transaction.totalQuantity
       : items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   const receiptDate = transaction.timestampISO
     ? formatDateTime(new Date(transaction.timestampISO))
     : transaction.timestamp
     ? formatDateTime(new Date(transaction.timestamp))
+    : transaction.date
+    ? formatDateTime(new Date(transaction.date))
     : formatDateTime(new Date());
 
+  // Check if this is a preview transaction
+  const isPreview = transaction.id?.startsWith("PREVIEW") || transaction.paymentMethod === "Preview";
+
+  // Get proper order number
+  const getOrderNumber = () => {
+    if (transaction.orderNumber) {
+      return transaction.orderNumber;
+    }
+    try {
+      const storedOrderNo = localStorage.getItem("pos_weekly_order_number");
+      return storedOrderNo ? parseInt(storedOrderNo, 10) : 1;
+    } catch {
+      return 1;
+    }
+  };
+
+  const orderNum = getOrderNumber();
+
+  // Get proper Order ID
+  const getOrderId = () => {
+    if (!isPreview && transaction.id && transaction.id !== "N/A") {
+      return transaction.id.replace(/-SPLIT$/, "");
+    }
+    const dateKey = new Date().toISOString().slice(0, 10);
+    try {
+      const seq = parseInt(localStorage.getItem("pos_tx_seq") || "1", 10);
+      return `ORD-${dateKey}-${seq}`;
+    } catch {
+      return `ORD-${dateKey}-1`;
+    }
+  };
+
+  const orderId = getOrderId();
+
+  // Get proper payment method
+  const getPaymentMethod = () => {
+    if (isPreview) {
+      try {
+        const storedMethod = localStorage.getItem("pos_payment_method");
+        if (storedMethod) {
+          return storedMethod.charAt(0).toUpperCase() + storedMethod.slice(1).toLowerCase();
+        }
+      } catch {}
+      return "Cash";
+    }
+    const method = transaction.paymentMethod || "cash";
+    return method.charAt(0).toUpperCase() + method.slice(1).toLowerCase();
+  };
+
+  const paymentMethod = getPaymentMethod();
+
   const getTransactionTypeBadge = () => {
+    if (isPreview) {
+      return "";
+    }
     if (transaction.type === "split") return "SPLIT PAYMENT";
-    if (transaction.type === "preview") return "PREVIEW";
     return "FULL PAYMENT";
   };
 
@@ -83,14 +137,22 @@ const PrintReceipt = ({ transaction, onClose }) => {
     return div.innerHTML;
   };
 
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   const handlePrint = () => {
-    // Generate receipt HTML
+    const badgeHTML = getTransactionTypeBadge() 
+      ? `<div class="type-badge">${escapeHtml(getTransactionTypeBadge())}</div>` 
+      : '';
+
     const receiptHTML = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Receipt - ${escapeHtml(transaction.id || 'N/A')}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Receipt - ${escapeHtml(orderId)}</title>
   <style>
     @page {
       size: 80mm auto;
@@ -101,6 +163,15 @@ const PrintReceipt = ({ transaction, onClose }) => {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    
+    html, body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
     }
     
     body {
@@ -108,13 +179,13 @@ const PrintReceipt = ({ transaction, onClose }) => {
       font-size: 12px;
       line-height: 1.4;
       color: #000000;
-      background: #ffffff;
-      width: 80mm;
       padding: 10mm;
     }
     
     .receipt-container {
       width: 100%;
+      max-width: 80mm;
+      margin: 0 auto;
     }
     
     .header {
@@ -149,6 +220,26 @@ const PrintReceipt = ({ transaction, onClose }) => {
     .order-block {
       font-size: 11px;
       margin: 6px 0;
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin: 2px 0 4px 0;
+      font-weight: bold;
+      gap: 8px;
+    }
+    
+    .order-header .left {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    
+    .order-header .right {
+      flex-shrink: 0;
+      text-align: right;
+      white-space: nowrap;
     }
     
     .row {
@@ -269,7 +360,11 @@ const PrintReceipt = ({ transaction, onClose }) => {
     @media print {
       body {
         width: 80mm;
-        padding: 0;
+        padding: 5mm;
+      }
+      
+      .receipt-container {
+        width: 100%;
       }
     }
   </style>
@@ -279,25 +374,25 @@ const PrintReceipt = ({ transaction, onClose }) => {
     <div class="header">
       <div class="shop-name">${escapeHtml(SETTINGS.shopName)}</div>
       <div class="shop-sub">${escapeHtml(SETTINGS.shopSubtitle || "")}</div>
-      <div class="type-badge">${escapeHtml(getTransactionTypeBadge())}</div>
+      ${badgeHTML}
     </div>
 
     <div class="order-block">
-      <div class="row">
-        <span><b>Order Details (Exc Tax)</b></span>
-        <span><b>${escapeHtml(receiptDate)}</b></span>
+      <div class="order-header">
+        <span class="left">Order Details </span>
+        <span class="right">${escapeHtml(receiptDate)}</span>
       </div>
       <div class="row">
         <span>Order No</span>
-        <span>${escapeHtml(String(transaction.orderNumber ?? "N/A"))}</span>
+        <span>#${orderNum}</span>
       </div>
       <div class="row">
         <span>Order ID</span>
-        <span>${escapeHtml(transaction.id || "N/A")}</span>
+        <span>${escapeHtml(orderId)}</span>
       </div>
       <div class="row">
         <span>Payment Method</span>
-        <span style="text-transform: capitalize;">${escapeHtml(transaction.paymentMethod || "Cash")}</span>
+        <span>${escapeHtml(paymentMethod)}</span>
       </div>
       <div class="row">
         <span>Staff</span>
@@ -389,51 +484,62 @@ const PrintReceipt = ({ transaction, onClose }) => {
 </body>
 </html>`;
 
-    // Remove existing iframe if any
-    const existingFrame = document.getElementById('print-receipt-frame');
-    if (existingFrame) {
-      existingFrame.remove();
+    // Mobile-friendly printing
+    if (isMobile()) {
+      const printWindow = window.open('', '_blank');
+      
+      if (!printWindow) {
+        alert('Please allow pop-ups to print receipts.');
+        return;
+      }
+
+      printWindow.document.open();
+      printWindow.document.write(receiptHTML);
+      printWindow.document.close();
+
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+        }, 500);
+      };
+    } else {
+      const existingFrame = document.getElementById('print-receipt-frame');
+      if (existingFrame) {
+        existingFrame.remove();
+      }
+
+      const iframe = document.createElement('iframe');
+      iframe.id = 'print-receipt-frame';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-10000px';
+      iframe.style.left = '-10000px';
+      iframe.style.width = '80mm';
+      iframe.style.height = '100vh';
+      iframe.style.border = 'none';
+      
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(receiptHTML);
+      iframeDoc.close();
+
+      iframe.onload = () => {
+        setTimeout(() => {
+          try {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+            
+            setTimeout(() => {
+              iframe.remove();
+            }, 1000);
+          } catch (error) {
+            console.error('Print error:', error);
+            alert('Unable to print. Please try again.');
+          }
+        }, 500);
+      };
     }
-
-    // Create hidden iframe
-    const iframe = document.createElement('iframe');
-    iframe.id = 'print-receipt-frame';
-    iframe.style.position = 'fixed';
-    iframe.style.top = '-10000px';
-    iframe.style.left = '-10000px';
-    iframe.style.width = '80mm';
-    iframe.style.height = '100vh';
-    iframe.style.border = 'none';
-    
-    document.body.appendChild(iframe);
-    printFrameRef.current = iframe;
-
-    // Write content to iframe
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write(receiptHTML);
-    iframeDoc.close();
-
-    // Wait for content to load, then print
-    iframe.onload = () => {
-      setTimeout(() => {
-        try {
-          iframe.contentWindow.focus();
-          iframe.contentWindow.print();
-          
-          // Clean up after print
-          setTimeout(() => {
-            if (printFrameRef.current) {
-              printFrameRef.current.remove();
-              printFrameRef.current = null;
-            }
-          }, 1000);
-        } catch (error) {
-          console.error('Print error:', error);
-          alert('Unable to print. Please try again.');
-        }
-      }, 500);
-    };
   };
 
   const modalStyles = {
@@ -503,6 +609,14 @@ const PrintReceipt = ({ transaction, onClose }) => {
       fontSize: '9px',
       fontWeight: 'bold',
     },
+    orderHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      margin: '2px 0 6px 0',
+      fontSize: '11px',
+      fontWeight: 'bold',
+      gap: '8px',
+    },
     row: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -540,6 +654,8 @@ const PrintReceipt = ({ transaction, onClose }) => {
     },
   };
 
+  const badgeContent = getTransactionTypeBadge();
+
   return (
     <div style={modalStyles.overlay} onClick={onClose}>
       <div style={modalStyles.container} onClick={(e) => e.stopPropagation()}>
@@ -549,25 +665,25 @@ const PrintReceipt = ({ transaction, onClose }) => {
           <div style={modalStyles.header}>
             <div style={modalStyles.shopName}>{SETTINGS.shopName}</div>
             <div style={modalStyles.shopSub}>{SETTINGS.shopSubtitle || ""}</div>
-            <div style={modalStyles.typeBadge}>{getTransactionTypeBadge()}</div>
+            {badgeContent && <div style={modalStyles.typeBadge}>{badgeContent}</div>}
           </div>
 
           <div style={{ fontSize: '11px', margin: '6px 0' }}>
-            <div style={modalStyles.row}>
-              <span><b>Order Details</b></span>
-              <span><b>{receiptDate}</b></span>
+            <div style={modalStyles.orderHeader}>
+              <span>Order Details</span>
+              <span>{receiptDate}</span>
             </div>
             <div style={modalStyles.row}>
               <span>Order No</span>
-              <span>{transaction.orderNumber ?? "N/A"}</span>
+              <span>#{orderNum}</span>
             </div>
             <div style={modalStyles.row}>
               <span>Order ID</span>
-              <span>{transaction.id || "N/A"}</span>
+              <span>{orderId}</span>
             </div>
             <div style={modalStyles.row}>
               <span>Payment</span>
-              <span style={{ textTransform: 'capitalize' }}>{transaction.paymentMethod || "Cash"}</span>
+              <span>{paymentMethod}</span>
             </div>
           </div>
 
