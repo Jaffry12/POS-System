@@ -168,7 +168,7 @@ const OrderPanel = ({ onClose = () => {} }) => {
 
     holdButton: {
       flex: "0 0 auto",
-      padding: "16px",
+      padding: "16px 20px",
       border: `2px solid ${theme.warning}`,
       borderRadius: "10px",
       background: "transparent",
@@ -241,6 +241,8 @@ const OrderPanel = ({ onClose = () => {} }) => {
         .order-mobile-header { display: none; }
         .order-desktop-header { display: block; }
 
+        .order-hold-text { display: inline; }
+
         @media (max-width: 1280px) {
           .order-panel { width: 350px !important; }
         }
@@ -306,6 +308,9 @@ const OrderPanel = ({ onClose = () => {} }) => {
           .order-empty-text { font-size: 13px !important; }
 
           .order-panel-list { max-height: 32vh !important; }
+
+          .order-hold-button { padding: 12px !important; }
+          .order-hold-text { display: none !important; }
         }
 
         .order-hold-button:hover:not(:disabled) {
@@ -373,6 +378,7 @@ const OrderPanel = ({ onClose = () => {} }) => {
               title="Hold this order"
             >
               <Archive size={18} />
+              <span className="order-hold-text">Hold</span>
             </button>
             <button
               className="order-place-button"

@@ -189,55 +189,77 @@ const PaymentModal = ({ isOpen, onClose }) => {
   }, [device]);
 
   /* ------------------ Totals ------------------ */
-  const baseSubtotal = useMemo(() => {
-    return (
-      (currentOrder || []).reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      ) / 100
-    );
-  }, [currentOrder]);
+  /* ------------------ Totals (SAFE: cents integer math) ------------------ */
 
-  const percentDiscountAmount = useMemo(() => {
-    return (baseSubtotal * (discount || 0)) / 100;
-  }, [baseSubtotal, discount]);
+// subtotal in cents (your item.price already looks like cents)
+const baseSubtotalCents = useMemo(() => {
+  return (currentOrder || []).reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+    0
+  );
+}, [currentOrder]);
 
-  const amountDiscountAmount = useMemo(() => {
-    const v = parseFloat(discountInput);
-    return Number.isFinite(v) ? Math.max(0, v) : 0;
-  }, [discountInput]);
+// discount cents
+const percentDiscountCents = useMemo(() => {
+  // percent of subtotal, rounded to cents
+  const pct = Number(discount || 0);
+  return Math.round(baseSubtotalCents * (pct / 100));
+}, [baseSubtotalCents, discount]);
 
-  const discountAmount = useMemo(() => {
-    if (discountMode === "amount")
-      return Math.min(amountDiscountAmount, baseSubtotal);
-    return Math.min(percentDiscountAmount, baseSubtotal);
-  }, [discountMode, amountDiscountAmount, percentDiscountAmount, baseSubtotal]);
+const amountDiscountCents = useMemo(() => {
+  // user enters dollars (e.g. 2.50) → convert to cents
+  const v = parseFloat(discountInput);
+  if (!Number.isFinite(v)) return 0;
+  return Math.max(0, Math.round((v + Number.EPSILON) * 100));
+}, [discountInput]);
 
-  const tax = useMemo(() => {
-    const taxable = Math.max(0, baseSubtotal - discountAmount);
-    return taxable * SETTINGS.taxRate;
-  }, [baseSubtotal, discountAmount]);
+const discountCents = useMemo(() => {
+  const raw =
+    discountMode === "amount" ? amountDiscountCents : percentDiscountCents;
+  return Math.min(raw, baseSubtotalCents); // cannot exceed subtotal
+}, [discountMode, amountDiscountCents, percentDiscountCents, baseSubtotalCents]);
 
-  const total = useMemo(() => {
-    return Math.max(0, baseSubtotal - discountAmount + tax);
-  }, [baseSubtotal, discountAmount, tax]);
+// tax cents (rounded)
+const taxCents = useMemo(() => {
+  const taxableCents = Math.max(0, baseSubtotalCents - discountCents);
+  // taxable dollars = taxableCents / 100 → multiply taxRate → back to cents
+  return Math.round((taxableCents * SETTINGS.taxRate) ); 
+  // NOTE: because taxableCents already *100, taxRate produces cents directly
+}, [baseSubtotalCents, discountCents]);
+
+// total cents
+const totalCents = useMemo(() => {
+  return Math.max(0, baseSubtotalCents - discountCents + taxCents);
+}, [baseSubtotalCents, discountCents, taxCents]);
+
+// values in dollars for display
+const baseSubtotal = useMemo(() => baseSubtotalCents / 100, [baseSubtotalCents]);
+const discountAmount = useMemo(() => discountCents / 100, [discountCents]);
+const tax = useMemo(() => taxCents / 100, [taxCents]);
+const total = useMemo(() => totalCents / 100, [totalCents]);
 
   // Split Totals (selected items only)
-  const splitSubtotal = useMemo(() => {
-    return (
-      (currentOrder || [])
-        .filter((item) => selectedItemIds.has(item.orderId))
-        .reduce((sum, item) => sum + item.price * item.quantity, 0) / 100
+  const splitSubtotalCents = useMemo(() => {
+  return (currentOrder || [])
+    .filter((item) => selectedItemIds.has(item.orderId))
+    .reduce(
+      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+      0
     );
-  }, [currentOrder, selectedItemIds]);
+}, [currentOrder, selectedItemIds]);
 
-  const splitTax = useMemo(() => {
-    return splitSubtotal * SETTINGS.taxRate;
-  }, [splitSubtotal]);
+const splitTaxCents = useMemo(() => {
+  return Math.round(splitSubtotalCents * SETTINGS.taxRate);
+}, [splitSubtotalCents]);
 
-  const splitTotal = useMemo(() => {
-    return splitSubtotal + splitTax;
-  }, [splitSubtotal, splitTax]);
+const splitTotalCents = useMemo(() => {
+  return splitSubtotalCents + splitTaxCents;
+}, [splitSubtotalCents, splitTaxCents]);
+
+const splitSubtotal = useMemo(() => splitSubtotalCents / 100, [splitSubtotalCents]);
+const splitTax = useMemo(() => splitTaxCents / 100, [splitTaxCents]);
+const splitTotal = useMemo(() => splitTotalCents / 100, [splitTotalCents]);
+
 
   /* ------------------ Payment helpers ------------------ */
   const handleNumberPad = (value) => {
@@ -258,40 +280,72 @@ const PaymentModal = ({ isOpen, onClose }) => {
   };
 
   const buildPreviewTransaction = () => {
-    const itemsForPreview = (currentOrder || []).map((it) => ({
-      ...it,
-      price: Number(it.price || 0) / 100,
-      basePrice: Number(it.basePrice || 0) / 100,
-      modifiersTotal: Number(it.modifiersTotal || 0) / 100,
-      finalUnitPrice: Number(it.finalUnitPrice || 0) / 100,
-    }));
+  // itemsForPreview prices are in dollars for PrintReceipt display
+  const itemsForPreview = (currentOrder || []).map((it) => ({
+    ...it,
+    price: Number(it.price || 0) / 100, // dollars
+    basePrice: Number(it.basePrice || 0) / 100,
+    modifiersTotal: Number(it.modifiersTotal || 0) / 100,
+    finalUnitPrice: Number(it.finalUnitPrice || 0) / 100,
+  }));
 
-    const previewSubtotal = itemsForPreview.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-    const previewTax = previewSubtotal * SETTINGS.taxRate;
-    const previewDiscountAmount = (previewSubtotal * (discount || 0)) / 100;
-    const previewTotal = previewSubtotal + previewTax - previewDiscountAmount;
-    const previewTotalQty = itemsForPreview.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
+  // ✅ subtotal in dollars (for readability)
+  const previewSubtotal = itemsForPreview.reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+    0
+  );
 
-    return {
-      id: `PREVIEW-${Date.now()}`,
-      date: new Date().toISOString(),
-      items: itemsForPreview,
-      subtotal: previewSubtotal,
-      tax: previewTax,
-      discount: previewDiscountAmount,
-      total: previewTotal,
-      totalQuantity: previewTotalQty,
-      paymentMethod: "Preview",
-      amountReceived: 0,
-      change: 0,
-    };
+  // ✅ Convert to cents and do all math in cents
+  const previewSubtotalCents = Math.round((previewSubtotal + Number.EPSILON) * 100);
+
+  // percent discount (your discount state is percent)
+  const previewDiscountCents = Math.round(
+    previewSubtotalCents * ((Number(discount || 0) + Number.EPSILON) / 100)
+  );
+
+  const taxableCents = Math.max(0, previewSubtotalCents - previewDiscountCents);
+
+  // taxableCents is already cents → multiply by taxRate → gives cents
+  const previewTaxCents = Math.round(taxableCents * SETTINGS.taxRate);
+
+  const previewTotalCents = taxableCents + previewTaxCents;
+
+  // ✅ Convert back to dollars for receipt
+  const previewSubtotalFixed = previewSubtotalCents / 100;
+  const previewTaxFixed = previewTaxCents / 100;
+  const previewDiscountFixed = previewDiscountCents / 100;
+  const previewTotalFixed = previewTotalCents / 100;
+
+  const previewTotalQty = itemsForPreview.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
+
+  return {
+    id: `PREVIEW-${Date.now()}`,
+    date: new Date().toISOString(),
+    type: "preview",
+    items: itemsForPreview,
+
+    // ✅ use these fixed values
+    subtotal: previewSubtotalFixed,
+    tax: previewTaxFixed,
+
+    // IMPORTANT:
+    // Your PrintReceipt reads either transaction.discountAmount OR computes from transaction.discount(%).
+    // So store BOTH to be safe:
+    discount: Number(discount || 0), // percent
+    discountAmount: previewDiscountFixed, // dollars
+
+    total: previewTotalFixed,
+    totalQty: previewTotalQty,
+
+    paymentMethod: "Preview",
+    amountReceived: 0,
+    change: 0,
   };
+};
+
 
   const handlePrintPreview = () => {
     const preview = buildPreviewTransaction();

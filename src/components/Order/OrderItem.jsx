@@ -4,6 +4,13 @@ import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import { SETTINGS } from "../../data/menuData";
 
+// Format price to remove trailing zero (9.90 becomes 9.9)
+const formatPrice = (priceInCents) => {
+  const dollars = (priceInCents / 100).toFixed(2);
+  // Remove trailing zero: "9.90" -> "9.9", but keep "10.00" -> "10.0" -> "10"
+  return dollars.replace(/\.?0+$/, '').replace(/\.$/, '.0');
+};
+
 const OrderItem = ({ item }) => {
   const { theme } = useTheme();
   const { updateQuantity, removeFromOrder } = usePOS();
@@ -104,7 +111,7 @@ const OrderItem = ({ item }) => {
     },
   };
 
-  const unit = Number(item?.price || 0) / 100;
+  const unit = Number(item?.price || 0);
   const lineTotal = unit * Number(item?.quantity || 1);
   const sizeDisplay = item.size ? ` (${item.size})` : '';
 
@@ -227,7 +234,7 @@ const OrderItem = ({ item }) => {
               {item.name}{sizeDisplay}
             </div>
             <div style={styles.unitPrice} className="order-item-price">
-              {SETTINGS.currency}{unit.toFixed(2)}
+              {SETTINGS.currency}{formatPrice(unit)}
             </div>
           </div>
 
@@ -236,7 +243,7 @@ const OrderItem = ({ item }) => {
               {modifierLines.map((m, idx) => (
                 <div key={idx} style={styles.modifierText}>
                   {m.name}
-                  {m.price > 0 && ` +${SETTINGS.currency}${(Number(m.price || 0) / 100).toFixed(2)}`}
+                  {m.price > 0 && ` +${SETTINGS.currency}${formatPrice(Number(m.price || 0))}`}
                 </div>
               ))}
             </div>
@@ -244,7 +251,7 @@ const OrderItem = ({ item }) => {
 
           <div style={styles.bottomRow} className="order-item-bottom">
             <div style={styles.lineTotal} className="order-item-total">
-              Line: {SETTINGS.currency}{lineTotal.toFixed(2)}
+              Line: {SETTINGS.currency}{formatPrice(lineTotal)}
             </div>
 
             <div style={styles.controls} className="order-item-controls">

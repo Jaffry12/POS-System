@@ -5,6 +5,11 @@ import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
 import { SETTINGS } from "../../data/menuData";
 
+// Proper rounding function that always rounds .5 up (not banker's rounding)
+const roundToTwo = (num) => {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+};
+
 const OrderSummary = () => {
   const { theme } = useTheme();
   const { currentOrder, discount, setDiscount } = usePOS();
@@ -16,11 +21,11 @@ const OrderSummary = () => {
       return sum + unit * qty;
     }, 0);
 
-    const subtotal = subtotalCents / 100;
-    const taxAmount = subtotal * SETTINGS.taxRate;
+    const subtotal = roundToTwo(subtotalCents / 100);
+    const taxAmount = roundToTwo(subtotal * SETTINGS.taxRate);
     const safeDiscount = Number.isFinite(discount) ? Math.max(0, Math.min(100, discount)) : 0;
-    const discountAmount = (subtotal * safeDiscount) / 100;
-    const total = subtotal + taxAmount - discountAmount;
+    const discountAmount = roundToTwo((subtotal * safeDiscount) / 100);
+    const total = roundToTwo(subtotal + taxAmount - discountAmount);
 
     return { subtotal, taxAmount, discountAmount, total, safeDiscount };
   }, [currentOrder, discount]);

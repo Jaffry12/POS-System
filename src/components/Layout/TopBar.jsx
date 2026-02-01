@@ -145,6 +145,7 @@ const TopBar = () => {
   return (
     <>
       <style>{`
+        /* Desktop - Default styling */
         .topbar-responsive {
           padding: 16px 24px;
         }
@@ -185,25 +186,42 @@ const TopBar = () => {
           opacity: 0.9;
         }
 
+        /* Tablet: Icon-only buttons to prevent text cutoff */
         @media (max-width: 1024px) {
           .topbar-responsive {
             padding: 14px 20px !important;
           }
           
+          .topbar-left-section {
+            gap: 10px !important;
+          }
+          
           .topbar-search-container {
-            max-width: 350px !important;
+            max-width: 250px !important;
           }
 
           .topbar-button-group {
             gap: 8px !important;
           }
 
+          /* Make buttons square with icon only on tablet */
           .topbar-held-button,
           .topbar-add-button {
-            padding: 10px 16px !important;
+            width: 48px !important;
+            height: 48px !important;
+            min-width: 48px !important;
+            padding: 0 !important;
+            border-radius: 12px !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+          }
+
+          .topbar-button-text {
+            display: none !important;
           }
         }
 
+        /* Mobile: Compact layout with icon-only buttons */
         @media (max-width: 768px) {
           .topbar-responsive {
             padding: 12px 16px 12px 70px !important;
@@ -253,6 +271,7 @@ const TopBar = () => {
           }
         }
 
+        /* Small Mobile: Even more compact */
         @media (max-width: 480px) {
           .topbar-responsive {
             padding: 10px 12px 10px 64px !important;
@@ -300,7 +319,7 @@ const TopBar = () => {
           </div>
 
           <div className="topbar-button-group" style={styles.buttonGroup}>
-            {/* ✅ Navigate to held orders page */}
+            {/* Held Orders Button */}
             <button
               className="topbar-held-button"
               style={styles.heldOrdersButton}
@@ -314,6 +333,7 @@ const TopBar = () => {
               )}
             </button>
 
+            {/* Add New Item Button */}
             <button
               className="topbar-add-button"
               style={styles.addButton}

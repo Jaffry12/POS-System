@@ -4,6 +4,13 @@ import ModifierModal from "./ModifierModal";
 import { SETTINGS } from "../../data/menuData";
 import { usePOS } from "../../hooks/usePOS";
 
+// Format price to remove trailing zero (9.90 becomes 9.9)
+const formatPrice = (priceInCents) => {
+  const dollars = (priceInCents / 100).toFixed(2);
+  // Remove trailing zero: "9.90" -> "9.9", but keep "10.00" -> "10.0" -> "10"
+  return dollars.replace(/\.?0+$/, '').replace(/\.$/, '.0');
+};
+
 const MenuItem = ({ item }) => {
   const { theme } = useTheme();
   const { addToOrder } = usePOS();
@@ -15,8 +22,8 @@ const MenuItem = ({ item }) => {
 
   // Display price - show lowest price if has sizes
   const priceDisplay = hasSizes
-    ? `${SETTINGS.currency}${(Object.values(item.prices)[0] / 100).toFixed(2)}`
-    : `${SETTINGS.currency}${((item.price || 0) / 100).toFixed(2)}`;
+    ? `${SETTINGS.currency}${formatPrice(Object.values(item.prices)[0])}`
+    : `${SETTINGS.currency}${formatPrice(item.price || 0)}`;
 
   const handleClick = () => {
     // ✅ If nothing to customize, add instantly (no modal blink)
