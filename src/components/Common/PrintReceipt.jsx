@@ -51,6 +51,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
     return "FULL PAYMENT";
   };
 
+  // only for modifier option prices that might be cents
   const normalizeMoney = (value) => {
     const n = Number(value || 0);
     if (!Number.isFinite(n)) return 0;
@@ -68,8 +69,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
           group.options.forEach((option) => {
             const raw = option?.price ?? 0;
             const p = normalizeMoney(raw);
-            const priceStr =
-              p > 0 ? ` +${SETTINGS.currency}${p.toFixed(2)}` : "";
+            const priceStr = p > 0 ? ` +${SETTINGS.currency}${p.toFixed(2)}` : "";
             modLines.push(`- ${option.name}${priceStr}`);
           });
         }
@@ -85,26 +85,36 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
     /* -------- Screen layout -------- */
     @media screen {
+      /* Full-screen overlay area */
       .print-page {
         height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 16px 12px;
-        gap: 12px;
+        width: 100%;
+        display: grid;
+        place-items: center;
+        padding: 12px;
       }
 
-      /* ✅ receipt area becomes scrollable so buttons remain visible */
+      /* Centered GROUP (receipt + buttons) */
+      .print-shell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;             /* ✅ small desktop gap */
+        width: 100%;
+        max-width: 520px;
+      }
+
+      /* receipt container NO longer flex:1 -> no big empty space */
       .receipt-container {
         width: 100%;
-        flex: 1;
-        min-height: 0;
         display: flex;
         justify-content: center;
         align-items: center;
+
+        /* allow scroll if receipt grows */
         overflow: auto;
-        padding: 10px 0;
+        padding: 0;          /* ✅ remove padding that creates visual gap */
       }
 
       .receipt-wrap {
@@ -121,7 +131,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       }
 
-      /* ✅ scroll long items INSIDE receipt */
+      /* scroll long items INSIDE receipt */
       .items-scroll {
         max-height: 38vh;
         overflow-y: auto;
@@ -137,6 +147,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
         gap: 12px;
         justify-content: center;
         align-items: center;
+        width: 100%;
       }
 
       .btn {
@@ -158,16 +169,18 @@ const PrintReceipt = ({ transaction, onClose }) => {
       .btn-close { background: #6b7280; color: #fff; }
       .btn-close:hover { background: #4b5563; }
 
-      /* ✅ MOBILE FIX: keep buttons always visible */
+      /* -------- Mobile fix: sticky buttons + reserve space -------- */
       @media (max-width: 520px) {
-        .print-page {
-          padding: 12px 10px;
+        .print-page { padding: 10px; }
+
+        .print-shell {
+          max-width: 100%;
           gap: 10px;
         }
 
+        /* Reserve space so sticky buttons don't cover receipt bottom */
         .receipt-container {
-          /* leave room for sticky button bar */
-          padding: 8px 0;
+          padding-bottom: calc(120px + env(safe-area-inset-bottom));
         }
 
         .buttons {
@@ -180,8 +193,6 @@ const PrintReceipt = ({ transaction, onClose }) => {
           background: rgba(0,0,0,0.25);
           backdrop-filter: blur(10px);
           border-radius: 14px;
-
-          /* keep the same look as before */
           gap: 10px;
         }
 
@@ -192,7 +203,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
       }
     }
 
-    /* -------- Print layout -------- */
+    /* -------- Print layout (only receipt) -------- */
     @page { size: auto; margin: 0; }
 
     @media print {
@@ -412,7 +423,7 @@ const PrintReceipt = ({ transaction, onClose }) => {
                   setTimeout(function () {
                     window.focus();
                     window.print();
-                  }, 150);
+                  }, 200);
                 };
               </script>
             </body>
@@ -463,9 +474,9 @@ const PrintReceipt = ({ transaction, onClose }) => {
             try {
               document.body.removeChild(iframe);
             } catch {}
-          }, 300);
+          }, 400);
         }
-      }, 250);
+      }, 300);
     } catch (e) {
       console.error("❌ Print error:", e);
       alert("Failed to print. Please try again.");
@@ -477,181 +488,182 @@ const PrintReceipt = ({ transaction, onClose }) => {
       <style>{receiptStyles}</style>
 
       <div className="print-page">
-        <div className="receipt-container">
-          <div className="receipt-wrap" id="print-receipt" ref={receiptRef}>
-            <div className="header">
-              <div className="shop-name">{SETTINGS.shopName}</div>
-              <div className="shop-sub">{SETTINGS.shopSubtitle || ""}</div>
-              <div className="type-badge">{getTransactionTypeBadge()}</div>
-            </div>
-
-            <div className="order-block">
-              <div className="row">
-                <span>
-                  <b>Order Details (Exc Tax)</b>
-                </span>
-                <span>
-                  <b>{receiptDate}</b>
-                </span>
+        <div className="print-shell">
+          <div className="receipt-container">
+            <div className="receipt-wrap" id="print-receipt" ref={receiptRef}>
+              <div className="header">
+                <div className="shop-name">{SETTINGS.shopName}</div>
+                <div className="shop-sub">{SETTINGS.shopSubtitle || ""}</div>
+                <div className="type-badge">{getTransactionTypeBadge()}</div>
               </div>
 
-              <div className="row">
-                <span>Order No</span>
-                <span>{transaction.orderNumber ?? "N/A"}</span>
+              <div className="order-block">
+                <div className="row">
+                  <span>
+                    <b>Order Details (Exc Tax)</b>
+                  </span>
+                  <span>
+                    <b>{receiptDate}</b>
+                  </span>
+                </div>
+
+                <div className="row">
+                  <span>Order No</span>
+                  <span>{transaction.orderNumber ?? "N/A"}</span>
+                </div>
+
+                <div className="row">
+                  <span>Order ID</span>
+                  <span>{transaction.id || "N/A"}</span>
+                </div>
+
+                <div className="row">
+                  <span>Payment Method</span>
+                  <span style={{ textTransform: "capitalize" }}>
+                    {transaction.paymentMethod || "Cash"}
+                  </span>
+                </div>
+
+                <div className="row">
+                  <span>Staff</span>
+                  <span>Manager</span>
+                </div>
+
+                <div className="row">
+                  <span>Device</span>
+                  <span>Till2</span>
+                </div>
               </div>
 
-              <div className="row">
-                <span>Order ID</span>
-                <span>{transaction.id || "N/A"}</span>
+              <div className="divider" />
+
+              <div className="table-head">
+                <div className="th-product">PRODUCT</div>
+                <div className="th-price">PRICE</div>
+                <div className="th-qty">QTY</div>
+                <div className="th-total">TOTAL</div>
               </div>
 
-              <div className="row">
-                <span>Payment Method</span>
-                <span style={{ textTransform: "capitalize" }}>
-                  {transaction.paymentMethod || "Cash"}
-                </span>
-              </div>
+              <div className="items-scroll">
+                {items.map((item, index) => {
+                  const price = Number(item.price || 0);
+                  const qty = Number(item.quantity || 0);
+                  const lineTotal = price * qty;
+                  const modLines = getItemModifiers(item);
 
-              <div className="row">
-                <span>Staff</span>
-                <span>Manager</span>
-              </div>
-
-              <div className="row">
-                <span>Device</span>
-                <span>Till2</span>
-              </div>
-            </div>
-
-            <div className="divider" />
-
-            <div className="table-head">
-              <div className="th-product">PRODUCT</div>
-              <div className="th-price">PRICE</div>
-              <div className="th-qty">QTY</div>
-              <div className="th-total">TOTAL</div>
-            </div>
-
-            <div className="items-scroll">
-              {items.map((item, index) => {
-                const price = Number(item.price || 0);
-                const qty = Number(item.quantity || 0);
-                const lineTotal = price * qty;
-                const modLines = getItemModifiers(item);
-
-                return (
-                  <div key={index} className="table-row">
-                    <div className="product-line">
-                      <div className="product-name">{item.name}</div>
-                      <div className="cell-price">
-                        {SETTINGS.currency}
-                        {price.toFixed(2)}
+                  return (
+                    <div key={index} className="table-row">
+                      <div className="product-line">
+                        <div className="product-name">{item.name}</div>
+                        <div className="cell-price">
+                          {SETTINGS.currency}
+                          {price.toFixed(2)}
+                        </div>
+                        <div className="cell-qty">{qty}</div>
+                        <div className="cell-total">
+                          {SETTINGS.currency}
+                          {lineTotal.toFixed(2)}
+                        </div>
                       </div>
-                      <div className="cell-qty">{qty}</div>
-                      <div className="cell-total">
-                        {SETTINGS.currency}
-                        {lineTotal.toFixed(2)}
-                      </div>
+
+                      {modLines.map((modLine, idx) => (
+                        <div key={idx} className="product-subline">
+                          {modLine}
+                        </div>
+                      ))}
                     </div>
-
-                    {modLines.map((modLine, idx) => (
-                      <div key={idx} className="product-subline">
-                        {modLine}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="qty-line">Total Qty {totalQty}</div>
-
-            <div className="divider" />
-
-            <div className="totals">
-              <div className="total-line">
-                <span>Sub Total</span>
-                <span>
-                  <b>
-                    {SETTINGS.currency}
-                    {subtotal.toFixed(2)}
-                  </b>
-                </span>
+                  );
+                })}
               </div>
 
-              {discountAmount > 0 && (
+              <div className="qty-line">Total Qty {totalQty}</div>
+
+              <div className="divider" />
+
+              <div className="totals">
                 <div className="total-line">
-                  <span>Discount</span>
+                  <span>Sub Total</span>
                   <span>
                     <b>
-                      -{SETTINGS.currency}
-                      {discountAmount.toFixed(2)}
+                      {SETTINGS.currency}
+                      {subtotal.toFixed(2)}
                     </b>
                   </span>
                 </div>
-              )}
 
-              <div className="total-line">
-                <span>Tax</span>
-                <span>
-                  <b>
-                    {SETTINGS.currency}
-                    {tax.toFixed(2)}
-                  </b>
-                </span>
-              </div>
+                {discountAmount > 0 && (
+                  <div className="total-line">
+                    <span>Discount</span>
+                    <span>
+                      <b>
+                        -{SETTINGS.currency}
+                        {discountAmount.toFixed(2)}
+                      </b>
+                    </span>
+                  </div>
+                )}
 
-              <div className="total-line">
-                <span>Total</span>
-                <span>
-                  <b>
+                <div className="total-line">
+                  <span>Tax</span>
+                  <span>
+                    <b>
+                      {SETTINGS.currency}
+                      {tax.toFixed(2)}
+                    </b>
+                  </span>
+                </div>
+
+                <div className="total-line">
+                  <span>Total</span>
+                  <span>
+                    <b>
+                      {SETTINGS.currency}
+                      {total.toFixed(2)}
+                    </b>
+                  </span>
+                </div>
+
+                <div className="amount-due">
+                  <span className="label">Amount Due</span>
+                  <span className="value">
                     {SETTINGS.currency}
                     {total.toFixed(2)}
-                  </b>
-                </span>
-              </div>
+                  </span>
+                </div>
 
-              <div className="amount-due">
-                <span className="label">Amount Due</span>
-                <span className="value">
-                  {SETTINGS.currency}
-                  {total.toFixed(2)}
-                </span>
-              </div>
+                <div className="tax-table-head">
+                  <span>TAX RATE</span>
+                  <span style={{ textAlign: "center" }}>PERCENTAGE</span>
+                  <span style={{ textAlign: "right" }}>TAX</span>
+                </div>
 
-              <div className="tax-table-head">
-                <span>TAX RATE</span>
-                <span style={{ textAlign: "center" }}>PERCENTAGE</span>
-                <span style={{ textAlign: "right" }}>TAX</span>
-              </div>
+                <div className="tax-table-row">
+                  <span>HST/VAT</span>
+                  <span style={{ textAlign: "center" }}>
+                    {(SETTINGS.taxRate * 100).toFixed(2)}%
+                  </span>
+                  <span style={{ textAlign: "right" }}>
+                    {SETTINGS.currency}
+                    {tax.toFixed(2)}
+                  </span>
+                </div>
 
-              <div className="tax-table-row">
-                <span>HST/VAT</span>
-                <span style={{ textAlign: "center" }}>
-                  {(SETTINGS.taxRate * 100).toFixed(2)}%
-                </span>
-                <span style={{ textAlign: "right" }}>
-                  {SETTINGS.currency}
-                  {tax.toFixed(2)}
-                </span>
-              </div>
-
-              <div className="footer">
-                {SETTINGS.receiptFooter || "Thank you for your business!"}
+                <div className="footer">
+                  {SETTINGS.receiptFooter || "Thank you for your business!"}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* ✅ Always visible on mobile now */}
-        <div className="buttons no-print">
-          <button className="btn btn-print" onClick={handlePrint}>
-            <Printer size={18} style={{ marginRight: 8 }} />
-            Print Receipt
-          </button>
-          <button className="btn btn-close" onClick={onClose}>
-            Close
-          </button>
+          <div className="buttons no-print">
+            <button className="btn btn-print" onClick={handlePrint}>
+              <Printer size={18} style={{ marginRight: 8 }} />
+              Print Receipt
+            </button>
+            <button className="btn btn-close" onClick={onClose}>
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </>
