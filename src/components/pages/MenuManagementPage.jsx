@@ -23,7 +23,17 @@ const toCents = (val) => {
   return Math.round(n * 100);
 };
 
-const fromCents = (cents) => ((Number(cents || 0) || 0) / 100).toFixed(2);
+const fromCents = (cents) => {
+  const value = (Number(cents || 0) || 0) / 100;
+  // Remove trailing zeros: 9.90 -> 9.9, 5.00 -> 5
+  return value % 1 === 0 ? value.toString() : value.toFixed(2).replace(/\.?0+$/, '');
+};
+
+const formatPriceDisplay = (cents) => {
+  const value = cents / 100;
+  if (value % 1 === 0) return value.toString();
+  return value.toFixed(2).replace(/\.?0+$/, '');
+};
 
 const MenuManagementPage = () => {
   const { theme } = useTheme();
@@ -157,12 +167,10 @@ const MenuManagementPage = () => {
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       return min === max
-        ? `${SETTINGS.currency}${(min / 100).toFixed(2)}`
-        : `${SETTINGS.currency}${(min / 100).toFixed(2)} - ${SETTINGS.currency}${(
-            max / 100
-          ).toFixed(2)}`;
+        ? `${SETTINGS.currency}${formatPriceDisplay(min)}`
+        : `${SETTINGS.currency}${formatPriceDisplay(min)} - ${SETTINGS.currency}${formatPriceDisplay(max)}`;
     }
-    return `${SETTINGS.currency}${(item.price / 100).toFixed(2)}`;
+    return `${SETTINGS.currency}${formatPriceDisplay(item.price)}`;
   };
 
   const styles = {

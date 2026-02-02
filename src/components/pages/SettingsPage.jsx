@@ -1,9 +1,13 @@
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { SETTINGS } from "../../data/menuData";
-import { FiDownload, FiTrash2 } from "react-icons/fi";
+import { FiDownload, FiTrash2, FiLogOut, FiUser, FiShield } from "react-icons/fi";
 
 const SettingsPage = () => {
   const { theme } = useTheme();
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
 
   const handleClearData = () => {
     if (
@@ -27,6 +31,13 @@ const SettingsPage = () => {
     link.download = `pos-data-${new Date().toISOString().split("T")[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      logout();
+      navigate("/login");
+    }
   };
 
   const styles = {
@@ -115,6 +126,10 @@ const SettingsPage = () => {
       background: theme.danger,
       color: "#FFFFFF",
     },
+    logoutButton: {
+      background: '#ef4444',  // Bright red background
+      color: '#FFFFFF',
+    },
     buttonGroup: {
       display: "flex",
       gap: "12px",
@@ -124,6 +139,49 @@ const SettingsPage = () => {
     icon: {
       fontSize: "18px",
       display: "inline-block",
+    },
+    userCard: {
+      background: theme.bgSecondary,
+      borderRadius: "12px",
+      padding: "20px",
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+      marginBottom: "16px",
+    },
+    userAvatar: {
+      width: "56px",
+      height: "56px",
+      borderRadius: "12px",
+      background: theme.success,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      color: "#fff",
+      fontSize: "24px",
+      fontWeight: "700",
+      flexShrink: 0,
+    },
+    userInfo: {
+      flex: 1,
+      minWidth: 0,
+    },
+    userName: {
+      fontSize: "16px",
+      fontWeight: "700",
+      color: theme.textPrimary,
+      marginBottom: "4px",
+    },
+    userRole: {
+      fontSize: "13px",
+      fontWeight: "600",
+      color: theme.textSecondary,
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+    },
+    fullWidthButton: {
+      width: "100%",
     },
   };
 
@@ -196,6 +254,21 @@ const SettingsPage = () => {
           .settings-button {
             width: 100% !important;
           }
+          .settings-user-card {
+            padding: 16px !important;
+            gap: 12px !important;
+          }
+          .settings-user-avatar {
+            width: 48px !important;
+            height: 48px !important;
+            font-size: 20px !important;
+          }
+          .settings-user-name {
+            font-size: 15px !important;
+          }
+          .settings-user-role {
+            font-size: 12px !important;
+          }
         }
 
         /* Small Mobile: < 480px */
@@ -229,6 +302,21 @@ const SettingsPage = () => {
           .settings-icon {
             font-size: 16px !important;
           }
+          .settings-user-card {
+            padding: 14px !important;
+            gap: 10px !important;
+          }
+          .settings-user-avatar {
+            width: 44px !important;
+            height: 44px !important;
+            font-size: 18px !important;
+          }
+          .settings-user-name {
+            font-size: 14px !important;
+          }
+          .settings-user-role {
+            font-size: 11px !important;
+          }
         }
       `}</style>
 
@@ -241,6 +329,41 @@ const SettingsPage = () => {
         </div>
 
         <div className="settings-scroll" style={styles.scrollableContent}>
+          {/* Account Section */}
+          <div style={styles.section} className="settings-section">
+            <div style={styles.sectionTitle} className="settings-section-title">
+              Account
+            </div>
+
+            {/* User Info Card */}
+            <div style={styles.userCard} className="settings-user-card">
+              <div style={styles.userAvatar} className="settings-user-avatar">
+                <FiUser />
+              </div>
+              <div style={styles.userInfo}>
+                <div style={styles.userName} className="settings-user-name">
+                  {user?.username || 'Admin'}
+                </div>
+                <div style={styles.userRole} className="settings-user-role">
+                  <FiShield size={14} />
+                  {user?.role === 'superadmin' ? 'Super Admin' : 'Admin'}
+                </div>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <button
+              style={{ ...styles.button, ...styles.logoutButton, ...styles.fullWidthButton }}
+              className="settings-button"
+              onClick={handleLogout}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.9")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              <FiLogOut style={styles.icon} className="settings-icon" />
+              Logout
+            </button>
+          </div>
+
           {/* Shop Information */}
           <div style={styles.section} className="settings-section">
             <div style={styles.sectionTitle} className="settings-section-title">
@@ -257,12 +380,12 @@ const SettingsPage = () => {
               <div style={styles.settingValue} className="settings-value">{SETTINGS.shopSubtitle}</div>
             </div>
 
-            <div style={{ ...styles.settingRow, borderBottom: "none" }} className="settings-row">
+            <div style={styles.settingRow} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Currency</div>
               <div style={styles.settingValue} className="settings-value">{SETTINGS.currency}</div>
             </div>
 
-            <div style={{ ...styles.settingRow, borderBottom: "none", paddingTop: 0 }} className="settings-row">
+            <div style={{ ...styles.settingRow, borderBottom: "none" }} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Tax Rate</div>
               <div style={styles.settingValue} className="settings-value">
                 {(SETTINGS.taxRate * 100).toFixed(0)}%
@@ -318,7 +441,7 @@ const SettingsPage = () => {
 
             <div style={{ ...styles.settingRow, borderBottom: "none" }} className="settings-row">
               <div style={styles.settingLabel} className="settings-label">Last Updated</div>
-              <div style={styles.settingValue} className="settings-value">January 2026</div>
+              <div style={styles.settingValue} className="settings-value">February 2026</div>
             </div>
           </div>
         </div>
