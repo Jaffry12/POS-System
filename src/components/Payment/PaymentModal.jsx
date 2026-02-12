@@ -340,7 +340,7 @@ const splitTotal = useMemo(() => splitTotalCents / 100, [splitTotalCents]);
     total: previewTotalFixed,
     totalQty: previewTotalQty,
 
-    paymentMethod: "Preview",
+    paymentMethod: paymentMethod, // Use current selected payment method
     amountReceived: 0,
     change: 0,
   };
@@ -398,7 +398,10 @@ const splitTotal = useMemo(() => splitTotalCents / 100, [splitTotalCents]);
       return;
     }
 
-    const savedTx = completePayment();
+    console.log("🔔 handleCompletePayment - Current paymentMethod:", paymentMethod);
+    
+    // Pass the current paymentMethod directly to avoid state timing issues
+    const savedTx = completePayment(paymentMethod);
     setReceiptTransaction(savedTx);
     setAutoPrint(true);
 
@@ -430,7 +433,10 @@ const splitTotal = useMemo(() => splitTotalCents / 100, [splitTotalCents]);
       return;
     }
 
-    const savedTx = completePartialPayment(Array.from(selectedItemIds));
+    console.log("🔔 handleCompleteSplitPayment - Current paymentMethod:", paymentMethod);
+    
+    // Pass the current paymentMethod directly to avoid state timing issues
+    const savedTx = completePartialPayment(Array.from(selectedItemIds), paymentMethod);
 
     if (!savedTx) {
       setError("Failed to complete split payment.");

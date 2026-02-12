@@ -61,7 +61,7 @@ const TopBar = () => {
       flexShrink: 0,
     },
     heldOrdersButton: {
-      padding: "10px 20px",
+      padding: "8px 16px",
       border: `2px solid ${theme.warning}`,
       borderRadius: "8px",
       background: "transparent",
@@ -70,7 +70,7 @@ const TopBar = () => {
       display: "flex",
       alignItems: "center",
       gap: "6px",
-      fontSize: "14px",
+      fontSize: "13px",
       fontWeight: "600",
       transition: "all 0.2s ease",
       whiteSpace: "nowrap",
@@ -95,7 +95,7 @@ const TopBar = () => {
       border: `2px solid ${theme.bgCard}`,
     },
     addButton: {
-      padding: "10px 20px",
+      padding: "8px 16px",
       border: "none",
       borderRadius: "8px",
       background: theme.success,
@@ -104,7 +104,7 @@ const TopBar = () => {
       display: "flex",
       alignItems: "center",
       gap: "6px",
-      fontSize: "14px",
+      fontSize: "13px",
       fontWeight: "600",
       transition: "all 0.2s ease",
       whiteSpace: "nowrap",
@@ -166,7 +166,8 @@ const TopBar = () => {
 
         .topbar-held-button,
         .topbar-add-button {
-          padding: 10px 20px;
+          padding: 8px 16px;
+          font-size: 13px;
         }
 
         .topbar-button-text {
@@ -184,9 +185,10 @@ const TopBar = () => {
 
         .topbar-add-button:hover {
           opacity: 0.9;
+          transform: translateY(-1px);
         }
 
-        /* Tablet: Icon-only buttons to prevent text cutoff */
+        /* Tablet: Smaller buttons with text */
         @media (max-width: 1024px) {
           .topbar-responsive {
             padding: 14px 20px !important;
@@ -197,31 +199,36 @@ const TopBar = () => {
           }
           
           .topbar-search-container {
-            max-width: 250px !important;
+            max-width: 280px !important;
           }
 
           .topbar-button-group {
             gap: 8px !important;
           }
 
-          /* Make buttons square with icon only on tablet */
           .topbar-held-button,
           .topbar-add-button {
-            width: 48px !important;
-            height: 48px !important;
-            min-width: 48px !important;
-            padding: 0 !important;
-            border-radius: 12px !important;
-            justify-content: center !important;
-            flex-shrink: 0 !important;
+            padding: 7px 12px !important;
+            font-size: 12px !important;
+            gap: 5px !important;
           }
 
-          .topbar-button-text {
-            display: none !important;
+          .topbar-held-button svg,
+          .topbar-add-button svg {
+            width: 16px !important;
+            height: 16px !important;
+          }
+
+          .topbar-order-number {
+            font-size: 15px !important;
+          }
+
+          .topbar-order-date {
+            font-size: 11px !important;
           }
         }
 
-        /* Mobile: Compact layout with icon-only buttons */
+        /* Mobile: Icon-only compact buttons */
         @media (max-width: 768px) {
           .topbar-responsive {
             padding: 12px 16px 12px 70px !important;
@@ -232,7 +239,7 @@ const TopBar = () => {
           .topbar-left-section {
             flex: 1 !important;
             min-width: 0 !important;
-            gap: 10px !important;
+            gap: 8px !important;
             display: flex !important;
             align-items: center !important;
           }
@@ -245,21 +252,29 @@ const TopBar = () => {
           
           .topbar-search-container input {
             padding-left: 36px !important;
+            font-size: 13px !important;
           }
 
           .topbar-button-group {
-            gap: 8px !important;
+            gap: 6px !important;
           }
           
+          /* Icon-only buttons on mobile */
           .topbar-held-button,
           .topbar-add-button {
-            width: 48px !important;
-            height: 48px !important;
-            min-width: 48px !important;
+            width: 42px !important;
+            height: 42px !important;
+            min-width: 42px !important;
             padding: 0 !important;
-            border-radius: 12px !important;
+            border-radius: 10px !important;
             justify-content: center !important;
             flex-shrink: 0 !important;
+          }
+
+          .topbar-held-button svg,
+          .topbar-add-button svg {
+            width: 18px !important;
+            height: 18px !important;
           }
           
           .topbar-button-text {
@@ -275,32 +290,43 @@ const TopBar = () => {
         @media (max-width: 480px) {
           .topbar-responsive {
             padding: 10px 12px 10px 64px !important;
-            gap: 8px !important;
+            gap: 6px !important;
           }
           
           .topbar-left-section {
-            gap: 8px !important;
+            gap: 6px !important;
           }
 
           .topbar-button-group {
-            gap: 6px !important;
+            gap: 5px !important;
           }
           
           .topbar-held-button,
           .topbar-add-button {
-            width: 44px !important;
-            height: 44px !important;
-            min-width: 44px !important;
-            border-radius: 10px !important;
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            border-radius: 8px !important;
+          }
+
+          .topbar-held-button svg,
+          .topbar-add-button svg {
+            width: 16px !important;
+            height: 16px !important;
           }
           
           .topbar-search-container input {
-            font-size: 13px !important;
-            padding: 9px 10px 9px 34px !important;
+            font-size: 12px !important;
+            padding: 8px 10px 8px 32px !important;
           }
           
           .topbar-search-icon {
             left: 10px !important;
+          }
+
+          .topbar-search-icon svg {
+            width: 16px !important;
+            height: 16px !important;
           }
         }
       `}</style>
@@ -326,8 +352,8 @@ const TopBar = () => {
               onClick={() => navigate("/held-orders")}
               title="View held orders"
             >
-              <Archive size={20} />
-              <span className="topbar-button-text">Held Orders</span>
+              <Archive size={18} />
+              <span className="topbar-button-text">Held</span>
               {heldOrders.length > 0 && (
                 <div style={styles.heldBadge}>{heldOrders.length}</div>
               )}
@@ -340,8 +366,8 @@ const TopBar = () => {
               onClick={() => setShowCustomItemModal(true)}
               title="Add new item"
             >
-              <Plus size={20} />
-              <span className="topbar-button-text">Add New Item</span>
+              <Plus size={18} />
+              <span className="topbar-button-text">Add Item</span>
             </button>
           </div>
         </div>

@@ -432,18 +432,28 @@ export const POSProvider = ({ children }) => {
     setDiscount(0);
   }, []);
 
-  const completePayment = useCallback(() => {
+  // ✅ FIXED: Accept optional payment method parameter
+  const completePayment = useCallback((overridePaymentMethod = null) => {
     const itemsForReceipt = toReceiptItems(currentOrder);
     const { subtotal, tax, discountAmount, total, totalQty } = computeTotals(itemsForReceipt, discount);
 
     const dateKey = new Date().toISOString().slice(0, 10);
+
+    // ✅ Use the passed payment method if provided, otherwise use state
+    const actualPaymentMethod = overridePaymentMethod || paymentMethod;
+    
+    console.log("💰 completePayment called with:", {
+      overridePaymentMethod,
+      statePaymentMethod: paymentMethod,
+      actualPaymentMethod
+    });
 
     const transaction = {
       id: `ORD-${dateKey}-${txSeq}`,
       txSeq,
       orderNumber,
       items: itemsForReceipt,
-      paymentMethod,
+      paymentMethod: actualPaymentMethod, // ✅ Use actualPaymentMethod
       discount,
       subtotal,
       tax,
@@ -474,8 +484,9 @@ export const POSProvider = ({ children }) => {
     persistTransaction,
   ]);
 
+  // ✅ FIXED: Accept optional payment method parameter as second argument
   const completePartialPayment = useCallback(
-    (selectedOrderIds = []) => {
+    (selectedOrderIds = [], overridePaymentMethod = null) => {
       const ids = new Set(selectedOrderIds || []);
       if (ids.size === 0) return null;
 
@@ -493,12 +504,21 @@ export const POSProvider = ({ children }) => {
 
       const dateKey = new Date().toISOString().slice(0, 10);
 
+      // ✅ Use the passed payment method if provided, otherwise use state
+      const actualPaymentMethod = overridePaymentMethod || paymentMethod;
+      
+      console.log("💰 completePartialPayment called with:", {
+        overridePaymentMethod,
+        statePaymentMethod: paymentMethod,
+        actualPaymentMethod
+      });
+
       const transaction = {
         id: `ORD-${dateKey}-${txSeq}-SPLIT`,
         txSeq,
         orderNumber,
         items: itemsForReceipt,
-        paymentMethod,
+        paymentMethod: actualPaymentMethod, // ✅ Use actualPaymentMethod
         discount: splitDiscount,
         subtotal,
         tax,

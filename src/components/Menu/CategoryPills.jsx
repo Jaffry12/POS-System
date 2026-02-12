@@ -1,16 +1,10 @@
 import * as Icons from "lucide-react";
-import { Package, ChevronLeft, Home, UtensilsCrossed } from "lucide-react";
+import { Package, ChevronLeft, Home } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { usePOS } from "../../hooks/usePOS";
-import { CATEGORIES, DEFAULT_MENU, SETTINGS } from "../../data/menuData";
+import { CATEGORIES, DEFAULT_MENU } from "../../data/menuData";
 
-// Format price to remove trailing zero (9.90 becomes 9.9)
-const formatPrice = (priceInCents) => {
-  const dollars = (priceInCents / 100).toFixed(2);
-  return dollars.replace(/\.?0+$/, '').replace(/\.$/, '.0');
-};
-
-// ✅ Categories that should ALWAYS show in home page
+// ✅ Categories that should ALWAYS show in home page as category pills
 const DEFAULT_CATEGORIES = ["subs", "drinks", "hots", "saladrolls"];
 
 // ✅ Map subcategory -> parent
@@ -26,7 +20,6 @@ const LABELS = {
   drinks: "DRINKS",
   hots: "HOTS",
   saladrolls: "SALAD ROLLS",
-  platter: "PLATTER",
   coffee: "VIETNAMESE ICED COFFEE",
   fruittea: "FRUIT TEA",
   milktea: "MILK TEA",
@@ -34,7 +27,7 @@ const LABELS = {
 
 const CategoryPills = () => {
   const { theme } = useTheme();
-  const { activeCategory, setActiveCategory, menu, addToOrder } = usePOS();
+  const { activeCategory, setActiveCategory, menu } = usePOS();
 
   // ✅ Categories that have items in menu
   const menuCategories = Object.keys(menu || {}).filter(
@@ -49,24 +42,22 @@ const CategoryPills = () => {
     return (
       !DEFAULT_MENU?.[categoryId] &&
       !["coffee", "fruittea", "milktea"].includes(categoryId) &&
-      !DEFAULT_CATEGORIES.includes(categoryId) &&
-      categoryId !== "platter"
+      !DEFAULT_CATEGORIES.includes(categoryId)
     );
   };
 
-  // Determine main categories
+  // ✅ FIXED: Determine main categories - ONLY show DEFAULT_CATEGORIES
+  // This prevents custom categories like "platter" from appearing as category pills
   const mainCategories = allCategories.filter((cat) => {
+    // ONLY show categories that are in DEFAULT_CATEGORIES list
     if (DEFAULT_CATEGORIES.includes(cat)) return true;
+    
+    // Hide drink subcategories (they appear under DRINKS)
     if (["coffee", "fruittea", "milktea"].includes(cat)) return false;
-    return true;
+    
+    // ✅ CRITICAL FIX: Hide ALL other categories (custom categories)
+    return false;
   });
-
-  // Add platter to main categories if it exists in menu
-  const hasPlatter = menu?.platter && menu.platter.length > 0;
-  const platterItem = menu?.platter?.[0];
-  if (hasPlatter && !mainCategories.includes("platter")) {
-    mainCategories.push("platter");
-  }
 
   // Get drink subcategories that exist in menu
   const drinkSubcategories =
@@ -181,38 +172,6 @@ const CategoryPills = () => {
       flexShrink: 0,
       whiteSpace: "nowrap",
     }),
-    platterPill: {
-      padding: "12px 24px",
-      borderRadius: "8px",
-      border: "none",
-      background: "#8B5CF6",
-      color: "#FFFFFF",
-      cursor: "pointer",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "4px",
-      fontSize: "14px",
-      fontWeight: "600",
-      transition: "all 0.2s ease",
-      position: "relative",
-      flexShrink: 0,
-      whiteSpace: "nowrap",
-    },
-    platterTop: {
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      textTransform: "uppercase",
-      fontSize: "14px",
-      fontWeight: "600",
-    },
-    platterPrice: {
-      fontSize: "12px",
-      fontWeight: "500",
-      opacity: 0.9,
-    },
     subCategoriesRow: {
       marginTop: "12px",
       display: "flex",
@@ -252,8 +211,6 @@ const CategoryPills = () => {
         return Icons.Flame;
       case "saladrolls":
         return Icons.Salad;
-      case "platter":
-        return UtensilsCrossed;
       default:
         return Package;
     }
@@ -262,13 +219,6 @@ const CategoryPills = () => {
   // ✅ MAIN category click (NO AUTO SUBCATEGORY)
   const handleMainCategoryClick = (category) => {
     setActiveCategory(category);
-  };
-
-  // ✅ Platter quick-add - directly add to order
-  const handlePlatterClick = () => {
-    if (platterItem) {
-      addToOrder(platterItem, null, []);
-    }
   };
 
   // ✅ Back behavior:
@@ -292,22 +242,8 @@ const CategoryPills = () => {
         .category-pills-wrapper::-webkit-scrollbar,
         .category-sub-pills::-webkit-scrollbar { display: none; }
 
-        .category-platter-pill:hover {
-          opacity: 0.9 !important;
-          transform: translateY(-1px);
-        }
-
         @media (max-width: 1024px) {
           .category-pills-container { padding: 16px 20px !important; }
-          .category-platter-pill {
-            padding: 10px 20px !important;
-          }
-          .category-platter-top {
-            font-size: 13px !important;
-          }
-          .category-platter-price {
-            font-size: 11px !important;
-          }
         }
 
         @media (max-width: 768px) {
@@ -327,15 +263,6 @@ const CategoryPills = () => {
             padding-bottom: 4px;
           }
           .category-pill-mobile { padding: 10px 20px !important; font-size: 13px !important; }
-          .category-platter-pill {
-            padding: 8px 16px !important;
-          }
-          .category-platter-top {
-            font-size: 12px !important;
-          }
-          .category-platter-price {
-            font-size: 10px !important;
-          }
           .category-sub-pill-mobile { padding: 8px 16px !important; font-size: 12px !important; }
           .category-label-mobile { font-size: 13px !important; }
           .category-top-row { gap: 10px !important; }
@@ -346,15 +273,6 @@ const CategoryPills = () => {
         @media (max-width: 480px) {
           .category-pills-container { padding: 12px !important; }
           .category-pill-mobile { padding: 8px 16px !important; font-size: 12px !important; }
-          .category-platter-pill {
-            padding: 7px 14px !important;
-          }
-          .category-platter-top {
-            font-size: 11px !important;
-          }
-          .category-platter-price {
-            font-size: 9px !important;
-          }
           .category-sub-pill-mobile { padding: 7px 14px !important; font-size: 11px !important; }
           .category-pill-icon { width: 16px !important; height: 16px !important; }
           .category-back-btn svg { width: 16px !important; height: 16px !important; }
@@ -405,77 +323,33 @@ const CategoryPills = () => {
           {isHome ? "Choose Category" : "Categories"}
         </div>
 
-        {/* Main Categories */}
+        {/* Main Categories - ONLY DEFAULT_CATEGORIES */}
         <div className="category-pills-wrapper" style={styles.pillsContainer}>
-          {mainCategories
-            .filter((cat) => !isCustomCategory(cat) && cat !== "platter")
-            .map((category) => {
-              const isActive =
-                parentCategory === category ||
-                (category === "drinks" && (activeCategory === "drinks" || isDrinksActive));
+          {mainCategories.map((category) => {
+            const isActive =
+              parentCategory === category ||
+              (category === "drinks" && (activeCategory === "drinks" || isDrinksActive));
 
-              const Icon = getCategoryIcon(category);
+            const Icon = getCategoryIcon(category);
 
-              return (
-                <button
-                  key={category}
-                  className="category-pill-mobile"
-                  style={styles.pill(isActive)}
-                  onClick={() => handleMainCategoryClick(category)}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.background = theme.bgHover;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.background = theme.bgSecondary;
-                  }}
-                >
-                  <Icon className="category-pill-icon" size={18} />
-                  {formatCategoryName(category)}
-                </button>
-              );
-            })}
-
-          {/* Platter Button - In Same Row with Price */}
-          {hasPlatter && platterItem && (
-            <button
-              className="category-pill-mobile category-platter-pill"
-              style={styles.platterPill}
-              onClick={handlePlatterClick}
-            >
-              <div className="category-platter-top" style={styles.platterTop}>
-                <UtensilsCrossed className="category-pill-icon" size={18} />
-                PLATTER
-              </div>
-              <div className="category-platter-price" style={styles.platterPrice}>
-                {SETTINGS.currency}{formatPrice(platterItem.price)}
-              </div>
-            </button>
-          )}
-
-          {/* Custom Categories */}
-          {mainCategories
-            .filter((cat) => isCustomCategory(cat))
-            .map((category) => {
-              const isActive = parentCategory === category;
-
-              return (
-                <button
-                  key={category}
-                  className="category-pill-mobile"
-                  style={styles.pill(isActive)}
-                  onClick={() => setActiveCategory(category)}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.background = theme.bgHover;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.background = theme.bgSecondary;
-                  }}
-                >
-                  <Package className="category-pill-icon" size={18} />
-                  {formatCategoryName(category)}
-                </button>
-              );
-            })}
+            return (
+              <button
+                key={category}
+                className="category-pill-mobile"
+                style={styles.pill(isActive)}
+                onClick={() => handleMainCategoryClick(category)}
+                onMouseEnter={(e) => {
+                  if (!isActive) e.currentTarget.style.background = theme.bgHover;
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) e.currentTarget.style.background = theme.bgSecondary;
+                }}
+              >
+                <Icon className="category-pill-icon" size={18} />
+                {formatCategoryName(category)}
+              </button>
+            );
+          })}
         </div>
 
         {/* Drink Subcategories */}

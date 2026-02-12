@@ -8,6 +8,8 @@ export const DEFAULT_MENU = {
     { id: 'sub-4', name: 'Lemongrass Tofu', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400', price: 990, category: 'subs', hasModifiers: true },
     { id: 'sub-5', name: 'Grilled Pork Sausage', image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400', price: 990, category: 'subs', hasModifiers: true },
     { id: 'sub-6', name: 'Assorted (Turkey, Ham, Pork)', image: 'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=400', price: 990, category: 'subs', hasModifiers: true },
+    // ✅ PLATTER moved from its own category to SUBS
+    { id: 'platter-1', name: 'Platter', image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400', price: 13093, category: 'subs', hasModifiers: false },
   ],
   coffee: [
     { id: 'coffee-1', name: 'Vietnamese Iced Coffee', image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400', price: 500, category: 'coffee', hasModifiers: false },
@@ -38,6 +40,7 @@ export const DEFAULT_MENU = {
     { id: 'mt-10', name: 'Okinawa Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'milktea', hasModifiers: true },
     { id: 'mt-11', name: 'Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', prices: { '500ml': 500, '700ml': 600 }, category: 'milktea', hasModifiers: true },
   ],
+  // ✅ HOTS: Fixed price, NO size selection, "Hot" prefix REMOVED from names
   hots: [
     { id: 'hot-1', name: 'Regular Milk Tea', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400', price: 500, category: 'hots', hasModifiers: false },
     { id: 'hot-2', name: 'Premium Brown Sugar Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', price: 500, category: 'hots', hasModifiers: false },
@@ -51,9 +54,6 @@ export const DEFAULT_MENU = {
     { id: 'hot-10', name: 'Okinawa Milk Tea', image: 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400', price: 500, category: 'hots', hasModifiers: false },
     { id: 'hot-11', name: 'Mango Milk Tea', image: 'https://images.unsplash.com/photo-1624484537985-e8ea6912e812?w=400', price: 500, category: 'hots', hasModifiers: false },
   ],
-  platter: [
-    { id: 'platter-1', name: 'Platter', image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400', price: 13093, category: 'platter', hasModifiers: false },
-  ],
 };
 
 // Category structure with main categories and subcategories
@@ -63,7 +63,6 @@ export const CATEGORIES = {
     { id: 'subs', name: 'SUBS', icon: 'Sandwich', color: '#4F46E5' },
     { id: 'drinks', name: 'DRINKS', icon: 'Coffee', color: '#10B981', hasSubcategories: true },
     { id: 'hots', name: 'HOTS', icon: 'Flame', color: '#F97316' },
-    { id: 'platter', name: 'Platter', icon: 'UtensilsCrossed', color: '#8B5CF6', isQuickAdd: true },
   ],
   
   // Drink subcategories - shown when DRINKS is selected
@@ -97,36 +96,37 @@ export const SUB_MODIFIERS = {
     options: [
       { id: 'extra-cilantro', name: 'Extra Cilantro', price: 0 },
       { id: 'extra-cucumber', name: 'Extra Cucumber', price: 0 },
-      { id: 'extra-garlic-mayo', name: 'Extra Garlic Mayo', price: 48 },
+      { id: 'extra-garlic-mayo', name: 'Extra Garlic Mayo', price: 50 },
       { id: 'extra-jalapenos', name: 'Extra Jalapeños', price: 0 },
       { id: 'extra-onions', name: 'Extra Onions', price: 0 },
-      { id: 'extra-pickled', name: 'Extra Pickled Carrots', price: 48 },
-      { id: 'extra-meat', name: 'Extra meat', price: 343 },
+      { id: 'extra-pickled', name: 'Extra Pickled Carrots', price: 50 },
+      { id: 'extra-meat', name: 'Extra meat', price: 350 },
       { id: 'no-extras', name: 'No Extras', price: 0 },
     ],
   },
 };
 
 // Toppings for drinks (Boba, Jelly, Popping Pearls)
+// ✅ FIXED: Changed all topping prices from 98 cents to 100 cents (CA$1.00)
 export const DRINK_MODIFIERS = {
   toppings: {
     groupId: 'toppings',
     groupTitle: 'Toppings',
     multiSelect: true, // Multiple can be selected
     options: [
-      { id: 'boba', name: 'Boba / Tapioca Pearls', price: 98 },
-      { id: 'crystal-boba', name: 'Crystal Boba', price: 98 },
-      { id: 'mango-jelly', name: 'Mango Jelly', price: 98 },
-      { id: 'lychee-jelly', name: 'Lychee Jelly', price: 98 },
-      { id: 'green-apple-jelly', name: 'Green Apple Jelly', price: 98 },
-      { id: 'passionfruit-jelly', name: 'Passion Fruit Jelly', price: 98 },
-      { id: 'strawberry-jelly', name: 'Strawberry Jelly', price: 98 },
-      { id: 'popping-mango', name: 'Popping Mango Pearls', price: 98 },
-      { id: 'popping-lychee', name: 'Popping Lychee Pearls', price: 98 },
-      { id: 'popping-peach', name: 'Popping Peach Pearls', price: 98 },
-      { id: 'popping-blueberry', name: 'Popping Blueberry Pearls', price: 98 },
-      { id: 'popping-strawberry', name: 'Popping Strawberry Pearls', price: 98 },
-      { id: 'popping-passionfruit', name: 'Popping Passion Fruit Pearls', price: 98 },
+      { id: 'boba', name: 'Boba / Tapioca Pearls', price: 100 },
+      { id: 'crystal-boba', name: 'Crystal Boba', price: 100 },
+      { id: 'mango-jelly', name: 'Mango Jelly', price: 100 },
+      { id: 'lychee-jelly', name: 'Lychee Jelly', price: 100 },
+      { id: 'green-apple-jelly', name: 'Green Apple Jelly', price: 100 },
+      { id: 'passionfruit-jelly', name: 'Passion Fruit Jelly', price: 100 },
+      { id: 'strawberry-jelly', name: 'Strawberry Jelly', price: 100 },
+      { id: 'popping-mango', name: 'Popping Mango Pearls', price: 100 },
+      { id: 'popping-lychee', name: 'Popping Lychee Pearls', price: 100 },
+      { id: 'popping-peach', name: 'Popping Peach Pearls', price: 100 },
+      { id: 'popping-blueberry', name: 'Popping Blueberry Pearls', price: 100 },
+      { id: 'popping-strawberry', name: 'Popping Strawberry Pearls', price: 100 },
+      { id: 'popping-passionfruit', name: 'Popping Passion Fruit Pearls', price: 100 },
       { id: 'no-toppings', name: 'No Toppings', price: 0 },
     ],
   },

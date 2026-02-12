@@ -80,19 +80,38 @@ const PrintReceipt = ({ transaction, onClose }) => {
 
   const orderId = getOrderId();
 
-  // Get proper payment method
+  // Get proper payment method - IMPROVED VERSION WITH DEBUG
   const getPaymentMethod = () => {
-    if (isPreview) {
-      try {
-        const storedMethod = localStorage.getItem("pos_payment_method");
-        if (storedMethod) {
-          return storedMethod.charAt(0).toUpperCase() + storedMethod.slice(1).toLowerCase();
-        }
-      } catch {}
-      return "Cash";
+    console.log("=== DEBUG Payment Method Detection ===");
+    console.log("Transaction object:", transaction);
+    console.log("transaction.paymentMethod:", transaction.paymentMethod);
+    console.log("isPreview:", isPreview);
+    
+    // PRIORITY 1: Use transaction object payment method (for completed transactions)
+    if (transaction.paymentMethod && transaction.paymentMethod !== "Preview") {
+      const method = transaction.paymentMethod;
+      const formatted = method.charAt(0).toUpperCase() + method.slice(1).toLowerCase();
+      console.log("✅ Using transaction.paymentMethod:", formatted);
+      return formatted;
     }
-    const method = transaction.paymentMethod || "cash";
-    return method.charAt(0).toUpperCase() + method.slice(1).toLowerCase();
+    
+    // PRIORITY 2: Check localStorage (for preview receipts and fallback)
+    try {
+      const storedMethod = localStorage.getItem("pos_payment_method");
+      console.log("localStorage pos_payment_method:", storedMethod);
+      
+      if (storedMethod && storedMethod.toLowerCase() !== "preview") {
+        const formatted = storedMethod.charAt(0).toUpperCase() + storedMethod.slice(1).toLowerCase();
+        console.log("✅ Using localStorage:", formatted);
+        return formatted;
+      }
+    } catch (e) {
+      console.error("Error reading from localStorage:", e);
+    }
+    
+    // PRIORITY 3: Default fallback
+    console.log("⚠️ Using fallback: Cash");
+    return "Cash";
   };
 
   const paymentMethod = getPaymentMethod();
